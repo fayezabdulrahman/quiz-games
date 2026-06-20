@@ -12,7 +12,7 @@ function getWinnerMessage(winnerCount) {
   return 'That calls for an immediate rematch.'
 }
 
-export default function Finished({ state, onRestart }) {
+export default function Finished({ state, onRestart, onChangeGame }) {
   const winners = state.winnerNames
   const playerCount = state.players.length
   const endedEarly = state.finishReason === 'host-ended'
@@ -67,9 +67,14 @@ export default function Finished({ state, onRestart }) {
         </>
       )}
       {state.isHost ? (
-        <button type="button" className="primary" onClick={onRestart}>
-          Play another round
-        </button>
+        <div className="finish-actions">
+          <button type="button" className="primary" onClick={onRestart}>
+            Replay The 1% Club
+          </button>
+          <button type="button" className="secondary" onClick={onChangeGame}>
+            Choose another game
+          </button>
+        </div>
       ) : (
         <div className="waiting-banner">Waiting for the host</div>
       )}

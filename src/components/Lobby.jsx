@@ -1,13 +1,34 @@
+import { useEffect, useRef, useState } from 'react'
 import Logo from './Logo.jsx'
 import PlayerList from './PlayerList.jsx'
 
 export default function Lobby({ state, onStart }) {
   const joinUrl = `${window.location.origin}?join=${state.code}`
+  const [copyStatus, setCopyStatus] = useState('')
+  const copyTimer = useRef(null)
+
+  useEffect(
+    () => () => {
+      window.clearTimeout(copyTimer.current)
+    },
+    [],
+  )
+
+  const copyInvite = async () => {
+    window.clearTimeout(copyTimer.current)
+    try {
+      await navigator.clipboard.writeText(joinUrl)
+      setCopyStatus('Invite link copied')
+    } catch {
+      setCopyStatus('Could not copy the link')
+    }
+    copyTimer.current = window.setTimeout(() => setCopyStatus(''), 2400)
+  }
 
   return (
     <main className="game-shell lobby">
       <header>
-        <Logo />
+        <Logo gameType={state.gameType} />
         <span className="live-chip">LIVE ROOM</span>
       </header>
       <section className="lobby-grid">
@@ -19,9 +40,9 @@ export default function Lobby({ state, onStart }) {
           <button
             type="button"
             className="text-button"
-            onClick={() => navigator.clipboard?.writeText(joinUrl)}
+            onClick={copyInvite}
           >
-            Copy invite link
+            {copyStatus === 'Invite link copied' ? 'Copied!' : 'Copy invite link'}
           </button>
         </div>
         <div className="contestants-panel">
@@ -33,13 +54,27 @@ export default function Lobby({ state, onStart }) {
             <span className="pulse" />
           </div>
           <div className="room-settings-summary">
-            <span>
-              <strong>{state.settings.lifelineCount}</strong>{' '}
-              {state.settings.lifelineCount === 1 ? 'pass' : 'passes'} each
-            </span>
-            <span>
-              {state.settings.lifelinesAnytime ? 'Available all round' : 'Available from 50%'}
-            </span>
+            {state.gameType === 'bluff-battle' ? (
+              <>
+                <span><strong>5</strong> bluffing rounds</span>
+                <span>2 points for truth · 1 per fooled player</span>
+              </>
+            ) : state.gameType === 'majority-rules' ? (
+              <>
+                <span><strong>8</strong> opinion rounds</span>
+                <span>Match the majority to score</span>
+              </>
+            ) : (
+              <>
+                <span>
+                  <strong>{state.settings.lifelineCount}</strong>{' '}
+                  {state.settings.lifelineCount === 1 ? 'pass' : 'passes'} each
+                </span>
+                <span>
+                  {state.settings.lifelinesAnytime ? 'Available all round' : 'Available from 50%'}
+                </span>
+              </>
+            )}
           </div>
           <PlayerList players={state.players} />
           {state.isHost ? (
@@ -47,9 +82,15 @@ export default function Lobby({ state, onStart }) {
               type="button"
               className="primary wide"
               onClick={onStart}
-              disabled={!state.players.length}
+              disabled={
+                state.gameType === 'bluff-battle'
+                  ? state.players.length < 2
+                  : !state.players.length
+              }
             >
-              Start the game
+              {state.gameType === 'bluff-battle' && state.players.length < 2
+                ? 'Waiting for 2 players'
+                : 'Start the game'}
             </button>
           ) : (
             <div className="waiting-banner">
@@ -59,6 +100,16 @@ export default function Lobby({ state, onStart }) {
           )}
         </div>
       </section>
+      {copyStatus && (
+        <div
+          className={`toast ${copyStatus.startsWith('Could') ? 'toast-error' : ''}`}
+          role="status"
+          aria-live="polite"
+        >
+          <span>{copyStatus.startsWith('Could') ? '!' : '✓'}</span>
+          {copyStatus}
+        </div>
+      )}
     </main>
   )
 }

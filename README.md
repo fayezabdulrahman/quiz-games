@@ -1,12 +1,30 @@
-# The 1% Club — Home Game
+# Game Night
 
-A real-time multiplayer logic quiz for playing with family and friends in the same room. It is inspired by the format of the UK game show *The 1% Club*: questions test logic, observation, and common sense rather than specialist trivia, becoming progressively harder until the final 1% question.
+A real-time multiplayer party-game platform for playing with family and friends in the same room. One device acts as the host screen while each player joins from their phone or browser using a four-letter room code. No accounts or app installation are required.
 
-One device acts as the host screen while each contestant joins from their own phone or browser using a four-letter room code. No accounts or app installation are required.
+The host currently chooses between three games:
 
-> This is an unofficial fan project and is not affiliated with or endorsed by the television programme or its owners.
+- **The 1% Club** — an elimination quiz based on logic, observation, and common sense.
+- **Majority Rules** — an opinion game where players score by matching the room's most popular answer.
+- **Bluff Battle** — a social bluffing game where players invent fake answers, find the truth, and fool one another.
 
-## How the game works
+> The 1% Club mode is an unofficial fan project and is not affiliated with or endorsed by the television programme or its owners.
+
+## How the games work
+
+### Majority Rules
+
+Each game contains eight randomly selected opinion rounds.
+
+1. The host creates a Majority Rules room and shares its code.
+2. Players privately choose the answer they think most of the room will select.
+3. Votes lock immediately and cannot be changed.
+4. The host reveals the vote distribution.
+5. Every player who matched the most popular answer receives one point.
+6. If multiple answers tie for the most votes, each tied answer scores.
+7. The player or players with the highest score after eight rounds win.
+
+### The 1% Club
 
 Each game contains ten questions, one for every difficulty level:
 
@@ -25,11 +43,26 @@ At the beginning of a round, the server randomly chooses one question at each le
 
 The host can then start another round with a newly selected set of questions.
 
+### Bluff Battle
+
+Each game contains five unusual-fact rounds.
+
+1. Every player writes a believable fake answer.
+2. Duplicate bluffs and answers matching the truth are rejected privately.
+3. The truth and submitted bluffs are shuffled together.
+4. Players vote for the answer they believe is real, but cannot choose their own bluff.
+5. Finding the truth earns two points.
+6. Fooling another player earns one point per vote.
+7. The highest score after five rounds wins.
+
 ## Features
 
 - Four-letter private room codes
+- Host game picker
 - Separate host and contestant experiences
 - Live lobby and player status updates
+- Majority Rules voting, vote distributions, scoring, and leaderboard
+- Bluff Battle private writing, anonymous voting, reveals, and scoring
 - Multiple-choice and free-text questions
 - Server-enforced answer locking
 - Host-controlled answer reveals and question progression
@@ -47,7 +80,7 @@ The project is a small client-server application. React renders the interface, w
 flowchart LR
     H["Host browser<br />React client"] <-->|"Socket.IO events"| S["Express + Socket.IO server<br />Authoritative room state"]
     P["Player browsers<br />React client"] <-->|"Socket.IO events"| S
-    Q["Question pool<br />server/questions.js"] --> S
+    Q["Game content<br />questions, opinions, and bluff prompts"] --> S
 ```
 
 ### Client
@@ -57,7 +90,7 @@ The browser application lives in `src/` and is built with React and Vite.
 - `src/App.jsx` selects the landing, lobby, question, and results screens from the current game phase.
 - `src/hooks/useGameSession.js` connects UI actions to Socket.IO events and stores the latest public room state.
 - `src/socket.js` creates the shared Socket.IO client.
-- `src/components/` contains the host and player views.
+- `src/components/` contains shared and game-specific host/player views.
 - `src/styles.css` contains the responsive visual system.
 
 The client does not decide whether an answer is valid or whether a player remains active. It sends an action to the server and renders the state returned by the server.
@@ -70,7 +103,7 @@ The client does not decide whether an answer is valid or whether a player remain
 - Player membership and connection status
 - Question selection and game phases
 - Answer validation and one-answer locking
-- Elimination, winners, and restarts
+- Game-specific elimination or scoring, winners, and restarts
 - Broadcasting a player-specific public state after every change
 
 The main realtime events are:
@@ -81,14 +114,18 @@ The main realtime events are:
 | `player:join` | Player | Join a room by code |
 | `host:start` | Host | Begin the first question |
 | `player:answer` | Player | Submit and lock an answer |
+| `player:bluff` | Player | Submit and lock a fake answer |
+| `player:vote` | Player | Vote for a Bluff Battle answer |
 | `host:reveal` | Host | Mark answers and eliminate players |
 | `host:next` | Host | Continue or finish the round |
 | `host:restart` | Host | Return to the lobby with new questions |
+| `host:return-to-games` | Host | Open the room's game picker after a game |
+| `host:select-game` | Host | Choose a different game while keeping the room and players |
 | `room:state` | Server | Send the latest permitted state to each client |
 
 Answers and explanations are withheld from clients until the room enters the reveal phase.
 
-### Question data
+### Game data
 
 `server/questions.js` and `server/additionalQuestions.js` contain the difficulty ladder and question pool. The current pool has five questions at each of the ten difficulty levels. Questions can use:
 
@@ -97,6 +134,10 @@ Answers and explanations are withheld from clients until the room enters the rev
 - Multiple accepted answer variants where needed
 
 Free-text answers are normalized on the server before comparison by trimming whitespace, ignoring case and selected punctuation, and collapsing repeated spaces.
+
+`server/majorityPrompts.js` contains the Majority Rules opinion pool. Eight prompts are selected per game, with used prompts avoided until the pool needs to reset.
+
+`server/bluffPrompts.js` contains original Bluff Battle prompts, truths, and reveal explanations.
 
 ### Persistence and deployment
 

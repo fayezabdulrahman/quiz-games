@@ -19,6 +19,18 @@ const featuredGames = {
     description:
       'Invent a convincing fake answer, spot the real one, and earn points whenever another player falls for your bluff.',
   },
+  'million-ladder': {
+    name: 'Million Ladder',
+    kicker: 'Take the hot seat',
+    description:
+      'One contestant faces 15 questions while the host runs the show and joined audience members stand by for a lifeline.',
+  },
+  'survey-showdown': {
+    name: 'Survey Showdown',
+    kicker: 'Name the popular answers',
+    description:
+      'Split into two teams, uncover the survey board, survive three strikes, and steal the bank from your rivals.',
+  },
 }
 
 export default function Landing({ onHost, onJoin, busy, error }) {
@@ -36,7 +48,7 @@ export default function Landing({ onHost, onJoin, busy, error }) {
     event.preventDefault()
 
     if (mode === 'host') {
-      onHost(name, gameType, { lifelineCount, lifelinesAnytime })
+      onHost(gameType, { lifelineCount, lifelinesAnytime })
       return
     }
 
@@ -60,7 +72,7 @@ export default function Landing({ onHost, onJoin, busy, error }) {
             <span>Games available</span>
             <small>Select one to learn more</small>
           </div>
-          <div className="landing-game-chips" aria-label="Available games">
+          <div className="landing-game-chips">
             {Object.entries(featuredGames).map(([id, game]) => (
               <button
                 key={id}
@@ -84,7 +96,11 @@ export default function Landing({ onHost, onJoin, busy, error }) {
                 ? '1%'
                 : featuredGame === 'majority-rules'
                   ? 'M'
-                  : '?'}
+                  : featuredGame === 'bluff-battle'
+                    ? '?'
+                    : featuredGame === 'survey-showdown'
+                      ? 'S'
+                      : '$'}
             </span>
             <div>
               <small>{featuredGames[featuredGame].kicker}</small>
@@ -113,35 +129,37 @@ export default function Landing({ onHost, onJoin, busy, error }) {
           </button>
         </div>
         <form onSubmit={submit}>
-          <label>
-            Your name
-            <input
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              placeholder={mode === 'host' ? 'Quizmaster' : 'Alex'}
-              maxLength={20}
-              autoComplete="nickname"
-            />
-          </label>
           {mode === 'join' && (
-            <label>
-              Room code
-              <input
-                className="code-input"
-                value={code}
-                onChange={(event) =>
-                  setCode(
-                    event.target.value
-                      .toUpperCase()
-                      .replace(/[^A-Z]/g, '')
-                      .slice(0, 4),
-                  )
-                }
-                placeholder="ABCD"
-                maxLength={4}
-                autoCapitalize="characters"
-              />
-            </label>
+            <>
+              <label>
+                Your name
+                <input
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  placeholder="Alex"
+                  maxLength={20}
+                  autoComplete="nickname"
+                />
+              </label>
+              <label>
+                Room code
+                <input
+                  className="code-input"
+                  value={code}
+                  onChange={(event) =>
+                    setCode(
+                      event.target.value
+                        .toUpperCase()
+                        .replace(/[^A-Z]/g, '')
+                        .slice(0, 4),
+                    )
+                  }
+                  placeholder="ABCD"
+                  maxLength={4}
+                  autoCapitalize="characters"
+                />
+              </label>
+            </>
           )}
           {mode === 'host' && (
             <>
@@ -183,6 +201,30 @@ export default function Landing({ onHost, onJoin, busy, error }) {
                   <span>
                     <strong>Majority Rules</strong>
                     <small>Match the room · score points · 8 rounds</small>
+                  </span>
+                  <span className="selection-dot" />
+                </button>
+                <button
+                  type="button"
+                  className={`game-card-option ${gameType === 'million-ladder' ? 'selected ladder' : ''}`}
+                  onClick={() => setGameType('million-ladder')}
+                >
+                  <span className="game-card-icon ladder-icon">$</span>
+                  <span>
+                    <strong>Million Ladder</strong>
+                    <small>One contestant · prize ladder · audience lifeline</small>
+                  </span>
+                  <span className="selection-dot" />
+                </button>
+                <button
+                  type="button"
+                  className={`game-card-option ${gameType === 'survey-showdown' ? 'selected survey' : ''}`}
+                  onClick={() => setGameType('survey-showdown')}
+                >
+                  <span className="game-card-icon survey-icon">S</span>
+                  <span>
+                    <strong>Survey Showdown</strong>
+                    <small>Two teams · strikes and steals · 6 rounds</small>
                   </span>
                   <span className="selection-dot" />
                 </button>
@@ -242,6 +284,18 @@ export default function Landing({ onHost, onJoin, busy, error }) {
                 <div className="selected-game-note bluff-note">
                   Invent a convincing fake answer, find the truth, and score whenever another
                   player falls for your bluff.
+                </div>
+              )}
+              {gameType === 'million-ladder' && (
+                <div className="selected-game-note ladder-note">
+                  The first player to join takes the hot seat. Everyone else joins the audience
+                  and can help if Ask the Audience is used.
+                </div>
+              )}
+              {gameType === 'survey-showdown' && (
+                <div className="selected-game-note survey-note">
+                  Players split into two teams. Uncover the most popular answers before three
+                  strikes give your rivals a chance to steal.
                 </div>
               )}
             </>

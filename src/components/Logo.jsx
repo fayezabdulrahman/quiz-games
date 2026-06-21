@@ -1,4 +1,25 @@
 export default function Logo({ gameType = 'one-percent' }) {
+  if (gameType === 'survey-showdown') {
+    return (
+      <div className="brand brand-survey">
+        <span className="brand-survey-mark">S</span>
+        <span><strong>SURVEY</strong><small>SHOWDOWN</small></span>
+      </div>
+    )
+  }
+
+  if (gameType === 'million-ladder') {
+    return (
+      <div className="brand brand-ladder">
+        <span className="brand-ladder-mark">$</span>
+        <span>
+          <strong>MILLION</strong>
+          <small>LADDER</small>
+        </span>
+      </div>
+    )
+  }
+
   if (gameType === 'bluff-battle') {
     return (
       <div className="brand brand-bluff">

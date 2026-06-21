@@ -1,10 +1,16 @@
+import BluffBattleFinished from './components/BluffBattleFinished.jsx'
+import BluffBattleScreen from './components/BluffBattleScreen.jsx'
 import Finished from './components/Finished.jsx'
 import Landing from './components/Landing.jsx'
 import Lobby from './components/Lobby.jsx'
 import MajorityFinished from './components/MajorityFinished.jsx'
 import MajorityRulesScreen from './components/MajorityRulesScreen.jsx'
+import MillionLadderFinished from './components/MillionLadderFinished.jsx'
+import MillionLadderScreen from './components/MillionLadderScreen.jsx'
 import QuestionScreen from './components/QuestionScreen.jsx'
 import RoomGamePicker from './components/RoomGamePicker.jsx'
+import SurveyShowdownFinished from './components/SurveyShowdownFinished.jsx'
+import SurveyShowdownScreen from './components/SurveyShowdownScreen.jsx'
 import { useGameSession } from './hooks/useGameSession.js'
 
 export default function App() {
@@ -18,7 +24,10 @@ export default function App() {
     answerQuestion,
     submitBluff,
     voteForBluff,
+    submitSurveyGuess,
+    chooseSurveyControl,
     useLifeline,
+    useLadderLifeline,
     revealAnswer,
     nextQuestion,
     endGame,
@@ -40,6 +49,9 @@ export default function App() {
   }
 
   if (state.phase === 'finished') {
+    if (state.gameType === 'survey-showdown') {
+      return <SurveyShowdownFinished state={state} onRestart={restartGame} onChangeGame={returnToGames} />
+    }
     if (state.gameType === 'bluff-battle') {
       return (
         <BluffBattleFinished
@@ -58,7 +70,21 @@ export default function App() {
         />
       )
     }
+    if (state.gameType === 'million-ladder') {
+      return (
+        <MillionLadderFinished
+          state={state}
+          onRestart={restartGame}
+          onChangeGame={returnToGames}
+        />
+      )
+    }
     return <Finished state={state} onRestart={restartGame} onChangeGame={returnToGames} />
+  }
+
+  if (state.gameType === 'survey-showdown') {
+    return <SurveyShowdownScreen state={state} error={error} onGuess={submitSurveyGuess}
+      onChooseControl={chooseSurveyControl} onNext={nextQuestion} onEnd={endGame} />
   }
 
   if (state.gameType === 'bluff-battle') {
@@ -88,6 +114,20 @@ export default function App() {
     )
   }
 
+  if (state.gameType === 'million-ladder') {
+    return (
+      <MillionLadderScreen
+        state={state}
+        error={error}
+        onAnswer={answerQuestion}
+        onReveal={revealAnswer}
+        onNext={nextQuestion}
+        onEnd={endGame}
+        onLifeline={useLadderLifeline}
+      />
+    )
+  }
+
   return (
     <QuestionScreen
       state={state}
@@ -100,5 +140,3 @@ export default function App() {
     />
   )
 }
-import BluffBattleFinished from './components/BluffBattleFinished.jsx'
-import BluffBattleScreen from './components/BluffBattleScreen.jsx'

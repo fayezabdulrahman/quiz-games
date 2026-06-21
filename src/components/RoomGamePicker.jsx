@@ -51,6 +51,22 @@ export default function RoomGamePicker({ state, error, onSelectGame }) {
                   <Logo gameType="majority-rules" />
                   <span>Read the room and score points</span>
                 </button>
+                <button
+                  type="button"
+                  className={`room-game-card ladder ${gameType === 'million-ladder' ? 'selected' : ''}`}
+                  onClick={() => setGameType('million-ladder')}
+                >
+                  <Logo gameType="million-ladder" />
+                  <span>One contestant takes on the prize ladder</span>
+                </button>
+                <button
+                  type="button"
+                  className={`room-game-card survey ${gameType === 'survey-showdown' ? 'selected' : ''}`}
+                  onClick={() => setGameType('survey-showdown')}
+                >
+                  <Logo gameType="survey-showdown" />
+                  <span>Two teams uncover answers, strike out and steal</span>
+                </button>
               </div>
               {gameType === 'one-percent' && (
                 <div className="host-settings room-picker-settings">

@@ -56,14 +56,20 @@ export function useGameSession() {
     state,
     busy,
     error,
-    hostGame: (hostName, gameType, settings) =>
-      runBusyAction('host:create', { hostName, gameType, ...settings }),
+    hostGame: (gameType, settings) =>
+      runBusyAction('host:create', { gameType, ...settings }),
     joinGame: (code, name) => runBusyAction('player:join', { code, name }),
     startGame: () => action('host:start', roomPayload()),
     answerQuestion: (answer) => action('player:answer', { ...roomPayload(), answer }),
     submitBluff: (bluff) => action('player:bluff', { ...roomPayload(), bluff }),
     voteForBluff: (optionId) => action('player:vote', { ...roomPayload(), optionId }),
+    submitSurveyGuess: (guess) =>
+      action('player:survey-guess', { ...roomPayload(), guess }),
+    chooseSurveyControl: (choice) =>
+      action('player:survey-control', { ...roomPayload(), choice }),
     useLifeline: () => action('player:pass', roomPayload()),
+    useLadderLifeline: (lifeline) =>
+      action('host:ladder-lifeline', { ...roomPayload(), lifeline }),
     revealAnswer: () => action('host:reveal', roomPayload()),
     nextQuestion: () => action('host:next', roomPayload()),
     endGame: () => action('host:end', roomPayload()),

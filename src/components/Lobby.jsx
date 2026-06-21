@@ -54,7 +54,12 @@ export default function Lobby({ state, onStart }) {
             <span className="pulse" />
           </div>
           <div className="room-settings-summary">
-            {state.gameType === 'bluff-battle' ? (
+            {state.gameType === 'survey-showdown' ? (
+              <>
+                <span><strong>6</strong> team survey rounds</span>
+                <span>Three strikes · one chance to steal</span>
+              </>
+            ) : state.gameType === 'bluff-battle' ? (
               <>
                 <span><strong>5</strong> bluffing rounds</span>
                 <span>2 points for truth · 1 per fooled player</span>
@@ -63,6 +68,11 @@ export default function Lobby({ state, onStart }) {
               <>
                 <span><strong>8</strong> opinion rounds</span>
                 <span>Match the majority to score</span>
+              </>
+            ) : state.gameType === 'million-ladder' ? (
+              <>
+                <span><strong>15</strong> prize questions</span>
+                <span>First player is contestant · others join the audience</span>
               </>
             ) : (
               <>
@@ -83,12 +93,13 @@ export default function Lobby({ state, onStart }) {
               className="primary wide"
               onClick={onStart}
               disabled={
-                state.gameType === 'bluff-battle'
+                state.gameType === 'bluff-battle' || state.gameType === 'survey-showdown'
                   ? state.players.length < 2
                   : !state.players.length
               }
             >
-              {state.gameType === 'bluff-battle' && state.players.length < 2
+              {(state.gameType === 'bluff-battle' || state.gameType === 'survey-showdown') &&
+              state.players.length < 2
                 ? 'Waiting for 2 players'
                 : 'Start the game'}
             </button>

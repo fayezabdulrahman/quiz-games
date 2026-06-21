@@ -2,11 +2,13 @@
 
 A real-time multiplayer party-game platform for playing with family and friends in the same room. One device acts as the host screen while each player joins from their phone or browser using a four-letter room code. No accounts or app installation are required.
 
-The host currently chooses between three games:
+The host currently chooses between five games:
 
 - **The 1% Club** — an elimination quiz based on logic, observation, and common sense.
 - **Majority Rules** — an opinion game where players score by matching the room's most popular answer.
 - **Bluff Battle** — a social bluffing game where players invent fake answers, find the truth, and fool one another.
+- **Million Ladder** — one contestant climbs through 15 questions while the host runs the show and the audience can help.
+- **Survey Showdown** — two teams uncover popular survey answers while managing strikes and steals.
 
 > The 1% Club mode is an unofficial fan project and is not affiliated with or endorsed by the television programme or its owners.
 
@@ -55,6 +57,31 @@ Each game contains five unusual-fact rounds.
 6. Fooling another player earns one point per vote.
 7. The highest score after five rounds wins.
 
+### Million Ladder
+
+One contestant climbs a 15-question prize ladder from `$100` to `$1,000,000`. The first player to join takes the hot seat and later players join the audience.
+
+1. The contestant privately chooses one of four answers.
+2. The host triggers lifelines and reveals the contestant's final answer.
+3. Audience members vote only when Ask the Audience is used.
+4. With no audience, Ask the Audience is replaced by Switch Question.
+5. The three lifelines are 50:50, Ask the Audience or Switch Question, and Skip Question.
+6. Only the first five questions use a 30-second timer.
+7. A missed rung ends the run at the latest `$1,000` or `$32,000` safety net.
+8. After a correct answer, the host can continue climbing or bank the current prize.
+
+### Survey Showdown
+
+Each game contains six surveys, with double points in rounds four and five and triple points in the final round.
+
+1. Players are split evenly between the Lime Team and Violet Team.
+2. One player from each team faces off. The higher-ranked answer wins control of the board.
+3. The face-off winner chooses whether their team will play or pass control to their opponents.
+4. The controlling team rotates through guesses while matching answers reveal their survey value.
+5. After three strikes, the opposing team gets one answer to steal the round bank.
+6. A successful steal takes the bank; a failed steal awards it to the team that had control.
+7. The team with the highest total after six rounds wins.
+
 ## Features
 
 - Four-letter private room codes
@@ -63,6 +90,8 @@ Each game contains five unusual-fact rounds.
 - Live lobby and player status updates
 - Majority Rules voting, vote distributions, scoring, and leaderboard
 - Bluff Battle private writing, anonymous voting, reveals, and scoring
+- Million Ladder prize progression, safety nets, live room voting, and shared lifelines
+- Survey Showdown team turns, answer board, strikes, steals, and score multipliers
 - Multiple-choice and free-text questions
 - Server-enforced answer locking
 - Host-controlled answer reveals and question progression
@@ -116,6 +145,9 @@ The main realtime events are:
 | `player:answer` | Player | Submit and lock an answer |
 | `player:bluff` | Player | Submit and lock a fake answer |
 | `player:vote` | Player | Vote for a Bluff Battle answer |
+| `player:survey-guess` | Player | Submit the active player's Survey Showdown guess |
+| `player:survey-control` | Player | Choose Play or Pass after winning the face-off |
+| `host:ladder-lifeline` | Host | Use a shared Million Ladder lifeline |
 | `host:reveal` | Host | Mark answers and eliminate players |
 | `host:next` | Host | Continue or finish the round |
 | `host:restart` | Host | Return to the lobby with new questions |
@@ -138,6 +170,10 @@ Free-text answers are normalized on the server before comparison by trimming whi
 `server/questions/commonAnswer/` contains the Majority Rules opinion pool. Eight prompts are selected per game, with used prompts avoided until the 64-prompt pool is exhausted.
 
 `server/questions/bluffBattle/` contains 60 original Bluff Battle prompts, truths, and reveal explanations. Five are selected per game.
+
+`server/questions/millionLadder/` contains six increasingly difficult choices for every prize rung. Used questions are remembered per room so the first six complete replays do not repeat a rung's question.
+
+`server/questions/surveyShowdown/` contains 60 original surveys with six scored answers and accepted guess variants. Six are selected per game without repeats until the pool is exhausted.
 
 ### Persistence and deployment
 

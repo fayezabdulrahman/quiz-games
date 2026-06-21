@@ -39,6 +39,24 @@ export function createRoundController({ broadcast, questionDurationMs }) {
       return true
     }
 
+    if (room.gameType === 'million-ladder') {
+      const contestant = room.players.find((player) => player.ladderRole === 'contestant')
+      room.players.forEach((player) => {
+        player.isCorrect =
+          player.ladderRole === 'contestant'
+            ? player.hasAnswered && correctAnswer(question, player.answer)
+            : null
+      })
+      room.ladderResult = {
+        won: Boolean(contestant?.isCorrect),
+      }
+      if (room.ladderResult.won) {
+        room.ladderReached = room.questionIndex
+      }
+      room.phase = 'revealed'
+      return true
+    }
+
     room.players.forEach((player) => {
       if (!player.active) return
       player.isCorrect =
@@ -112,10 +130,9 @@ export function createRoundController({ broadcast, questionDurationMs }) {
     return true
   }
 
-  function startQuestionTimer(room, expectedPhase = 'answering') {
-    clearQuestionTimer(room)
+  function scheduleQuestionTimer(room, expectedPhase, durationMs) {
     const questionIndex = room.questionIndex
-    room.questionEndsAt = Date.now() + questionDurationMs
+    room.questionEndsAt = Date.now() + durationMs
     room.questionTimer = setTimeout(() => {
       if (room.phase !== expectedPhase || room.questionIndex !== questionIndex) return
       if (room.gameType === 'bluff-battle') {
@@ -125,7 +142,32 @@ export function createRoundController({ broadcast, questionDurationMs }) {
         revealQuestion(room)
       }
       broadcast(room)
-    }, questionDurationMs)
+    }, durationMs)
+  }
+
+  function startQuestionTimer(room, expectedPhase = 'answering') {
+    clearQuestionTimer(room)
+    scheduleQuestionTimer(room, expectedPhase, questionDurationMs)
+  }
+
+  function pauseQuestionTimer(room) {
+    if (!room.questionEndsAt) return 0
+    const remainingMs = Math.max(0, room.questionEndsAt - Date.now())
+    clearQuestionTimer(room)
+    return remainingMs
+  }
+
+  function resumeQuestionTimer(room, durationMs, expectedPhase = 'answering') {
+    clearQuestionTimer(room)
+    if (durationMs > 0) scheduleQuestionTimer(room, expectedPhase, durationMs)
+  }
+
+  function extendQuestionTimer(room, extraMs) {
+    if (room.phase !== 'answering') return false
+    const remainingMs = Math.max(0, room.questionEndsAt - Date.now())
+    clearQuestionTimer(room)
+    scheduleQuestionTimer(room, 'answering', remainingMs + extraMs)
+    return true
   }
 
   function closeExpiredQuestion(room) {
@@ -144,5 +186,8 @@ export function createRoundController({ broadcast, questionDurationMs }) {
     revealBluffRound,
     revealQuestion,
     startQuestionTimer,
+    pauseQuestionTimer,
+    resumeQuestionTimer,
+    extendQuestionTimer,
   }
 }

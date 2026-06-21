@@ -5,4 +5,10 @@ export const allowedOrigins = (process.env.CLIENT_ORIGIN || '')
 
 export const corsOrigin = allowedOrigins.length > 0 ? allowedOrigins : true
 export const questionDurationMs = Number(process.env.QUESTION_TIME_MS || 30_000)
-export const gameTypes = new Set(['one-percent', 'majority-rules', 'bluff-battle'])
+export const gameTypes = new Set([
+  'one-percent',
+  'majority-rules',
+  'bluff-battle',
+  'million-ladder',
+  'survey-showdown',
+])

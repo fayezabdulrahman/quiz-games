@@ -1,7 +1,9 @@
 import crypto from 'node:crypto'
 import { selectBluffPrompts } from '../questions/bluffBattle/index.js'
 import { selectMajorityPrompts } from '../questions/commonAnswer/index.js'
+import { selectMillionLadderQuestions } from '../questions/millionLadder/index.js'
 import { selectQuestions } from '../questions/onePercent/index.js'
+import { selectSurveyShowdownPrompts } from '../questions/surveyShowdown/index.js'
 
 export function normalize(value = '') {
   return String(value)
@@ -25,6 +27,8 @@ export function normalizeLifelineCount(value) {
 export function settingsForGame(gameType, settings = {}) {
   if (gameType === 'majority-rules') return { roundCount: 8 }
   if (gameType === 'bluff-battle') return { roundCount: 5 }
+  if (gameType === 'million-ladder') return { roundCount: 15 }
+  if (gameType === 'survey-showdown') return { roundCount: 6 }
   return {
     lifelineCount: normalizeLifelineCount(settings.lifelineCount),
     lifelinesAnytime: Boolean(settings.lifelinesAnytime),
@@ -34,6 +38,8 @@ export function settingsForGame(gameType, settings = {}) {
 export function questionsForGame(gameType, usedQuestionIds) {
   if (gameType === 'majority-rules') return selectMajorityPrompts(8, usedQuestionIds)
   if (gameType === 'bluff-battle') return selectBluffPrompts(5, usedQuestionIds)
+  if (gameType === 'million-ladder') return selectMillionLadderQuestions(usedQuestionIds)
+  if (gameType === 'survey-showdown') return selectSurveyShowdownPrompts(6, usedQuestionIds)
   return selectQuestions(usedQuestionIds)
 }
 
@@ -48,7 +54,21 @@ export function resetPlayer(player, settings, resetScore = false) {
   player.bluff = null
   player.voteOptionId = null
   player.fooledCount = 0
+  player.teamId = null
   if (resetScore) player.score = 0
+}
+
+export function createSurveyTeams(players) {
+  const teams = [
+    { id: 'lime', name: 'Lime Team', score: 0, playerIds: [] },
+    { id: 'violet', name: 'Violet Team', score: 0, playerIds: [] },
+  ]
+  players.forEach((player, index) => {
+    const team = teams[index % teams.length]
+    player.teamId = team.id
+    team.playerIds.push(player.id)
+  })
+  return teams
 }
 
 export function resetPlayerForNextQuestion(player) {
@@ -69,6 +89,7 @@ export function createPlayer(socketId, name, settings) {
     name,
     connected: true,
     score: 0,
+    ladderRole: null,
   }
   resetPlayer(player, settings)
   return player

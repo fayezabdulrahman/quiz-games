@@ -127,7 +127,7 @@ Answers and explanations are withheld from clients until the room enters the rev
 
 ### Game data
 
-`server/questions.js` and `server/additionalQuestions.js` contain the difficulty ladder and question pool. The current pool has five questions at each of the ten difficulty levels. Questions can use:
+`server/questions/onePercent/` contains the difficulty ladder and question pool. The current pool has eight questions at each of the ten difficulty levels. Questions can use:
 
 - `choice` for selectable answers
 - `input` for free-text answers
@@ -135,9 +135,9 @@ Answers and explanations are withheld from clients until the room enters the rev
 
 Free-text answers are normalized on the server before comparison by trimming whitespace, ignoring case and selected punctuation, and collapsing repeated spaces.
 
-`server/majorityPrompts.js` contains the Majority Rules opinion pool. Eight prompts are selected per game, with used prompts avoided until the pool needs to reset.
+`server/questions/commonAnswer/` contains the Majority Rules opinion pool. Eight prompts are selected per game, with used prompts avoided until the 64-prompt pool is exhausted.
 
-`server/bluffPrompts.js` contains original Bluff Battle prompts, truths, and reveal explanations.
+`server/questions/bluffBattle/` contains 60 original Bluff Battle prompts, truths, and reveal explanations. Five are selected per game.
 
 ### Persistence and deployment
 

@@ -1,0 +1,21 @@
+ .majority-layout, .bluff-layout, .survey-layout {
+	 display: grid;
+	 grid-template-columns: minmax(0, 1fr) 300px;
+	 gap: 54px;
+}
+ .majority-main, .bluff-main, .ladder-main, .survey-main {
+	 min-width: 0;
+}
+ .majority-winner-score span, .bluff-winner-score span {
+	 color: #b8bcd0;
+	 font-size: .72rem;
+	 text-transform: uppercase;
+	 letter-spacing: .12em;
+}
+
+ @media (max-width: 800px) {
+	 .majority-layout, .bluff-layout, .ladder-layout, .survey-layout {
+		 grid-template-columns: 1fr;
+		 gap: 40px;
+	}
+}

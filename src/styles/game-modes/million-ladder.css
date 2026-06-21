@@ -318,6 +318,10 @@
 	 letter-spacing: -.06em;
 }
  @media (max-width: 800px) {
+	 .ladder-layout {
+		 grid-template-columns: 1fr;
+		 gap: 40px;
+	}
 	 .ladder-options {
 		 grid-template-columns: 1fr;
 	}

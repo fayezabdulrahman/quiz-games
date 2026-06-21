@@ -1,4 +1,4 @@
- .majority-layout, .bluff-layout, .survey-layout {
+ .majority-layout, .bluff-layout, .ladder-layout, .survey-layout {
 	 display: grid;
 	 grid-template-columns: minmax(0, 1fr) 300px;
 	 gap: 54px;

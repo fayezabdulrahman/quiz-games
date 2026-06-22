@@ -31,6 +31,12 @@ const featuredGames = {
     description:
       'Split into two teams, uncover the survey board, survive three strikes, and steal the bank from your rivals.',
   },
+  'quickfire-30': {
+    name: 'Quickfire 30',
+    kicker: 'Describe five. Beat the clock.',
+    description:
+      'Split into two teams, roll the handicap die, and race around the board by describing Irish-heavy answer cards.',
+  },
 }
 
 export default function Landing({ onHost, onJoin, busy, error }) {
@@ -43,12 +49,13 @@ export default function Landing({ onHost, onJoin, busy, error }) {
   )
   const [lifelineCount, setLifelineCount] = useState(1)
   const [lifelinesAnytime, setLifelinesAnytime] = useState(false)
+  const [diceMode, setDiceMode] = useState('digital')
 
   const submit = (event) => {
     event.preventDefault()
 
     if (mode === 'host') {
-      onHost(gameType, { lifelineCount, lifelinesAnytime })
+      onHost(gameType, { lifelineCount, lifelinesAnytime, diceMode })
       return
     }
 
@@ -100,6 +107,8 @@ export default function Landing({ onHost, onJoin, busy, error }) {
                     ? '?'
                     : featuredGame === 'survey-showdown'
                       ? 'S'
+                      : featuredGame === 'quickfire-30'
+                        ? '30'
                       : '$'}
             </span>
             <div>
@@ -168,6 +177,18 @@ export default function Landing({ onHost, onJoin, busy, error }) {
                   <strong>Choose your game</strong>
                   <span>Everyone joins after you create the room.</span>
                 </div>
+                <button
+                  type="button"
+                  className={`game-card-option ${gameType === 'quickfire-30' ? 'selected quickfire' : ''}`}
+                  onClick={() => setGameType('quickfire-30')}
+                >
+                  <span className="game-card-icon quickfire-icon">30</span>
+                  <span>
+                    <strong>Quickfire 30</strong>
+                    <small>Two teams · Irish cards · race board</small>
+                  </span>
+                  <span className="selection-dot" />
+                </button>
                 <button
                   type="button"
                   className={`game-card-option ${gameType === 'one-percent' ? 'selected' : ''}`}
@@ -296,6 +317,34 @@ export default function Landing({ onHost, onJoin, busy, error }) {
                 <div className="selected-game-note survey-note">
                   Players split into two teams. Uncover the most popular answers before three
                   strikes give your rivals a chance to steal.
+                </div>
+              )}
+              {gameType === 'quickfire-30' && (
+                <div className="host-settings quickfire-settings">
+                  <div className="settings-heading">
+                    <div>
+                      <strong>Handicap die</strong>
+                      <span>Roll before every card.</span>
+                    </div>
+                  </div>
+                  <div className="quickfire-dice-options">
+                    <button
+                      type="button"
+                      className={diceMode === 'digital' ? 'active' : ''}
+                      onClick={() => setDiceMode('digital')}
+                    >
+                      <strong>Digital die</strong>
+                      <span>Roll it on the describer’s phone</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={diceMode === 'manual' ? 'active' : ''}
+                      onClick={() => setDiceMode('manual')}
+                    >
+                      <strong>Physical die</strong>
+                      <span>Enter the 0, 1 or 2 rolled at home</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </>

@@ -1,4 +1,13 @@
 export default function Logo({ gameType = 'one-percent' }) {
+  if (gameType === 'quickfire-30') {
+    return (
+      <div className="brand brand-quickfire">
+        <span className="brand-quickfire-mark">30</span>
+        <span><strong>QUICKFIRE</strong><small>SECONDS</small></span>
+      </div>
+    )
+  }
+
   if (gameType === 'survey-showdown') {
     return (
       <div className="brand brand-survey">

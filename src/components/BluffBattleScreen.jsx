@@ -43,8 +43,9 @@ function Leaderboard({ players, highlightId }) {
   )
 }
 
-function BluffForm({ onSubmit }) {
+function BluffForm({ inputMode, onSubmit }) {
   const [bluff, setBluff] = useState('')
+  const expectsNumber = inputMode === 'numeric'
 
   const submit = (event) => {
     event.preventDefault()
@@ -59,8 +60,9 @@ function BluffForm({ onSubmit }) {
         value={bluff}
         onChange={(event) => setBluff(event.target.value)}
         maxLength={100}
-        placeholder="Make it convincing…"
+        placeholder={expectsNumber ? 'Enter a convincing number…' : 'Make it convincing…'}
         autoComplete="off"
+        inputMode={inputMode}
       />
       <div>
         <span>{bluff.length}/100</span>
@@ -90,6 +92,11 @@ function BluffResults({ state }) {
               <span>
                 {option.isTruth ? 'THE TRUTH' : `Written by ${option.authorName}`}
               </span>
+              {!option.isTruth && option.voterNames.length > 0 && (
+                <span className="fooled-players">
+                  Fooled {option.voterNames.join(', ')}
+                </span>
+              )}
             </div>
             <b>{option.votes} {option.votes === 1 ? 'vote' : 'votes'}</b>
           </div>
@@ -177,7 +184,7 @@ export default function BluffBattleScreen({
                 <div><strong>Bluff locked</strong><span>Keep a straight face while everyone else writes.</span></div>
               </div>
             ) : (
-              <BluffForm onSubmit={onSubmitBluff} />
+              <BluffForm inputMode={state.question.inputMode} onSubmit={onSubmitBluff} />
             )
           )}
 

@@ -1,8 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import Logo from './Logo.jsx'
 import PlayerList from './PlayerList.jsx'
+import QuickfireTeamSetup from './QuickfireTeamSetup.jsx'
 
-export default function Lobby({ state, onStart }) {
+export default function Lobby({
+  state,
+  onStart,
+  onAssignQuickfireTeam,
+  onRandomizeQuickfireTeams,
+}) {
   const joinUrl = `${window.location.origin}?join=${state.code}`
   const [copyStatus, setCopyStatus] = useState('')
   const copyTimer = useRef(null)
@@ -54,7 +60,12 @@ export default function Lobby({ state, onStart }) {
             <span className="pulse" />
           </div>
           <div className="room-settings-summary">
-            {state.gameType === 'survey-showdown' ? (
+            {state.gameType === 'quickfire-30' ? (
+              <>
+                <span><strong>30</strong> second team turns</span>
+                <span>{state.settings.diceMode === 'manual' ? 'Physical' : 'Digital'} handicap die · first to 30</span>
+              </>
+            ) : state.gameType === 'survey-showdown' ? (
               <>
                 <span><strong>6</strong> team survey rounds</span>
                 <span>Three strikes · one chance to steal</span>
@@ -86,21 +97,37 @@ export default function Lobby({ state, onStart }) {
               </>
             )}
           </div>
-          <PlayerList players={state.players} />
+          {state.gameType === 'quickfire-30' ? (
+            <QuickfireTeamSetup
+              state={state}
+              onAssign={onAssignQuickfireTeam}
+              onRandomize={onRandomizeQuickfireTeams}
+            />
+          ) : (
+            <PlayerList players={state.players} />
+          )}
           {state.isHost ? (
             <button
               type="button"
               className="primary wide"
               onClick={onStart}
               disabled={
-                state.gameType === 'bluff-battle' || state.gameType === 'survey-showdown'
-                  ? state.players.length < 2
+                ['bluff-battle', 'survey-showdown', 'quickfire-30'].includes(state.gameType)
+                  ? state.players.length < 2 ||
+                    (state.gameType === 'quickfire-30' &&
+                      (state.players.some((player) => !player.teamId) ||
+                        state.quickfireTeams.some((team) => team.playerIds.length === 0)))
                   : !state.players.length
               }
             >
-              {(state.gameType === 'bluff-battle' || state.gameType === 'survey-showdown') &&
-              state.players.length < 2
-                ? 'Waiting for 2 players'
+              {['bluff-battle', 'survey-showdown', 'quickfire-30'].includes(state.gameType) &&
+              (state.players.length < 2 ||
+                (state.gameType === 'quickfire-30' &&
+                  (state.players.some((player) => !player.teamId) ||
+                    state.quickfireTeams.some((team) => team.playerIds.length === 0))))
+                ? state.players.length < 2
+                  ? 'Waiting for 2 players'
+                  : 'Assign both teams'
                 : 'Start the game'}
             </button>
           ) : (

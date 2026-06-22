@@ -8,6 +8,8 @@ import MajorityRulesScreen from './components/MajorityRulesScreen.jsx'
 import MillionLadderFinished from './components/MillionLadderFinished.jsx'
 import MillionLadderScreen from './components/MillionLadderScreen.jsx'
 import QuestionScreen from './components/QuestionScreen.jsx'
+import Quickfire30Finished from './components/Quickfire30Finished.jsx'
+import Quickfire30Screen from './components/Quickfire30Screen.jsx'
 import RoomGamePicker from './components/RoomGamePicker.jsx'
 import SurveyShowdownFinished from './components/SurveyShowdownFinished.jsx'
 import SurveyShowdownScreen from './components/SurveyShowdownScreen.jsx'
@@ -26,6 +28,13 @@ export default function App() {
     voteForBluff,
     submitSurveyGuess,
     chooseSurveyControl,
+    assignQuickfireTeam,
+    randomizeQuickfireTeams,
+    rollQuickfireDie,
+    drawQuickfireCard,
+    scoreQuickfireCard,
+    nextQuickfireTurn,
+    endQuickfireGame,
     useLifeline,
     useLadderLifeline,
     revealAnswer,
@@ -41,7 +50,14 @@ export default function App() {
   }
 
   if (state.phase === 'lobby') {
-    return <Lobby state={state} onStart={startGame} />
+    return (
+      <Lobby
+        state={state}
+        onStart={startGame}
+        onAssignQuickfireTeam={assignQuickfireTeam}
+        onRandomizeQuickfireTeams={randomizeQuickfireTeams}
+      />
+    )
   }
 
   if (state.phase === 'game-select') {
@@ -49,6 +65,15 @@ export default function App() {
   }
 
   if (state.phase === 'finished') {
+    if (state.gameType === 'quickfire-30') {
+      return (
+        <Quickfire30Finished
+          state={state}
+          onRestart={restartGame}
+          onChangeGame={returnToGames}
+        />
+      )
+    }
     if (state.gameType === 'survey-showdown') {
       return <SurveyShowdownFinished state={state} onRestart={restartGame} onChangeGame={returnToGames} />
     }
@@ -85,6 +110,20 @@ export default function App() {
   if (state.gameType === 'survey-showdown') {
     return <SurveyShowdownScreen state={state} error={error} onGuess={submitSurveyGuess}
       onChooseControl={chooseSurveyControl} onNext={nextQuestion} onEnd={endGame} />
+  }
+
+  if (state.gameType === 'quickfire-30') {
+    return (
+      <Quickfire30Screen
+        state={state}
+        error={error}
+        onRoll={rollQuickfireDie}
+        onDraw={drawQuickfireCard}
+        onScore={scoreQuickfireCard}
+        onNext={nextQuickfireTurn}
+        onEnd={endQuickfireGame}
+      />
+    )
   }
 
   if (state.gameType === 'bluff-battle') {

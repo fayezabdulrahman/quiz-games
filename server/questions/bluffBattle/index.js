@@ -22,7 +22,8 @@ export const bluffPromptPool = [
   {
     id: 'octopus-hearts',
     prompt: 'How many hearts does an octopus have?',
-    answer: 'Three',
+    answer: '3',
+    inputMode: 'numeric',
     explanation: 'Two pump blood through the gills and one pumps it around the body.',
   },
   {
@@ -93,8 +94,9 @@ export const bluffPromptPool = [
   },
   {
     id: 'snail-sleep',
-    prompt: 'In extreme conditions, some land snails can remain dormant for roughly how long?',
-    answer: 'Three years',
+    prompt: 'In extreme conditions, some land snails can remain dormant for roughly how many years?',
+    answer: '3',
+    inputMode: 'numeric',
     explanation: 'Some species can enter extended dormancy to survive prolonged dry conditions.',
   },
   {
@@ -184,7 +186,8 @@ export const bluffPromptPool = [
   {
     id: 'snail-teeth',
     prompt: 'A garden snail can have roughly how many tiny teeth?',
-    answer: 'Thousands',
+    answer: '14,000',
+    inputMode: 'numeric',
     explanation: 'Its ribbon-like radula is covered with thousands of microscopic teeth.',
   },
   {
@@ -243,8 +246,9 @@ export const bluffPromptPool = [
   },
   {
     id: 'shortest-war',
-    prompt: 'The shortest recorded war, fought between Britain and Zanzibar, lasted roughly how long?',
-    answer: 'About 40 minutes',
+    prompt: 'The shortest recorded war, fought between Britain and Zanzibar, lasted roughly how many minutes?',
+    answer: '40',
+    inputMode: 'numeric',
     explanation: 'The Anglo-Zanzibar War of 1896 ended in well under an hour.',
   },
   {
@@ -262,7 +266,8 @@ export const bluffPromptPool = [
   {
     id: 'first-popsicle',
     prompt: 'How old was the inventor who accidentally created the first Popsicle-style ice pop?',
-    answer: 'Eleven years old',
+    answer: '11',
+    inputMode: 'numeric',
     explanation: 'Frank Epperson was 11 when a flavoured drink and stirring stick froze outside overnight.',
   },
   {
@@ -357,8 +362,9 @@ export const bluffPromptPool = [
   },
   {
     id: 'earth-water',
-    prompt: 'About what fraction of Earth’s surface is covered by water?',
-    answer: 'About 70 percent',
+    prompt: 'About what percentage of Earth’s surface is covered by water?',
+    answer: '71',
+    inputMode: 'numeric',
     explanation: 'Oceans and other water cover roughly 71% of Earth’s surface.',
   },
 ]

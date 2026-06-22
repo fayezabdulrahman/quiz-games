@@ -274,6 +274,11 @@
  .bluff-reveal-list .truth span {
 	 color: var(--bluff-mint);
 }
+ .bluff-reveal-list span.fooled-players {
+	 color: #d8b4fe;
+	 letter-spacing: .03em;
+	 text-transform: none;
+}
  .bluff-form > div > span {
 	 color: #747b96;
 	 font-size: .72rem;

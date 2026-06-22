@@ -26,7 +26,7 @@ function broadcast(room) {
 }
 
 const roundController = createRoundController({ broadcast, questionDurationMs })
-registerSocketHandlers({ io, rooms, gameTypes, broadcast, roundController })
+registerSocketHandlers({ io, rooms, gameTypes, broadcast, roundController, questionDurationMs })
 
 app.get('/api/health', (_request, response) => {
   response.json({ ok: true, rooms: rooms.size })

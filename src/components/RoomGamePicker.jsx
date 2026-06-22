@@ -6,9 +6,10 @@ export default function RoomGamePicker({ state, error, onSelectGame }) {
   const [gameType, setGameType] = useState(state.gameType)
   const [lifelineCount, setLifelineCount] = useState(1)
   const [lifelinesAnytime, setLifelinesAnytime] = useState(false)
+  const [diceMode, setDiceMode] = useState('digital')
 
   const continueToLobby = () => {
-    onSelectGame(gameType, { lifelineCount, lifelinesAnytime })
+    onSelectGame(gameType, { lifelineCount, lifelinesAnytime, diceMode })
   }
 
   return (
@@ -27,6 +28,14 @@ export default function RoomGamePicker({ state, error, onSelectGame }) {
           {state.isHost ? (
             <>
               <div className="room-game-grid">
+                <button
+                  type="button"
+                  className={`room-game-card quickfire ${gameType === 'quickfire-30' ? 'selected' : ''}`}
+                  onClick={() => setGameType('quickfire-30')}
+                >
+                  <Logo gameType="quickfire-30" />
+                  <span>Two teams describe five names against the clock</span>
+                </button>
                 <button
                   type="button"
                   className={`room-game-card ${gameType === 'one-percent' ? 'selected' : ''}`}
@@ -111,6 +120,22 @@ export default function RoomGamePicker({ state, error, onSelectGame }) {
                     />
                     <span className="toggle" aria-hidden="true" />
                   </label>
+                </div>
+              )}
+              {gameType === 'quickfire-30' && (
+                <div className="host-settings room-picker-settings quickfire-settings">
+                  <div className="settings-heading">
+                    <div>
+                      <strong>Choose the die</strong>
+                      <span>Digital rolls in the app; physical lets the player enter 0, 1 or 2.</span>
+                    </div>
+                  </div>
+                  <div className="quickfire-dice-options">
+                    <button type="button" className={diceMode === 'digital' ? 'active' : ''}
+                      onClick={() => setDiceMode('digital')}>Digital</button>
+                    <button type="button" className={diceMode === 'manual' ? 'active' : ''}
+                      onClick={() => setDiceMode('manual')}>Physical</button>
+                  </div>
                 </div>
               )}
               {error && <p className="form-error" role="alert">{error}</p>}

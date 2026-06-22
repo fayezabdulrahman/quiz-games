@@ -3,6 +3,7 @@ import { selectBluffPrompts } from '../questions/bluffBattle/index.js'
 import { selectMajorityPrompts } from '../questions/commonAnswer/index.js'
 import { selectMillionLadderQuestions } from '../questions/millionLadder/index.js'
 import { selectQuestions } from '../questions/onePercent/index.js'
+import { selectQuickfire30Cards } from '../questions/quickfire30/index.js'
 import { selectSurveyShowdownPrompts } from '../questions/surveyShowdown/index.js'
 
 export function normalize(value = '') {
@@ -29,6 +30,12 @@ export function settingsForGame(gameType, settings = {}) {
   if (gameType === 'bluff-battle') return { roundCount: 5 }
   if (gameType === 'million-ladder') return { roundCount: 15 }
   if (gameType === 'survey-showdown') return { roundCount: 6 }
+  if (gameType === 'quickfire-30') {
+    return {
+      diceMode: settings.diceMode === 'manual' ? 'manual' : 'digital',
+      boardLength: 30,
+    }
+  }
   return {
     lifelineCount: normalizeLifelineCount(settings.lifelineCount),
     lifelinesAnytime: Boolean(settings.lifelinesAnytime),
@@ -40,6 +47,7 @@ export function questionsForGame(gameType, usedQuestionIds) {
   if (gameType === 'bluff-battle') return selectBluffPrompts(5, usedQuestionIds)
   if (gameType === 'million-ladder') return selectMillionLadderQuestions(usedQuestionIds)
   if (gameType === 'survey-showdown') return selectSurveyShowdownPrompts(6, usedQuestionIds)
+  if (gameType === 'quickfire-30') return selectQuickfire30Cards(64, usedQuestionIds)
   return selectQuestions(usedQuestionIds)
 }
 

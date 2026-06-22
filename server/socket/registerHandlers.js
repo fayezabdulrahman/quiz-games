@@ -49,6 +49,28 @@ function nextSurveyTeamPlayer(team, currentPlayerId) {
   return team.playerIds[(Math.max(0, currentIndex) + 1) % team.playerIds.length]
 }
 
+function createQuickfireTeams() {
+  return [
+    { id: 'coral', name: 'Team A', position: 0, playerIds: [] },
+    { id: 'blue', name: 'Team B', position: 0, playerIds: [] },
+  ]
+}
+
+function syncQuickfireTeamPlayers(room) {
+  room.quickfireTeams.forEach((team) => {
+    team.playerIds = room.players
+      .filter((player) => player.teamId === team.id)
+      .map((player) => player.id)
+  })
+}
+
+function quickfireDescriber(room) {
+  const team = room.quickfireTeams[room.quickfireActiveTeamIndex]
+  if (!team?.playerIds.length) return null
+  const turnCount = room.quickfireTeamTurnCounts[team.id] || 0
+  return team.playerIds[turnCount % team.playerIds.length]
+}
+
 function prepareRoomGame(room, gameType, settings, clearQuestionTimer) {
   clearQuestionTimer(room)
   room.gameType = gameType
@@ -78,6 +100,13 @@ function prepareRoomGame(room, gameType, settings, clearQuestionTimer) {
   room.surveyFaceoffPairIndex = 0
   room.surveyFaceoffGuesses = []
   room.surveyControlChooserPlayerId = null
+  room.quickfireTeams = createQuickfireTeams()
+  room.quickfireActiveTeamIndex = 0
+  room.quickfireTeamTurnCounts = { coral: 0, blue: 0 }
+  room.quickfireActivePlayerId = null
+  room.quickfireDie = null
+  room.quickfireCorrectTermIndexes = []
+  room.quickfireLastMove = null
   room.players.forEach((player) => {
     resetPlayer(player, room.settings, true)
   })
@@ -96,6 +125,7 @@ export function registerSocketHandlers({
   gameTypes,
   broadcast,
   roundController,
+  questionDurationMs,
 }) {
   const {
     clearQuestionTimer,
@@ -107,6 +137,28 @@ export function registerSocketHandlers({
     pauseQuestionTimer,
     resumeQuestionTimer,
   } = roundController
+
+  function startQuickfireTurn(room) {
+    clearQuestionTimer(room)
+    room.quickfireActivePlayerId = quickfireDescriber(room)
+    room.quickfireDie = null
+    room.quickfireCorrectTermIndexes = []
+    room.quickfireLastMove = null
+    room.phase = 'quickfire-roll'
+  }
+
+  function finishQuickfireTimer(room) {
+    if (room.gameType !== 'quickfire-30' || room.phase !== 'quickfire-describing') return
+    clearQuestionTimer(room)
+    room.phase = 'quickfire-scoring'
+    broadcast(room)
+  }
+
+  function startQuickfireTimer(room) {
+    clearQuestionTimer(room)
+    room.questionEndsAt = Date.now() + questionDurationMs
+    room.questionTimer = setTimeout(() => finishQuickfireTimer(room), questionDurationMs)
+  }
 
   function startRoomQuestionTimer(room) {
     if (room.gameType === 'million-ladder' && room.questionIndex >= 5) {
@@ -132,13 +184,14 @@ export function registerSocketHandlers({
   io.on('connection', (socket) => {
     socket.on(
       'host:create',
-      ({ gameType, lifelineCount, lifelinesAnytime } = {}, callback) => {
+      ({ gameType, lifelineCount, lifelinesAnytime, diceMode } = {}, callback) => {
         const code = makeCode(rooms)
         const usedQuestionIds = new Set()
         const selectedGameType = gameTypes.has(gameType) ? gameType : 'one-percent'
         const settings = settingsForGame(selectedGameType, {
           lifelineCount,
           lifelinesAnytime,
+          diceMode,
         })
         const room = {
           code,
@@ -174,6 +227,13 @@ export function registerSocketHandlers({
           surveyFaceoffPairIndex: 0,
           surveyFaceoffGuesses: [],
           surveyControlChooserPlayerId: null,
+          quickfireTeams: createQuickfireTeams(),
+          quickfireActiveTeamIndex: 0,
+          quickfireTeamTurnCounts: { coral: 0, blue: 0 },
+          quickfireActivePlayerId: null,
+          quickfireDie: null,
+          quickfireCorrectTermIndexes: [],
+          quickfireLastMove: null,
           settings,
         }
         rooms.set(code, room)
@@ -212,14 +272,20 @@ export function registerSocketHandlers({
         return replyError(callback, 'Only the host can start.')
       }
       const minimumPlayers =
-        room.gameType === 'bluff-battle' || room.gameType === 'survey-showdown' ? 2 : 1
+        ['bluff-battle', 'survey-showdown', 'quickfire-30'].includes(room.gameType) ? 2 : 1
       if (room.players.length < minimumPlayers) {
         return replyError(
           callback,
-          room.gameType === 'bluff-battle' || room.gameType === 'survey-showdown'
-            ? `${room.gameType === 'bluff-battle' ? 'Bluff Battle' : 'Survey Showdown'} needs at least two players.`
+          ['bluff-battle', 'survey-showdown', 'quickfire-30'].includes(room.gameType)
+            ? `${room.gameType === 'bluff-battle' ? 'Bluff Battle' : room.gameType === 'survey-showdown' ? 'Survey Showdown' : 'Quickfire 30'} needs at least two players.`
             : 'At least one player must join.',
         )
+      }
+      if (room.gameType === 'quickfire-30') {
+        syncQuickfireTeamPlayers(room)
+        if (room.quickfireTeams.some((team) => team.playerIds.length === 0)) {
+          return replyError(callback, 'Assign at least one player to each team.')
+        }
       }
 
       room.questionIndex = 0
@@ -229,12 +295,172 @@ export function registerSocketHandlers({
       if (room.gameType === 'survey-showdown') {
         room.surveyTeams = createSurveyTeams(room.players)
         startSurveyFaceoff(room)
+      } else if (room.gameType === 'quickfire-30') {
+        room.questionIndex = -1
+        room.quickfireTeams.forEach((team) => {
+          team.playerIds.forEach((playerId) => {
+            const player = room.players.find((item) => item.id === playerId)
+            if (player) player.teamId = team.id
+          })
+        })
+        room.quickfireTeams.forEach((team) => {
+          team.position = 0
+        })
+        room.quickfireActiveTeamIndex = 0
+        room.quickfireTeamTurnCounts = { coral: 0, blue: 0 }
+        startQuickfireTurn(room)
       } else {
         room.phase = room.gameType === 'bluff-battle' ? 'bluffing' : 'answering'
       }
       room.finishReason = null
       room.bluffOptions = []
       if (room.gameType !== 'survey-showdown') startRoomQuestionTimer(room)
+      callback?.({ ok: true })
+      broadcast(room)
+    })
+
+    socket.on('host:quickfire-assign', ({ code, playerId, teamId } = {}, callback) => {
+      const room = getRoom(rooms, code)
+      if (!room || room.hostSocketId !== socket.id) {
+        return replyError(callback, 'Only the host can assign teams.')
+      }
+      if (room.gameType !== 'quickfire-30' || room.phase !== 'lobby') {
+        return replyError(callback, 'Teams can only be changed in the Quickfire 30 lobby.')
+      }
+      const player = room.players.find((item) => item.id === playerId)
+      if (!player || !['coral', 'blue'].includes(teamId)) {
+        return replyError(callback, 'Choose a player and team.')
+      }
+      player.teamId = teamId
+      syncQuickfireTeamPlayers(room)
+      callback?.({ ok: true })
+      broadcast(room)
+    })
+
+    socket.on('host:quickfire-randomize', ({ code } = {}, callback) => {
+      const room = getRoom(rooms, code)
+      if (!room || room.hostSocketId !== socket.id) {
+        return replyError(callback, 'Only the host can assign teams.')
+      }
+      if (room.gameType !== 'quickfire-30' || room.phase !== 'lobby') {
+        return replyError(callback, 'Teams can only be changed in the Quickfire 30 lobby.')
+      }
+      const shuffled = [...room.players].sort(() => Math.random() - 0.5)
+      shuffled.forEach((player, index) => {
+        player.teamId = index % 2 === 0 ? 'coral' : 'blue'
+      })
+      syncQuickfireTeamPlayers(room)
+      callback?.({ ok: true })
+      broadcast(room)
+    })
+
+    socket.on('player:quickfire-roll', ({ code, value } = {}, callback) => {
+      const room = getRoom(rooms, code)
+      const player = room?.players.find((item) => item.socketId === socket.id)
+      if (!room || !player) return replyError(callback, 'You are not in this room.')
+      if (room.gameType !== 'quickfire-30' || room.phase !== 'quickfire-roll') {
+        return replyError(callback, 'The die cannot be rolled right now.')
+      }
+      if (player.id !== room.quickfireActivePlayerId) {
+        return replyError(callback, 'The current describer rolls the die.')
+      }
+      if (room.settings.diceMode === 'manual') {
+        const manualValue = Number(value)
+        if (![0, 1, 2].includes(manualValue)) {
+          return replyError(callback, 'Enter the 0, 1 or 2 shown on your physical die.')
+        }
+        room.quickfireDie = manualValue
+      } else {
+        room.quickfireDie = Math.floor(Math.random() * 3)
+      }
+      room.phase = 'quickfire-ready'
+      callback?.({ ok: true, value: room.quickfireDie })
+      broadcast(room)
+    })
+
+    socket.on('player:quickfire-draw', ({ code } = {}, callback) => {
+      const room = getRoom(rooms, code)
+      const player = room?.players.find((item) => item.socketId === socket.id)
+      if (!room || !player) return replyError(callback, 'You are not in this room.')
+      if (room.gameType !== 'quickfire-30' || room.phase !== 'quickfire-ready') {
+        return replyError(callback, 'Roll the die before drawing a card.')
+      }
+      if (player.id !== room.quickfireActivePlayerId) {
+        return replyError(callback, 'Only the current describer can draw the card.')
+      }
+      if (room.questionIndex >= room.questions.length - 1) {
+        room.questions = questionsForGame('quickfire-30', room.usedQuestionIds)
+        room.questionIndex = -1
+      }
+      room.questionIndex += 1
+      room.phase = 'quickfire-describing'
+      startQuickfireTimer(room)
+      callback?.({ ok: true })
+      broadcast(room)
+    })
+
+    socket.on(
+      'player:quickfire-score',
+      ({ code, correctTermIndexes } = {}, callback) => {
+        const room = getRoom(rooms, code)
+        const player = room?.players.find((item) => item.socketId === socket.id)
+        if (!room || !player) return replyError(callback, 'You are not in this room.')
+        if (room.gameType !== 'quickfire-30' || room.phase !== 'quickfire-scoring') {
+          return replyError(callback, 'Scoring is not open.')
+        }
+        if (player.id !== room.quickfireActivePlayerId) {
+          return replyError(callback, 'The describer records the correct answers.')
+        }
+        const indexes = [...new Set(Array.isArray(correctTermIndexes) ? correctTermIndexes : [])]
+          .map(Number)
+          .filter((index) => Number.isInteger(index) && index >= 0 && index < 5)
+        const team = room.quickfireTeams[room.quickfireActiveTeamIndex]
+        const move = Math.max(0, indexes.length - room.quickfireDie)
+        room.quickfireCorrectTermIndexes = indexes
+        team.position = Math.min(room.settings.boardLength, team.position + move)
+        room.quickfireLastMove = {
+          teamId: team.id,
+          correctCount: indexes.length,
+          die: room.quickfireDie,
+          move,
+        }
+        room.quickfireTeamTurnCounts[team.id] += 1
+        if (team.position >= room.settings.boardLength) {
+          room.phase = 'finished'
+          room.finishReason = 'completed'
+        } else {
+          room.phase = 'quickfire-result'
+        }
+        callback?.({ ok: true, move })
+        broadcast(room)
+      },
+    )
+
+    socket.on('host:quickfire-next', ({ code } = {}, callback) => {
+      const room = getRoom(rooms, code)
+      if (!room || room.hostSocketId !== socket.id) {
+        return replyError(callback, 'Only the host can start the next turn.')
+      }
+      if (room.gameType !== 'quickfire-30' || room.phase !== 'quickfire-result') {
+        return replyError(callback, 'Finish scoring this turn first.')
+      }
+      room.quickfireActiveTeamIndex = (room.quickfireActiveTeamIndex + 1) % 2
+      startQuickfireTurn(room)
+      callback?.({ ok: true })
+      broadcast(room)
+    })
+
+    socket.on('host:quickfire-end', ({ code } = {}, callback) => {
+      const room = getRoom(rooms, code)
+      if (!room || room.hostSocketId !== socket.id) {
+        return replyError(callback, 'Only the host can end the game.')
+      }
+      if (room.gameType !== 'quickfire-30' || room.phase === 'lobby') {
+        return replyError(callback, 'Quickfire 30 is not in progress.')
+      }
+      clearQuestionTimer(room)
+      room.phase = 'finished'
+      room.finishReason = 'host-ended'
       callback?.({ ok: true })
       broadcast(room)
     })
@@ -671,7 +897,7 @@ export function registerSocketHandlers({
 
     socket.on(
       'host:select-game',
-      ({ code, gameType, lifelineCount, lifelinesAnytime } = {}, callback) => {
+      ({ code, gameType, lifelineCount, lifelinesAnytime, diceMode } = {}, callback) => {
         const room = getRoom(rooms, code)
         if (!room || room.hostSocketId !== socket.id) {
           return replyError(callback, 'Only the host can choose the next game.')
@@ -683,7 +909,7 @@ export function registerSocketHandlers({
         prepareRoomGame(
           room,
           gameType,
-          { lifelineCount, lifelinesAnytime },
+          { lifelineCount, lifelinesAnytime, diceMode },
           clearQuestionTimer,
         )
         callback?.({ ok: true })

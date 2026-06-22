@@ -39,13 +39,26 @@ function bluffOptionsFor(room) {
             ? room.players.find((player) => player.id === option.authorPlayerId)?.name
             : null,
           votes: room.players.filter((player) => player.voteOptionId === option.id).length,
+          voterNames: room.players
+            .filter((player) => player.voteOptionId === option.id)
+            .map((player) => player.name),
         }
       : {}),
   }))
 }
 
-function publicQuestion(room, question) {
+function publicQuestion(room, question, socketId) {
   if (!question) return null
+  if (room.gameType === 'quickfire-30') {
+    const player = room.players.find((item) => item.socketId === socketId)
+    const canSeeTerms =
+      ['quickfire-scoring', 'quickfire-result', 'finished'].includes(room.phase) ||
+      (room.phase === 'quickfire-describing' && player?.id === room.quickfireActivePlayerId)
+    return {
+      id: question.id,
+      terms: canSeeTerms ? question.terms : [],
+    }
+  }
   const revealAnswer =
     room.phase === 'revealed' ||
     (room.phase === 'finished' &&
@@ -78,6 +91,7 @@ function publicQuestion(room, question) {
   return {
     id: question.id,
     type: question.type,
+    inputMode: question.inputMode,
     prompt: question.prompt,
     detail: question.detail,
     options:
@@ -107,6 +121,7 @@ export function createPublicState(room, socketId, questionDurationMs) {
   const isBluffBattle = room.gameType === 'bluff-battle'
   const isMillionLadder = room.gameType === 'million-ladder'
   const isSurveyShowdown = room.gameType === 'survey-showdown'
+  const isQuickfire30 = room.gameType === 'quickfire-30'
   const isScoreGame = isMajorityRules || isBluffBattle
   const topScore = Math.max(0, ...room.players.map((player) => player.score || 0))
 
@@ -121,6 +136,8 @@ export function createPublicState(room, socketId, questionDurationMs) {
           ? 'Million Ladder'
           : isSurveyShowdown
             ? 'Survey Showdown'
+            : isQuickfire30
+              ? 'Quickfire 30'
             : 'The 1% Club',
     phase: room.phase,
     questionIndex: room.questionIndex,
@@ -137,7 +154,7 @@ export function createPublicState(room, socketId, questionDurationMs) {
         ? room.bluffOptions.find((option) => option.authorPlayerId === me.id)?.id || null
         : null,
     selectedVoteOptionId: isBluffBattle && me ? me.voteOptionId : null,
-    question: publicQuestion(room, question),
+    question: publicQuestion(room, question, socketId),
     players: room.players.map((player) => playerView(player, revealResponses)),
     me: me ? playerView(me, revealResponses) : null,
     isHost: room.hostSocketId === socketId,
@@ -177,9 +194,27 @@ export function createPublicState(room, socketId, questionDurationMs) {
           surveyMultiplier: room.questionIndex < 3 ? 1 : room.questionIndex < 5 ? 2 : 3,
         }
       : {}),
+    ...(isQuickfire30
+      ? {
+          quickfireTeams: room.quickfireTeams,
+          quickfireActiveTeamId:
+            room.quickfireTeams[room.quickfireActiveTeamIndex]?.id || null,
+          quickfireActivePlayerId: room.quickfireActivePlayerId,
+          quickfireDie: room.quickfireDie,
+          quickfireCorrectTermIndexes: room.quickfireCorrectTermIndexes,
+          quickfireLastMove: room.quickfireLastMove,
+        }
+      : {}),
     winnerNames:
       room.phase === 'finished'
-        ? isSurveyShowdown
+        ? isQuickfire30
+          ? room.quickfireTeams
+              .filter(
+                (team) =>
+                  team.position === Math.max(...room.quickfireTeams.map((item) => item.position)),
+              )
+              .map((team) => team.name)
+          : isSurveyShowdown
           ? room.surveyTeams
               .filter((team) => team.score === Math.max(...room.surveyTeams.map((item) => item.score)))
               .map((team) => team.name)

@@ -11,4 +11,5 @@ export const gameTypes = new Set([
   'bluff-battle',
   'million-ladder',
   'survey-showdown',
+  'quickfire-30',
 ])

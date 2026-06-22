@@ -5,6 +5,17 @@
 	 border-radius: 50%;
 	 background: #ff5277;
 	 box-shadow: 0 0 12px #ff5277;
+	 animation: live-room-pulse 1.5s ease-out infinite;
+}
+ @keyframes live-room-pulse {
+	 0%, 100% {
+		 transform: scale(1);
+		 box-shadow: 0 0 0 0 rgba(255,82,119,.5), 0 0 12px #ff5277;
+	}
+	 50% {
+		 transform: scale(1.18);
+		 box-shadow: 0 0 0 7px rgba(255,82,119,0), 0 0 16px #ff5277;
+	}
 }
  .lobby-grid {
 	 display: grid;

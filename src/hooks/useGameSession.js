@@ -67,6 +67,16 @@ export function useGameSession() {
       action('player:survey-guess', { ...roomPayload(), guess }),
     chooseSurveyControl: (choice) =>
       action('player:survey-control', { ...roomPayload(), choice }),
+    assignQuickfireTeam: (playerId, teamId) =>
+      action('host:quickfire-assign', { ...roomPayload(), playerId, teamId }),
+    randomizeQuickfireTeams: () => action('host:quickfire-randomize', roomPayload()),
+    rollQuickfireDie: (value) =>
+      action('player:quickfire-roll', { ...roomPayload(), value }),
+    drawQuickfireCard: () => action('player:quickfire-draw', roomPayload()),
+    scoreQuickfireCard: (correctTermIndexes) =>
+      action('player:quickfire-score', { ...roomPayload(), correctTermIndexes }),
+    nextQuickfireTurn: () => action('host:quickfire-next', roomPayload()),
+    endQuickfireGame: () => action('host:quickfire-end', roomPayload()),
     useLifeline: () => action('player:pass', roomPayload()),
     useLadderLifeline: (lifeline) =>
       action('host:ladder-lifeline', { ...roomPayload(), lifeline }),

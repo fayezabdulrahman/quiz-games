@@ -17,6 +17,18 @@ export default function Logo({ gameType = 'one-percent' }) {
     )
   }
 
+  if (gameType === 'say-what-you-see') {
+    return (
+      <div className="brand brand-catchphrase">
+        <span className="brand-catchphrase-mark">EYE</span>
+        <span>
+          <strong>SAY WHAT</strong>
+          <small>YOU SEE</small>
+        </span>
+      </div>
+    )
+  }
+
   if (gameType === 'million-ladder') {
     return (
       <div className="brand brand-ladder">

@@ -58,9 +58,17 @@
  .room-picker-settings {
 	 max-width: 780px;
 }
- .picker-continue {
-	 width: min(100%, 780px);
+ .room-picker-actions {
+	 display: grid;
+	 gap: 12px;
+	 max-width: 780px;
 	 margin-top: 18px;
+}
+ .picker-continue {
+	 width: 100%;
+}
+ .picker-close {
+	 width: 100%;
 }
  .room-picker-layout aside h2 {
 	 margin: 7px 0 22px;

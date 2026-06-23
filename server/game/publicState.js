@@ -15,6 +15,7 @@ function playerView(player, revealResponses = false) {
     fooledCount: player.fooledCount || 0,
     teamId: player.teamId || null,
     ladderRole: player.ladderRole || null,
+    buzzedOut: Boolean(player.buzzedOut),
     ...(revealResponses
       ? { submittedAnswer: player.passedCurrentQuestion ? 'PASS' : player.answer }
       : {}),
@@ -88,6 +89,20 @@ function publicQuestion(room, question, socketId) {
     }
   }
 
+  if (room.gameType === 'say-what-you-see') {
+    return {
+      id: question.id,
+      layout: question.layout,
+      tokens: question.tokens,
+      ...(revealAnswer
+        ? {
+            answer: Array.isArray(question.answer) ? question.answer[0] : question.answer,
+            explanation: question.explanation,
+          }
+        : {}),
+    }
+  }
+
   return {
     id: question.id,
     type: question.type,
@@ -122,7 +137,8 @@ export function createPublicState(room, socketId, questionDurationMs) {
   const isMillionLadder = room.gameType === 'million-ladder'
   const isSurveyShowdown = room.gameType === 'survey-showdown'
   const isQuickfire30 = room.gameType === 'quickfire-30'
-  const isScoreGame = isMajorityRules || isBluffBattle
+  const isSayWhatYouSee = room.gameType === 'say-what-you-see'
+  const isScoreGame = isMajorityRules || isBluffBattle || isSayWhatYouSee
   const topScore = Math.max(0, ...room.players.map((player) => player.score || 0))
 
   return {
@@ -138,6 +154,8 @@ export function createPublicState(room, socketId, questionDurationMs) {
             ? 'Survey Showdown'
             : isQuickfire30
               ? 'Quickfire 30'
+              : isSayWhatYouSee
+                ? 'Say What You See'
             : 'The 1% Club',
     phase: room.phase,
     questionIndex: room.questionIndex,
@@ -155,6 +173,15 @@ export function createPublicState(room, socketId, questionDurationMs) {
         : null,
     selectedVoteOptionId: isBluffBattle && me ? me.voteOptionId : null,
     question: publicQuestion(room, question, socketId),
+    ...(isSayWhatYouSee
+      ? {
+          catchphraseBuzzerPlayerId: room.catchphraseBuzzerPlayerId,
+          catchphraseBuzzerName:
+            room.players.find((player) => player.id === room.catchphraseBuzzerPlayerId)?.name ||
+            null,
+          catchphraseLastGuess: room.catchphraseLastGuess,
+        }
+      : {}),
     players: room.players.map((player) => playerView(player, revealResponses)),
     me: me ? playerView(me, revealResponses) : null,
     isHost: room.hostSocketId === socketId,

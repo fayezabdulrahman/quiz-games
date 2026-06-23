@@ -9,6 +9,8 @@ const irishPeople = [
   'Brian O’Driscoll', 'Johnny Sexton', 'Paul O’Connell', 'Rhasidat Adeleke', 'Sonia O’Sullivan',
   'Robbie Keane', 'Seamus Coleman', 'Evan Ferguson', 'Henry Shefflin', 'Joe Canning',
   'Daniel O’Donnell', 'Enya', 'Sinéad O’Connor', 'Dolores O’Riordan', 'Dermot Kennedy',
+  'The Edge', 'Bob Geldof', 'Nadine Coyle', 'Rory McIlroy', 'Katie McCabe',
+  'Andrew Scott', 'Brenda Fricker', 'Sally Rooney', 'Seamus Heaney', 'Bram Stoker',
 ]
 
 const irishPlaces = [
@@ -20,6 +22,8 @@ const irishPlaces = [
   'The River Liffey', 'Phoenix Park', 'Trinity College Dublin', 'Blarney Castle', 'Newgrange',
   'The Aran Islands', 'The Skellig Islands', 'Glendalough', 'Connemara', 'The Wild Atlantic Way',
   'The Rock of Cashel', 'Páirc Uí Chaoimh', 'Hill 16', 'Copper Face Jacks', 'Tayto Park',
+  'Malahide Castle', 'Dublin Zoo', 'The National Gallery', 'Howth', 'Dalkey',
+  'Dingle', 'Achill Island', 'Slane Castle', 'The Phoenix Monument', 'The Spire',
 ]
 
 const irishSport = [
@@ -31,6 +35,8 @@ const irishSport = [
   'The Grand National', 'Punchestown', 'The Curragh', 'The Galway Races', 'The Dublin Marathon',
   'Italia 90', 'Lansdowne Road', 'A penalty shootout', 'A red card', 'A hat-trick',
   'A sliotar', 'A hurley', 'A scrum', 'A bicycle kick', 'A photo finish',
+  'A lineout', 'A free kick', 'A sideline cut', 'A yellow card', 'The Heineken Champions Cup',
+  'The League of Ireland', 'The Irish Open', 'A penalty save', 'A drop goal', 'A county final',
 ]
 
 const irishCulture = [
@@ -42,6 +48,8 @@ const irishCulture = [
   'A céilí', 'A trad session', 'An Irish wake', 'A county jersey', 'A Sunday roast',
   'The Book of Kells', 'Bloomsday', 'Saint Patrick’s Day', 'Halloween', 'The Late Late Toy Show jumper',
   'Ulysses', 'Dracula', 'Gulliver’s Travels', 'The Fields of Athenry', 'Molly Malone',
+  'The Abbey Theatre', 'The Olympia Theatre', 'The Plough and the Stars', 'The Quiet Man', 'Kneecap',
+  'An Irish goodbye', 'A school debs', 'A pub quiz', 'A tin whistle', 'A GAA club draw',
 ]
 
 const irishEveryday = [
@@ -53,6 +61,8 @@ const irishEveryday = [
   'The immersion', 'A wooden spoon', 'A hot press', 'A hurley bag', 'A turf fire',
   'The Luas', 'Dublin Bus', 'Iarnród Éireann', 'Ryanair', 'Aer Lingus',
   'Dunnes Stores', 'Penney’s', 'SuperValu', 'Centra', 'Smyths Toys',
+  'A deli counter', 'A breakfast spice bag', 'A leap card', 'A rain jacket', 'A packet of biscuits',
+  'A toasted special', 'MiWadi', 'A school jumper', 'A county flag', 'A Sunday paper',
 ]
 
 const worldPeople = [
@@ -64,6 +74,8 @@ const worldPeople = [
   'Michael Jordan', 'David Beckham', 'Roger Federer', 'Lewis Hamilton', 'Simone Biles',
   'Albert Einstein', 'William Shakespeare', 'Marie Curie', 'Nelson Mandela', 'Walt Disney',
   'Steve Jobs', 'Oprah Winfrey', 'David Attenborough', 'Bear Grylls', 'Jamie Oliver',
+  'Billie Eilish', 'Dua Lipa', 'Ariana Grande', 'Keanu Reeves', 'Emma Watson',
+  'Stephen King', 'Greta Thunberg', 'Barack Obama', 'Michelle Obama', 'MrBeast',
 ]
 
 const worldPlacesAndThings = [
@@ -75,6 +87,8 @@ const worldPlacesAndThings = [
   'McDonald’s', 'Coca-Cola', 'Lego', 'Nike', 'Adidas',
   'Hertz', 'IKEA', 'YouTube', 'WhatsApp', 'Instagram',
   'A Rubik’s Cube', 'A selfie stick', 'A karaoke machine', 'A vending machine', 'A lie detector',
+  'The Louvre', 'The Taj Mahal', 'The Sydney Opera House', 'The Amazon rainforest', 'The Panama Canal',
+  'Nintendo', 'TikTok', 'Tesla', 'Starbucks', 'A drone',
 ]
 
 const screenAndStories = [
@@ -86,6 +100,8 @@ const screenAndStories = [
   'Sherlock Holmes', 'James Bond', 'Batman', 'Spider-Man', 'Superman',
   'Cinderella', 'Peter Pan', 'Robin Hood', 'Winnie-the-Pooh', 'Paddington Bear',
   'The Gruffalo', 'Charlie and the Chocolate Factory', 'The Hunger Games', 'The Da Vinci Code', 'The Catcher in the Rye',
+  'Matilda', 'Wonka', 'The Avengers', 'Doctor Who', 'Wednesday',
+  'The Traitors', 'Squid Game', 'Wicked', 'Hamilton', 'The Wizard of Oz',
 ]
 
 const banks = [
@@ -99,7 +115,7 @@ const banks = [
   screenAndStories,
 ]
 
-export const quickfire30Pool = Array.from({ length: 64 }, (_, cardIndex) => ({
+export const quickfire30Pool = Array.from({ length: 80 }, (_, cardIndex) => ({
   id: `qf30-${String(cardIndex + 1).padStart(3, '0')}`,
   terms: Array.from({ length: 5 }, (_, termIndex) => {
     const absoluteIndex = cardIndex * 5 + termIndex

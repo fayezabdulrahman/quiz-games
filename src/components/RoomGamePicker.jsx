@@ -2,14 +2,15 @@ import { useState } from 'react'
 import Logo from './Logo.jsx'
 import PlayerList from './PlayerList.jsx'
 
-export default function RoomGamePicker({ state, error, onSelectGame }) {
+export default function RoomGamePicker({ state, error, onSelectGame, onCloseRoom }) {
   const [gameType, setGameType] = useState(state.gameType)
   const [lifelineCount, setLifelineCount] = useState(1)
   const [lifelinesAnytime, setLifelinesAnytime] = useState(false)
   const [diceMode, setDiceMode] = useState('digital')
+  const [bluffRoundCount, setBluffRoundCount] = useState(state.settings?.roundCount || 6)
 
   const continueToLobby = () => {
-    onSelectGame(gameType, { lifelineCount, lifelinesAnytime, diceMode })
+    onSelectGame(gameType, { lifelineCount, lifelinesAnytime, diceMode, roundCount: bluffRoundCount })
   }
 
   return (
@@ -35,6 +36,14 @@ export default function RoomGamePicker({ state, error, onSelectGame }) {
                 >
                   <Logo gameType="quickfire-30" />
                   <span>Two teams describe five names against the clock</span>
+                </button>
+                <button
+                  type="button"
+                  className={`room-game-card catchphrase ${gameType === 'say-what-you-see' ? 'selected' : ''}`}
+                  onClick={() => setGameType('say-what-you-see')}
+                >
+                  <Logo gameType="say-what-you-see" />
+                  <span>Visual puzzles, buzzers and fast guesses</span>
                 </button>
                 <button
                   type="button"
@@ -122,6 +131,35 @@ export default function RoomGamePicker({ state, error, onSelectGame }) {
                   </label>
                 </div>
               )}
+              {gameType === 'bluff-battle' && (
+                <div className="host-settings room-picker-settings">
+                  <div className="settings-heading">
+                    <div>
+                      <strong>Bluff rounds</strong>
+                      <span>Pick how many prompts to play before the final scores.</span>
+                    </div>
+                    <fieldset className="stepper" aria-label="Bluff Battle rounds">
+                      <button
+                        type="button"
+                        onClick={() => setBluffRoundCount((count) => Math.max(3, count - 1))}
+                        disabled={bluffRoundCount === 3}
+                        aria-label="Remove one Bluff Battle round"
+                      >
+                        −
+                      </button>
+                      <strong>{bluffRoundCount}</strong>
+                      <button
+                        type="button"
+                        onClick={() => setBluffRoundCount((count) => Math.min(20, count + 1))}
+                        disabled={bluffRoundCount === 20}
+                        aria-label="Add one Bluff Battle round"
+                      >
+                        +
+                      </button>
+                    </fieldset>
+                  </div>
+                </div>
+              )}
               {gameType === 'quickfire-30' && (
                 <div className="host-settings room-picker-settings quickfire-settings">
                   <div className="settings-heading">
@@ -139,9 +177,20 @@ export default function RoomGamePicker({ state, error, onSelectGame }) {
                 </div>
               )}
               {error && <p className="form-error" role="alert">{error}</p>}
-              <button type="button" className="primary picker-continue" onClick={continueToLobby}>
-                Continue to lobby
-              </button>
+              <div className="room-picker-actions">
+                <button type="button" className="primary picker-continue" onClick={continueToLobby}>
+                  Continue to lobby
+                </button>
+                {state.players.length > 0 && (
+                  <button
+                    type="button"
+                    className="secondary danger picker-close"
+                    onClick={onCloseRoom}
+                  >
+                    Close room
+                  </button>
+                )}
+              </div>
             </>
           ) : (
             <div className="waiting-banner">

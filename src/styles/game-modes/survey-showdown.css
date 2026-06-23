@@ -62,6 +62,128 @@
 	 border-color: rgba(85,230,190,.58);
 	 box-shadow: inset 0 0 0 1px rgba(85,230,190,.12);
 }
+ .survey-team-setup {
+	 display: grid;
+	 gap: 14px;
+	 margin: 22px 0;
+}
+ .survey-team-heading {
+	 display: flex;
+	 align-items: center;
+	 justify-content: space-between;
+	 gap: 14px;
+}
+ .survey-team-heading > div {
+	 display: grid;
+	 gap: 3px;
+}
+ .survey-team-heading span, .survey-player-note {
+	 color: #858ca5;
+	 font-size: .73rem;
+	 line-height: 1.45;
+}
+ .survey-team-heading button {
+	 min-height: 38px;
+	 padding: 0 13px;
+	 font-size: .72rem;
+}
+ .survey-unassigned {
+	 display: grid;
+	 gap: 7px;
+	 padding: 13px;
+	 border: 1px dashed #4a506d;
+	 border-radius: 12px;
+}
+ .survey-unassigned > strong {
+	 color: #aeb4ca;
+	 font-size: .7rem;
+	 text-transform: uppercase;
+	 letter-spacing: .1em;
+}
+ .survey-unassigned > div {
+	 display: flex;
+	 align-items: center;
+	 justify-content: space-between;
+	 gap: 10px;
+}
+ .survey-unassigned > div > span:last-child {
+	 display: flex;
+	 gap: 6px;
+}
+ .survey-unassigned button, .survey-lobby-team li button {
+	 padding: 6px 9px;
+	 border: 1px solid #444b69;
+	 border-radius: 7px;
+	 color: #dfe2f1;
+	 background: #191e36;
+	 font-size: .68rem;
+	 transition: border-color .18s, background .18s, transform .18s;
+}
+ .survey-unassigned > div > span:last-child button:first-child {
+	 color: #d8ff43;
+	 border-color: rgba(216,255,67,.48);
+	 background: rgba(216,255,67,.08);
+}
+ .survey-unassigned > div > span:last-child button:first-child:hover {
+	 color: white;
+	 border-color: #d8ff43;
+	 background: rgba(216,255,67,.2);
+	 transform: translateY(-1px);
+}
+ .survey-unassigned > div > span:last-child button:last-child {
+	 color: #a793ff;
+	 border-color: rgba(141,114,255,.52);
+	 background: rgba(141,114,255,.08);
+}
+ .survey-unassigned > div > span:last-child button:last-child:hover {
+	 color: white;
+	 border-color: #a793ff;
+	 background: rgba(141,114,255,.2);
+	 transform: translateY(-1px);
+}
+ .survey-lobby-teams {
+	 display: grid;
+	 grid-template-columns: 1fr 1fr;
+	 gap: 10px;
+}
+ .survey-lobby-team {
+	 min-width: 0;
+	 padding: 14px;
+	 border: 1px solid #343a57;
+	 border-radius: 13px;
+	 background: #11152a;
+}
+ .survey-lobby-team.lime {
+	 border-color: rgba(216,255,67,.34);
+}
+ .survey-lobby-team.violet {
+	 border-color: rgba(141,114,255,.38);
+}
+ .survey-lobby-team > div {
+	 display: flex;
+	 justify-content: space-between;
+	 gap: 8px;
+}
+ .survey-lobby-team > div span, .survey-lobby-team p {
+	 color: #777f99;
+	 font-size: .68rem;
+}
+ .survey-lobby-team ul {
+	 display: grid;
+	 gap: 7px;
+	 margin: 12px 0 0;
+	 padding: 0;
+	 list-style: none;
+}
+ .survey-lobby-team li {
+	 display: flex;
+	 align-items: center;
+	 justify-content: space-between;
+	 gap: 8px;
+}
+ .survey-player-note {
+	 margin: 0;
+}
  .survey-shell {
 	 --survey-mint: #55e6be;
 }
@@ -360,6 +482,13 @@
 		 grid-template-columns: 1fr;
 	}
 	 .survey-final-teams {
+		 grid-template-columns: 1fr;
+	}
+	 .survey-team-heading {
+		 align-items: flex-start;
+		 flex-direction: column;
+	}
+	 .survey-lobby-teams {
 		 grid-template-columns: 1fr;
 	}
 }

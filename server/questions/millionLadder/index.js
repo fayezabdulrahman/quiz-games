@@ -1,4 +1,5 @@
 import { additionalMillionLadderQuestions } from './additionalQuestions.js'
+import { extraMillionLadderQuestions } from './extraQuestions.js'
 
 export const millionLadderQuestions = [
   { id: 'ml-01a', rung: 0, type: 'choice', prompt: 'Which of these is traditionally used to tell the time?', options: ['Compass', 'Thermometer', 'Clock', 'Telescope'], answer: 'Clock', explanation: 'A clock measures and displays time.' },
@@ -47,6 +48,7 @@ export const millionLadderQuestions = [
   { id: 'ml-15b', rung: 14, type: 'choice', prompt: 'Which ancient scholar estimated Earth’s circumference using shadows in two cities?', options: ['Euclid', 'Eratosthenes', 'Archimedes', 'Ptolemy'], answer: 'Eratosthenes', explanation: 'Eratosthenes used shadow angles at Syene and Alexandria.' },
   { id: 'ml-15c', rung: 14, type: 'choice', prompt: 'The fictional county of Yoknapatawpha appears in works by which author?', options: ['William Faulkner', 'John Steinbeck', 'Ernest Hemingway', 'F. Scott Fitzgerald'], answer: 'William Faulkner', explanation: 'William Faulkner set many novels in fictional Yoknapatawpha County.' },
   ...additionalMillionLadderQuestions,
+  ...extraMillionLadderQuestions,
 ]
 
 function questionsForRung(rung) {

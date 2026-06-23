@@ -1,4 +1,5 @@
 import { selectPrompts } from '../selectPrompts.js'
+import { extraBluffPrompts } from './extraPrompts.js'
 
 export const bluffPromptPool = [
   {
@@ -367,6 +368,7 @@ export const bluffPromptPool = [
     inputMode: 'numeric',
     explanation: 'Oceans and other water cover roughly 71% of Earth’s surface.',
   },
+  ...extraBluffPrompts,
 ]
 
 export function selectBluffPrompts(count = 5, excludedIds = new Set()) {

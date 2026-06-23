@@ -1,5 +1,7 @@
+import crypto from 'node:crypto'
 import {
   createPlayer,
+  correctAnswer,
   createSurveyTeams,
   normalize,
   questionsForGame,
@@ -10,6 +12,7 @@ import {
 import { selectMillionLadderReplacement } from '../questions/millionLadder/index.js'
 
 const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ'
+const hostReconnectGraceMs = 15 * 60 * 1000
 
 function replyError(callback, message) {
   callback?.({ ok: false, error: message })
@@ -30,6 +33,40 @@ function getRoom(rooms, code) {
   return rooms.get(String(code || '').trim().toUpperCase())
 }
 
+function cleanSessionToken(value = '') {
+  return String(value || '').trim().slice(0, 80)
+}
+
+function setHostSocket(room, socket) {
+  if (room.hostReconnectTimer) {
+    clearTimeout(room.hostReconnectTimer)
+    room.hostReconnectTimer = null
+  }
+  room.hostSocketId = socket.id
+  room.socketIds.add(socket.id)
+  socket.join(room.code)
+}
+
+function setPlayerSocket(room, player, socket) {
+  if (player.socketId && player.socketId !== socket.id) {
+    room.socketIds.delete(player.socketId)
+  }
+  player.socketId = socket.id
+  player.connected = true
+  room.socketIds.add(socket.id)
+  socket.join(room.code)
+}
+
+function closeRoom({ io, rooms, room, clearQuestionTimer }) {
+  if (room.hostReconnectTimer) {
+    clearTimeout(room.hostReconnectTimer)
+    room.hostReconnectTimer = null
+  }
+  clearQuestionTimer(room)
+  io.to(room.code).emit('room:closed')
+  rooms.delete(room.code)
+}
+
 function surveyFaceoffPlayer(room, team, pairIndex = room.surveyFaceoffPairIndex) {
   return team.playerIds[pairIndex % team.playerIds.length]
 }
@@ -47,6 +84,32 @@ function startSurveyFaceoff(room) {
 function nextSurveyTeamPlayer(team, currentPlayerId) {
   const currentIndex = team.playerIds.indexOf(currentPlayerId)
   return team.playerIds[(Math.max(0, currentIndex) + 1) % team.playerIds.length]
+}
+
+function createEmptySurveyTeams() {
+  return [
+    { id: 'lime', name: 'Lime Team', score: 0, playerIds: [] },
+    { id: 'violet', name: 'Violet Team', score: 0, playerIds: [] },
+  ]
+}
+
+function syncSurveyTeamPlayers(room) {
+  if (!room.surveyTeams.length) room.surveyTeams = createEmptySurveyTeams()
+  room.surveyTeams.forEach((team) => {
+    team.playerIds = room.players
+      .filter((player) => player.teamId === team.id)
+      .map((player) => player.id)
+  })
+}
+
+function assignSurveyPlayerToSmallestTeam(room, player) {
+  if (!room.surveyTeams.length) room.surveyTeams = createEmptySurveyTeams()
+  syncSurveyTeamPlayers(room)
+  const targetTeam = [...room.surveyTeams].sort(
+    (first, second) => first.playerIds.length - second.playerIds.length,
+  )[0]
+  player.teamId = targetTeam?.id || 'lime'
+  syncSurveyTeamPlayers(room)
 }
 
 function createQuickfireTeams() {
@@ -74,8 +137,8 @@ function quickfireDescriber(room) {
 function prepareRoomGame(room, gameType, settings, clearQuestionTimer) {
   clearQuestionTimer(room)
   room.gameType = gameType
-  room.questions = questionsForGame(gameType, room.usedQuestionIds)
   room.settings = settingsForGame(gameType, settings)
+  room.questions = questionsForGame(gameType, room.usedQuestionIds, room.settings)
   room.questionIndex = -1
   room.phase = 'lobby'
   room.finishReason = null
@@ -89,7 +152,7 @@ function prepareRoomGame(room, gameType, settings, clearQuestionTimer) {
   room.ladderPollActive = false
   room.ladderAudienceVotingOpen = false
   room.ladderTimerRemainingMs = null
-  room.surveyTeams = []
+  room.surveyTeams = gameType === 'survey-showdown' ? createEmptySurveyTeams() : []
   room.surveyRevealedAnswerIds = []
   room.surveyStrikes = 0
   room.surveyRoundBank = 0
@@ -107,6 +170,9 @@ function prepareRoomGame(room, gameType, settings, clearQuestionTimer) {
   room.quickfireDie = null
   room.quickfireCorrectTermIndexes = []
   room.quickfireLastMove = null
+  room.catchphraseBuzzerPlayerId = null
+  room.catchphraseTimerRemainingMs = null
+  room.catchphraseLastGuess = null
   room.players.forEach((player) => {
     resetPlayer(player, room.settings, true)
   })
@@ -117,6 +183,9 @@ function prepareRoomGame(room, gameType, settings, clearQuestionTimer) {
         : 'audience'
       : null
   })
+  if (gameType === 'survey-showdown') {
+    room.surveyTeams = createSurveyTeams(room.players)
+  }
 }
 
 export function registerSocketHandlers({
@@ -182,21 +251,49 @@ export function registerSocketHandlers({
   }
 
   io.on('connection', (socket) => {
+    socket.on('room:restore', ({ code, sessionToken } = {}, callback) => {
+      const room = getRoom(rooms, code)
+      const token = cleanSessionToken(sessionToken)
+      if (!room || !token) return replyError(callback, 'This room is no longer available.')
+
+      if (room.hostSessionToken === token) {
+        setHostSocket(room, socket)
+        callback?.({ ok: true, role: 'host' })
+        broadcast(room)
+        return
+      }
+
+      const player = room.players.find((item) => item.sessionToken === token)
+      if (!player) return replyError(callback, 'This room is no longer available.')
+
+      setPlayerSocket(room, player, socket)
+      finishAudienceVoteIfReady(room)
+      callback?.({ ok: true, role: 'player' })
+      broadcast(room)
+    })
+
     socket.on(
       'host:create',
-      ({ gameType, lifelineCount, lifelinesAnytime, diceMode } = {}, callback) => {
+      (
+        { gameType, lifelineCount, lifelinesAnytime, diceMode, roundCount, sessionToken } = {},
+        callback,
+      ) => {
         const code = makeCode(rooms)
+        const hostSessionToken = cleanSessionToken(sessionToken) || crypto.randomUUID()
         const usedQuestionIds = new Set()
         const selectedGameType = gameTypes.has(gameType) ? gameType : 'one-percent'
         const settings = settingsForGame(selectedGameType, {
           lifelineCount,
           lifelinesAnytime,
           diceMode,
+          roundCount,
         })
         const room = {
           code,
           gameType: selectedGameType,
           hostSocketId: socket.id,
+          hostSessionToken,
+          hostReconnectTimer: null,
           socketIds: new Set([socket.id]),
           players: [],
           phase: 'lobby',
@@ -204,7 +301,7 @@ export function registerSocketHandlers({
           questionIndex: -1,
           questionEndsAt: null,
           questionTimer: null,
-          questions: questionsForGame(selectedGameType, usedQuestionIds),
+          questions: questionsForGame(selectedGameType, usedQuestionIds, settings),
           usedQuestionIds,
           roundResults: [],
           majorityAnswers: [],
@@ -216,7 +313,7 @@ export function registerSocketHandlers({
           ladderPollActive: false,
           ladderAudienceVotingOpen: false,
           ladderTimerRemainingMs: null,
-          surveyTeams: [],
+          surveyTeams: selectedGameType === 'survey-showdown' ? createEmptySurveyTeams() : [],
           surveyRevealedAnswerIds: [],
           surveyStrikes: 0,
           surveyRoundBank: 0,
@@ -234,18 +331,22 @@ export function registerSocketHandlers({
           quickfireDie: null,
           quickfireCorrectTermIndexes: [],
           quickfireLastMove: null,
+          catchphraseBuzzerPlayerId: null,
+          catchphraseTimerRemainingMs: null,
+          catchphraseLastGuess: null,
           settings,
         }
         rooms.set(code, room)
         socket.join(code)
-        callback?.({ ok: true, code })
+        callback?.({ ok: true, code, sessionToken: hostSessionToken })
         broadcast(room)
       },
     )
 
-    socket.on('player:join', ({ code, name } = {}, callback) => {
+    socket.on('player:join', ({ code, name, sessionToken } = {}, callback) => {
       const room = getRoom(rooms, code)
       const cleanName = String(name || '').trim().slice(0, 20)
+      const playerSessionToken = cleanSessionToken(sessionToken)
       if (!room) return replyError(callback, 'That room code does not exist.')
       if (room.phase !== 'lobby') return replyError(callback, 'This game has already started.')
       if (!cleanName) return replyError(callback, 'Enter a player name.')
@@ -254,15 +355,19 @@ export function registerSocketHandlers({
       }
 
       const player = createPlayer(socket.id, cleanName, room.settings)
+      player.sessionToken = playerSessionToken || player.sessionToken
       if (room.gameType === 'million-ladder') {
         player.ladderRole = room.players.some((item) => item.ladderRole === 'contestant')
           ? 'audience'
           : 'contestant'
       }
       room.players.push(player)
+      if (room.gameType === 'survey-showdown') {
+        assignSurveyPlayerToSmallestTeam(room, player)
+      }
       room.socketIds.add(socket.id)
       socket.join(room.code)
-      callback?.({ ok: true })
+      callback?.({ ok: true, sessionToken: player.sessionToken })
       broadcast(room)
     })
 
@@ -286,14 +391,29 @@ export function registerSocketHandlers({
         if (room.quickfireTeams.some((team) => team.playerIds.length === 0)) {
           return replyError(callback, 'Assign at least one player to each team.')
         }
+      } else if (room.gameType === 'survey-showdown') {
+        syncSurveyTeamPlayers(room)
+        if (
+          room.players.some((player) => !player.teamId) ||
+          room.surveyTeams.some((team) => team.playerIds.length === 0)
+        ) {
+          return replyError(callback, 'Assign at least one player to each survey team.')
+        }
       }
 
       room.questionIndex = 0
+      const surveyAssignments = new Map(room.players.map((player) => [player.id, player.teamId]))
       room.players.forEach((player) => {
         resetPlayer(player, room.settings, true)
       })
       if (room.gameType === 'survey-showdown') {
-        room.surveyTeams = createSurveyTeams(room.players)
+        room.players.forEach((player) => {
+          player.teamId = surveyAssignments.get(player.id) || null
+        })
+        syncSurveyTeamPlayers(room)
+        room.surveyTeams.forEach((team) => {
+          team.score = 0
+        })
         startSurveyFaceoff(room)
       } else if (room.gameType === 'quickfire-30') {
         room.questionIndex = -1
@@ -315,6 +435,41 @@ export function registerSocketHandlers({
       room.finishReason = null
       room.bluffOptions = []
       if (room.gameType !== 'survey-showdown') startRoomQuestionTimer(room)
+      callback?.({ ok: true })
+      broadcast(room)
+    })
+
+    socket.on('host:survey-assign', ({ code, playerId, teamId } = {}, callback) => {
+      const room = getRoom(rooms, code)
+      if (!room || room.hostSocketId !== socket.id) {
+        return replyError(callback, 'Only the host can assign teams.')
+      }
+      if (room.gameType !== 'survey-showdown' || room.phase !== 'lobby') {
+        return replyError(callback, 'Teams can only be changed in the Survey Showdown lobby.')
+      }
+      const player = room.players.find((item) => item.id === playerId)
+      if (!player || !['lime', 'violet'].includes(teamId)) {
+        return replyError(callback, 'Choose a player and team.')
+      }
+      player.teamId = teamId
+      syncSurveyTeamPlayers(room)
+      callback?.({ ok: true })
+      broadcast(room)
+    })
+
+    socket.on('host:survey-randomize', ({ code } = {}, callback) => {
+      const room = getRoom(rooms, code)
+      if (!room || room.hostSocketId !== socket.id) {
+        return replyError(callback, 'Only the host can assign teams.')
+      }
+      if (room.gameType !== 'survey-showdown' || room.phase !== 'lobby') {
+        return replyError(callback, 'Teams can only be changed in the Survey Showdown lobby.')
+      }
+      const shuffled = [...room.players].sort(() => Math.random() - 0.5)
+      shuffled.forEach((player, index) => {
+        player.teamId = index % 2 === 0 ? 'lime' : 'violet'
+      })
+      syncSurveyTeamPlayers(room)
       callback?.({ ok: true })
       broadcast(room)
     })
@@ -640,6 +795,60 @@ export function registerSocketHandlers({
       broadcast(room)
     })
 
+    socket.on('player:catchphrase-buzz', ({ code } = {}, callback) => {
+      const room = getRoom(rooms, code)
+      const player = room?.players.find((item) => item.socketId === socket.id)
+      if (!room || !player) return replyError(callback, 'You are not in this room.')
+      if (closeExpiredQuestion(room)) return replyError(callback, 'Time is up.')
+      if (room.gameType !== 'say-what-you-see' || room.phase !== 'answering') {
+        return replyError(callback, 'Buzzers are closed.')
+      }
+      if (player.buzzedOut) return replyError(callback, 'You have already guessed this one.')
+
+      room.catchphraseBuzzerPlayerId = player.id
+      room.catchphraseTimerRemainingMs = pauseQuestionTimer(room)
+      room.phase = 'catchphrase-guessing'
+      callback?.({ ok: true })
+      broadcast(room)
+    })
+
+    socket.on('player:catchphrase-guess', ({ code, answer } = {}, callback) => {
+      const room = getRoom(rooms, code)
+      const player = room?.players.find((item) => item.socketId === socket.id)
+      const question = room?.questions[room.questionIndex]
+      const cleanAnswer = String(answer || '').trim().slice(0, 120)
+      if (!room || !player) return replyError(callback, 'You are not in this room.')
+      if (room.gameType !== 'say-what-you-see' || room.phase !== 'catchphrase-guessing') {
+        return replyError(callback, 'No answer is being taken right now.')
+      }
+      if (room.catchphraseBuzzerPlayerId !== player.id) {
+        return replyError(callback, 'The buzzed-in player answers this one.')
+      }
+      if (!cleanAnswer) return replyError(callback, 'Type your answer.')
+
+      player.answer = cleanAnswer
+      player.hasAnswered = true
+      const isCorrect = correctAnswer(question, cleanAnswer)
+      room.catchphraseLastGuess = { playerName: player.name, answer: cleanAnswer, isCorrect }
+      if (isCorrect) {
+        player.isCorrect = true
+        revealQuestion(room)
+      } else {
+        player.isCorrect = false
+        player.buzzedOut = true
+        room.catchphraseBuzzerPlayerId = null
+        const remainingGuessers = room.players.filter((item) => !item.buzzedOut)
+        if (!remainingGuessers.length) {
+          revealQuestion(room)
+        } else {
+          room.phase = 'answering'
+          resumeQuestionTimer(room, room.catchphraseTimerRemainingMs || questionDurationMs)
+        }
+      }
+      callback?.({ ok: true, correct: isCorrect })
+      broadcast(room)
+    })
+
     socket.on('player:pass', ({ code } = {}, callback) => {
       const room = getRoom(rooms, code)
       const player = room?.players.find((item) => item.socketId === socket.id)
@@ -784,6 +993,11 @@ export function registerSocketHandlers({
         if (room.phase === 'bluffing') openBluffVoting(room)
         else if (room.phase === 'voting') revealBluffRound(room)
         else return replyError(callback, 'There is nothing to reveal.')
+      } else if (room.gameType === 'say-what-you-see') {
+        if (!['answering', 'catchphrase-guessing'].includes(room.phase)) {
+          return replyError(callback, 'There is nothing to reveal.')
+        }
+        revealQuestion(room)
       } else {
         if (room.phase !== 'answering') {
           return replyError(callback, 'There is nothing to reveal.')
@@ -818,6 +1032,9 @@ export function registerSocketHandlers({
         room.roundResults = []
         room.majorityAnswers = []
         room.bluffOptions = []
+        room.catchphraseBuzzerPlayerId = null
+        room.catchphraseTimerRemainingMs = null
+        room.catchphraseLastGuess = null
         room.ladderResult = null
         room.ladderHiddenOptions = []
         room.ladderPollActive = false
@@ -874,6 +1091,15 @@ export function registerSocketHandlers({
       broadcast(room)
     })
 
+    socket.on('host:close-room', ({ code } = {}, callback) => {
+      const room = getRoom(rooms, code)
+      if (!room || room.hostSocketId !== socket.id) {
+        return replyError(callback, 'Only the host can close this room.')
+      }
+      callback?.({ ok: true })
+      closeRoom({ io, rooms, room, clearQuestionTimer })
+    })
+
     socket.on('host:return-to-games', ({ code } = {}, callback) => {
       const room = getRoom(rooms, code)
       if (!room || room.hostSocketId !== socket.id) {
@@ -890,6 +1116,7 @@ export function registerSocketHandlers({
         player.isCorrect = null
         player.passedCurrentQuestion = false
         player.roundPoints = 0
+        player.buzzedOut = false
       })
       callback?.({ ok: true })
       broadcast(room)
@@ -897,7 +1124,7 @@ export function registerSocketHandlers({
 
     socket.on(
       'host:select-game',
-      ({ code, gameType, lifelineCount, lifelinesAnytime, diceMode } = {}, callback) => {
+      ({ code, gameType, lifelineCount, lifelinesAnytime, diceMode, roundCount } = {}, callback) => {
         const room = getRoom(rooms, code)
         if (!room || room.hostSocketId !== socket.id) {
           return replyError(callback, 'Only the host can choose the next game.')
@@ -909,7 +1136,7 @@ export function registerSocketHandlers({
         prepareRoomGame(
           room,
           gameType,
-          { lifelineCount, lifelinesAnytime, diceMode },
+          { lifelineCount, lifelinesAnytime, diceMode, roundCount },
           clearQuestionTimer,
         )
         callback?.({ ok: true })
@@ -920,9 +1147,16 @@ export function registerSocketHandlers({
     socket.on('disconnect', () => {
       for (const [code, room] of rooms) {
         if (room.hostSocketId === socket.id) {
-          clearQuestionTimer(room)
-          io.to(code).emit('room:closed')
-          rooms.delete(code)
+          room.socketIds.delete(socket.id)
+          room.hostSocketId = null
+          if (!room.hostReconnectTimer) {
+            room.hostReconnectTimer = setTimeout(() => {
+              const latestRoom = rooms.get(code)
+              if (!latestRoom || latestRoom.hostSocketId) return
+              closeRoom({ io, rooms, room: latestRoom, clearQuestionTimer })
+            }, hostReconnectGraceMs)
+          }
+          broadcast(room)
           continue
         }
         const player = room.players.find((item) => item.socketId === socket.id)

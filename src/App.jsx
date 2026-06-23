@@ -11,6 +11,8 @@ import QuestionScreen from './components/QuestionScreen.jsx'
 import Quickfire30Finished from './components/Quickfire30Finished.jsx'
 import Quickfire30Screen from './components/Quickfire30Screen.jsx'
 import RoomGamePicker from './components/RoomGamePicker.jsx'
+import SayWhatYouSeeFinished from './components/SayWhatYouSeeFinished.jsx'
+import SayWhatYouSeeScreen from './components/SayWhatYouSeeScreen.jsx'
 import SurveyShowdownFinished from './components/SurveyShowdownFinished.jsx'
 import SurveyShowdownScreen from './components/SurveyShowdownScreen.jsx'
 import { useGameSession } from './hooks/useGameSession.js'
@@ -24,10 +26,14 @@ export default function App() {
     joinGame,
     startGame,
     answerQuestion,
+    buzzCatchphrase,
+    guessCatchphrase,
     submitBluff,
     voteForBluff,
     submitSurveyGuess,
     chooseSurveyControl,
+    assignSurveyTeam,
+    randomizeSurveyTeams,
     assignQuickfireTeam,
     randomizeQuickfireTeams,
     rollQuickfireDie,
@@ -42,6 +48,7 @@ export default function App() {
     endGame,
     restartGame,
     returnToGames,
+    closeRoom,
     selectRoomGame,
   } = useGameSession()
 
@@ -54,20 +61,39 @@ export default function App() {
       <Lobby
         state={state}
         onStart={startGame}
+        onAssignSurveyTeam={assignSurveyTeam}
+        onRandomizeSurveyTeams={randomizeSurveyTeams}
         onAssignQuickfireTeam={assignQuickfireTeam}
         onRandomizeQuickfireTeams={randomizeQuickfireTeams}
+        onCloseRoom={closeRoom}
       />
     )
   }
 
   if (state.phase === 'game-select') {
-    return <RoomGamePicker state={state} error={error} onSelectGame={selectRoomGame} />
+    return (
+      <RoomGamePicker
+        state={state}
+        error={error}
+        onSelectGame={selectRoomGame}
+        onCloseRoom={closeRoom}
+      />
+    )
   }
 
   if (state.phase === 'finished') {
     if (state.gameType === 'quickfire-30') {
       return (
         <Quickfire30Finished
+          state={state}
+          onRestart={restartGame}
+          onChangeGame={returnToGames}
+        />
+      )
+    }
+    if (state.gameType === 'say-what-you-see') {
+      return (
+        <SayWhatYouSeeFinished
           state={state}
           onRestart={restartGame}
           onChangeGame={returnToGames}
@@ -110,6 +136,20 @@ export default function App() {
   if (state.gameType === 'survey-showdown') {
     return <SurveyShowdownScreen state={state} error={error} onGuess={submitSurveyGuess}
       onChooseControl={chooseSurveyControl} onNext={nextQuestion} onEnd={endGame} />
+  }
+
+  if (state.gameType === 'say-what-you-see') {
+    return (
+      <SayWhatYouSeeScreen
+        state={state}
+        error={error}
+        onBuzz={buzzCatchphrase}
+        onGuess={guessCatchphrase}
+        onReveal={revealAnswer}
+        onNext={nextQuestion}
+        onEnd={endGame}
+      />
+    )
   }
 
   if (state.gameType === 'quickfire-30') {

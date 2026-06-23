@@ -94,7 +94,13 @@ function BluffResults({ state }) {
               </span>
               {!option.isTruth && option.voterNames.length > 0 && (
                 <span className="fooled-players">
-                  Fooled {option.voterNames.join(', ')}
+                  Fooled{' '}
+                  {option.voterNames.map((name, index) => (
+                    <span className="fooled-player-name" key={`${option.id}-${name}`}>
+                      {index > 0 ? ', ' : ''}
+                      {name}
+                    </span>
+                  ))}
                 </span>
               )}
             </div>

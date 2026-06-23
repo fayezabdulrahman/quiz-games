@@ -1,4 +1,5 @@
 import { selectPrompts } from '../selectPrompts.js'
+import { extraSurveyShowdownPrompts } from './extraPrompts.js'
 
 const answer = (text, points, ...accepted) => ({ text, points, accepted: [text, ...accepted] })
 
@@ -63,6 +64,7 @@ export const surveyShowdownPool = [
   { id: 'ss-58', prompt: 'Name something that can make a car journey feel longer.', answers: [answer('Traffic', 31), answer('Children asking if we are there yet', 21, 'kids complaining', 'are we there yet'), answer('Bad music', 16, 'music'), answer('Needing the toilet', 13, 'bathroom', 'toilet'), answer('Getting lost', 11, 'wrong turn'), answer('Bad weather', 8, 'rain')] },
   { id: 'ss-59', prompt: 'Name something people do after finishing a big meal.', answers: [answer('Sit back and relax', 27, 'relax'), answer('Have dessert', 23, 'dessert'), answer('Wash the dishes', 17, 'clean up', 'dishes'), answer('Make tea or coffee', 14, 'tea', 'coffee'), answer('Unbutton their trousers', 11, 'loosen belt'), answer('Go for a walk', 8, 'walk')] },
   { id: 'ss-60', prompt: 'Name something that makes a family game night memorable.', answers: [answer('Lots of laughter', 29, 'laughing', 'fun'), answer('Friendly arguments', 21, 'arguments', 'competition'), answer('Snacks', 17, 'food'), answer('A surprise winner', 13, 'unexpected winner'), answer('Inside jokes', 11, 'jokes'), answer('Someone cheating', 9, 'cheating')] },
+  ...extraSurveyShowdownPrompts,
 ]
 
 export function selectSurveyShowdownPrompts(count = 6, usedQuestionIds) {

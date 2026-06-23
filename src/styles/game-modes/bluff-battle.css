@@ -279,6 +279,9 @@
 	 letter-spacing: .03em;
 	 text-transform: none;
 }
+ .bluff-reveal-list span.fooled-player-name {
+	 color: #ff5d73;
+}
  .bluff-form > div > span {
 	 color: #747b96;
 	 font-size: .72rem;

@@ -1,4 +1,5 @@
 import { additionalQuestions } from './additionalQuestions.js'
+import { extraQuestions } from './extraQuestions.js'
 import { moreQuestions } from './moreQuestions.js'
 
 export const difficulties = [90, 80, 70, 60, 50, 40, 30, 20, 10, 1]
@@ -182,6 +183,7 @@ export const questionPool = [
   },
   ...additionalQuestions,
   ...moreQuestions,
+  ...extraQuestions,
 ]
 
 export function selectQuestions(usedQuestionIds = new Set()) {

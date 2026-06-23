@@ -97,7 +97,7 @@ Each game contains six surveys, with double points in rounds four and five and t
 - Host-controlled answer reveals and question progression
 - Automatic elimination with spectator mode
 - Responsive interface designed for phones and a shared host screen
-- Randomized rounds drawn from a 50-question pool
+- Randomized rounds drawn from a 100-question pool
 - Per-room question history prevents repeats for five full rounds
 - No user accounts or database required
 
@@ -159,7 +159,7 @@ Answers and explanations are withheld from clients until the room enters the rev
 
 ### Game data
 
-`server/questions/onePercent/` contains the difficulty ladder and question pool. The current pool has eight questions at each of the ten difficulty levels. Questions can use:
+`server/questions/onePercent/` contains the difficulty ladder and question pool. The current pool has ten questions at each of the ten difficulty levels. Questions can use:
 
 - `choice` for selectable answers
 - `input` for free-text answers
@@ -167,13 +167,15 @@ Answers and explanations are withheld from clients until the room enters the rev
 
 Free-text answers are normalized on the server before comparison by trimming whitespace, ignoring case and selected punctuation, and collapsing repeated spaces.
 
-`server/questions/commonAnswer/` contains the Majority Rules opinion pool. Eight prompts are selected per game, with used prompts avoided until the 64-prompt pool is exhausted.
+`server/questions/commonAnswer/` contains the Majority Rules opinion pool. Eight prompts are selected per game, with used prompts avoided until the 84-prompt pool is exhausted.
 
-`server/questions/bluffBattle/` contains 60 original Bluff Battle prompts, truths, and reveal explanations. Five are selected per game.
+`server/questions/bluffBattle/` contains 80 original Bluff Battle prompts, truths, and reveal explanations. The host can choose 3 to 20 rounds per game.
 
-`server/questions/millionLadder/` contains six increasingly difficult choices for every prize rung. Used questions are remembered per room so the first six complete replays do not repeat a rung's question.
+`server/questions/millionLadder/` contains seven increasingly difficult choices for every prize rung. Used questions are remembered per room so the first seven complete replays do not repeat a rung's question.
 
-`server/questions/surveyShowdown/` contains 60 original surveys with six scored answers and accepted guess variants. Six are selected per game without repeats until the pool is exhausted.
+`server/questions/surveyShowdown/` contains 72 original surveys with six scored answers and accepted guess variants. Six are selected per game without repeats until the pool is exhausted.
+
+`server/questions/quickfire30/` generates 80 Quickfire 30 cards from balanced term banks. Used cards are avoided until the generated pool is exhausted.
 
 ### Persistence and deployment
 

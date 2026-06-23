@@ -12,6 +12,7 @@ import './styles/game-modes/bluff-battle.css'
 import './styles/game-modes/million-ladder.css'
 import './styles/game-modes/survey-showdown.css'
 import './styles/game-modes/quickfire-30.css'
+import './styles/game-modes/say-what-you-see.css'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

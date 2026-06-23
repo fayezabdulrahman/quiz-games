@@ -65,6 +65,9 @@
 	 text-decoration: underline;
 	 text-underline-offset: 4px;
 }
+ .lobby-host-actions .secondary.wide {
+	 margin-top: 12px;
+}
  .toast {
 	 position: fixed;
 	 right: 24px;

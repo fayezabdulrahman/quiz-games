@@ -4,6 +4,7 @@ import { selectMajorityPrompts } from '../questions/commonAnswer/index.js'
 import { selectMillionLadderQuestions } from '../questions/millionLadder/index.js'
 import { selectQuestions } from '../questions/onePercent/index.js'
 import { selectQuickfire30Cards } from '../questions/quickfire30/index.js'
+import { selectSayWhatYouSeePuzzles } from '../questions/sayWhatYouSee/index.js'
 import { selectSurveyShowdownPrompts } from '../questions/surveyShowdown/index.js'
 
 export function normalize(value = '') {
@@ -25,11 +26,17 @@ export function normalizeLifelineCount(value) {
   return Number.isFinite(count) ? Math.min(Math.max(count, 0), 10) : 1
 }
 
+export function normalizeBluffRoundCount(value) {
+  const count = Number.parseInt(value, 10)
+  return Number.isFinite(count) ? Math.min(Math.max(count, 3), 20) : 6
+}
+
 export function settingsForGame(gameType, settings = {}) {
   if (gameType === 'majority-rules') return { roundCount: 8 }
-  if (gameType === 'bluff-battle') return { roundCount: 5 }
+  if (gameType === 'bluff-battle') return { roundCount: normalizeBluffRoundCount(settings.roundCount) }
   if (gameType === 'million-ladder') return { roundCount: 15 }
   if (gameType === 'survey-showdown') return { roundCount: 6 }
+  if (gameType === 'say-what-you-see') return { roundCount: 10 }
   if (gameType === 'quickfire-30') {
     return {
       diceMode: settings.diceMode === 'manual' ? 'manual' : 'digital',
@@ -42,11 +49,12 @@ export function settingsForGame(gameType, settings = {}) {
   }
 }
 
-export function questionsForGame(gameType, usedQuestionIds) {
+export function questionsForGame(gameType, usedQuestionIds, settings = {}) {
   if (gameType === 'majority-rules') return selectMajorityPrompts(8, usedQuestionIds)
-  if (gameType === 'bluff-battle') return selectBluffPrompts(5, usedQuestionIds)
+  if (gameType === 'bluff-battle') return selectBluffPrompts(settings.roundCount || 6, usedQuestionIds)
   if (gameType === 'million-ladder') return selectMillionLadderQuestions(usedQuestionIds)
   if (gameType === 'survey-showdown') return selectSurveyShowdownPrompts(6, usedQuestionIds)
+  if (gameType === 'say-what-you-see') return selectSayWhatYouSeePuzzles(10, usedQuestionIds)
   if (gameType === 'quickfire-30') return selectQuickfire30Cards(64, usedQuestionIds)
   return selectQuestions(usedQuestionIds)
 }
@@ -63,6 +71,7 @@ export function resetPlayer(player, settings, resetScore = false) {
   player.voteOptionId = null
   player.fooledCount = 0
   player.teamId = null
+  player.buzzedOut = false
   if (resetScore) player.score = 0
 }
 
@@ -88,12 +97,14 @@ export function resetPlayerForNextQuestion(player) {
   player.bluff = null
   player.voteOptionId = null
   player.fooledCount = 0
+  player.buzzedOut = false
 }
 
 export function createPlayer(socketId, name, settings) {
   const player = {
     id: crypto.randomUUID(),
     socketId,
+    sessionToken: crypto.randomUUID(),
     name,
     connected: true,
     score: 0,

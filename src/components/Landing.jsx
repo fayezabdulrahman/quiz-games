@@ -37,6 +37,12 @@ const featuredGames = {
     description:
       'Split into two teams, roll the handicap die, and race around the board by describing Irish-heavy answer cards.',
   },
+  'say-what-you-see': {
+    name: 'Say What You See',
+    kicker: 'Buzz on the visual clue',
+    description:
+      'Look at the rebus puzzle, buzz in first, and type the phrase you think the picture is showing.',
+  },
 }
 
 export default function Landing({ onHost, onJoin, busy, error }) {
@@ -50,12 +56,13 @@ export default function Landing({ onHost, onJoin, busy, error }) {
   const [lifelineCount, setLifelineCount] = useState(1)
   const [lifelinesAnytime, setLifelinesAnytime] = useState(false)
   const [diceMode, setDiceMode] = useState('digital')
+  const [bluffRoundCount, setBluffRoundCount] = useState(6)
 
   const submit = (event) => {
     event.preventDefault()
 
     if (mode === 'host') {
-      onHost(gameType, { lifelineCount, lifelinesAnytime, diceMode })
+      onHost(gameType, { lifelineCount, lifelinesAnytime, diceMode, roundCount: bluffRoundCount })
       return
     }
 
@@ -109,6 +116,8 @@ export default function Landing({ onHost, onJoin, busy, error }) {
                       ? 'S'
                       : featuredGame === 'quickfire-30'
                         ? '30'
+                        : featuredGame === 'say-what-you-see'
+                          ? 'EYE'
                       : '$'}
             </span>
             <div>
@@ -191,6 +200,18 @@ export default function Landing({ onHost, onJoin, busy, error }) {
                 </button>
                 <button
                   type="button"
+                  className={`game-card-option ${gameType === 'say-what-you-see' ? 'selected catchphrase' : ''}`}
+                  onClick={() => setGameType('say-what-you-see')}
+                >
+                  <span className="game-card-icon catchphrase-icon">EYE</span>
+                  <span>
+                    <strong>Say What You See</strong>
+                    <small>Visual puzzles · buzzer race · 10 rounds</small>
+                  </span>
+                  <span className="selection-dot" />
+                </button>
+                <button
+                  type="button"
                   className={`game-card-option ${gameType === 'one-percent' ? 'selected' : ''}`}
                   onClick={() => setGameType('one-percent')}
                 >
@@ -209,7 +230,7 @@ export default function Landing({ onHost, onJoin, busy, error }) {
                   <span className="game-card-icon bluff-icon">?</span>
                   <span>
                     <strong>Bluff Battle</strong>
-                    <small>Write fakes · fool friends · 5 rounds</small>
+                    <small>Write fakes · fool friends · {bluffRoundCount} rounds</small>
                   </span>
                   <span className="selection-dot" />
                 </button>
@@ -301,10 +322,43 @@ export default function Landing({ onHost, onJoin, busy, error }) {
                   earns one point.
                 </div>
               )}
+              {gameType === 'say-what-you-see' && (
+                <div className="selected-game-note catchphrase-note">
+                  The visual puzzle opens to the room. First player to buzz gets the answer box;
+                  a miss puts the puzzle back on the buzzer.
+                </div>
+              )}
               {gameType === 'bluff-battle' && (
-                <div className="selected-game-note bluff-note">
-                  Invent a convincing fake answer, find the truth, and score whenever another
-                  player falls for your bluff.
+                <div className="host-settings bluff-settings">
+                  <div className="settings-heading">
+                    <div>
+                      <strong>Bluff rounds</strong>
+                      <span>Choose how many prompts this game will use.</span>
+                    </div>
+                    <fieldset className="stepper" aria-label="Bluff Battle rounds">
+                      <button
+                        type="button"
+                        onClick={() => setBluffRoundCount((count) => Math.max(3, count - 1))}
+                        disabled={bluffRoundCount === 3}
+                        aria-label="Remove one Bluff Battle round"
+                      >
+                        −
+                      </button>
+                      <strong>{bluffRoundCount}</strong>
+                      <button
+                        type="button"
+                        onClick={() => setBluffRoundCount((count) => Math.min(20, count + 1))}
+                        disabled={bluffRoundCount === 20}
+                        aria-label="Add one Bluff Battle round"
+                      >
+                        +
+                      </button>
+                    </fieldset>
+                  </div>
+                  <div className="selected-game-note bluff-note">
+                    Invent a convincing fake answer, find the truth, and score whenever another
+                    player falls for your bluff.
+                  </div>
                 </div>
               )}
               {gameType === 'million-ladder' && (

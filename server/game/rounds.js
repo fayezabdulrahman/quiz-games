@@ -8,7 +8,10 @@ export function createRoundController({ broadcast, questionDurationMs }) {
   }
 
   function revealQuestion(room) {
-    if (room.phase !== 'answering') return false
+    if (
+      room.phase !== 'answering' &&
+      !(room.gameType === 'say-what-you-see' && room.phase === 'catchphrase-guessing')
+    ) return false
     clearQuestionTimer(room)
     const question = room.questions[room.questionIndex]
 
@@ -53,6 +56,17 @@ export function createRoundController({ broadcast, questionDurationMs }) {
       if (room.ladderResult.won) {
         room.ladderReached = room.questionIndex
       }
+      room.phase = 'revealed'
+      return true
+    }
+
+    if (room.gameType === 'say-what-you-see') {
+      room.players.forEach((player) => {
+        player.isCorrect = player.hasAnswered && correctAnswer(question, player.answer)
+        player.roundPoints = player.isCorrect ? 1 : 0
+        player.score = (player.score || 0) + player.roundPoints
+      })
+      room.catchphraseBuzzerPlayerId = null
       room.phase = 'revealed'
       return true
     }

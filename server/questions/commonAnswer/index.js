@@ -1,4 +1,5 @@
 import { selectPrompts } from '../selectPrompts.js'
+import { extraMajorityPrompts } from './extraPrompts.js'
 
 export const majorityPromptPool = [
   {
@@ -321,6 +322,7 @@ export const majorityPromptPool = [
     prompt: 'What would you miss most if the internet disappeared for a day?',
     options: ['Messaging', 'Streaming', 'Social media', 'Looking things up'],
   },
+  ...extraMajorityPrompts,
 ]
 
 export function selectMajorityPrompts(count = 8, excludedIds = new Set()) {

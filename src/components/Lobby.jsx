@@ -72,7 +72,11 @@ export default function Lobby({
             ) : state.gameType === 'say-what-you-see' ? (
               <>
                 <span><strong>10</strong> visual puzzles</span>
-                <span>First buzz gets the answer box</span>
+                <span>
+                  {state.settings.guessTimerEnabled
+                    ? `${state.settings.guessSeconds}s to answer after buzzing`
+                    : 'No buzz answer timer'}
+                </span>
               </>
             ) : state.gameType === 'survey-showdown' ? (
               <>

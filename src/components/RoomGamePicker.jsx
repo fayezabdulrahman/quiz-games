@@ -8,9 +8,22 @@ export default function RoomGamePicker({ state, error, onSelectGame, onCloseRoom
   const [lifelinesAnytime, setLifelinesAnytime] = useState(false)
   const [diceMode, setDiceMode] = useState('digital')
   const [bluffRoundCount, setBluffRoundCount] = useState(state.settings?.roundCount || 6)
+  const [catchphraseTimerEnabled, setCatchphraseTimerEnabled] = useState(
+    Boolean(state.settings?.guessTimerEnabled),
+  )
+  const [catchphraseGuessSeconds, setCatchphraseGuessSeconds] = useState(
+    state.settings?.guessSeconds || 10,
+  )
 
   const continueToLobby = () => {
-    onSelectGame(gameType, { lifelineCount, lifelinesAnytime, diceMode, roundCount: bluffRoundCount })
+    onSelectGame(gameType, {
+      lifelineCount,
+      lifelinesAnytime,
+      diceMode,
+      roundCount: bluffRoundCount,
+      guessTimerEnabled: catchphraseTimerEnabled,
+      guessSeconds: catchphraseGuessSeconds,
+    })
   }
 
   return (
@@ -158,6 +171,49 @@ export default function RoomGamePicker({ state, error, onSelectGame, onCloseRoom
                       </button>
                     </fieldset>
                   </div>
+                </div>
+              )}
+              {gameType === 'say-what-you-see' && (
+                <div className="host-settings room-picker-settings catchphrase-settings">
+                  <div className="settings-heading">
+                    <div>
+                      <strong>Buzz answer timer</strong>
+                      <span>
+                        {catchphraseTimerEnabled
+                          ? 'Timeouts void the guess and reopen the puzzle.'
+                          : 'Leave untimed, or turn on a buzz-answer limit.'}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      className={`catchphrase-timer-toggle ${catchphraseTimerEnabled ? 'active' : ''}`}
+                      onClick={() => setCatchphraseTimerEnabled((enabled) => !enabled)}
+                      aria-pressed={catchphraseTimerEnabled}
+                    >
+                      {catchphraseTimerEnabled ? 'Timer on' : 'Timer off'}
+                    </button>
+                  </div>
+                  {catchphraseTimerEnabled && (
+                    <fieldset className="stepper catchphrase-timer-stepper" aria-label="Seconds per buzzed guess">
+                      <button
+                        type="button"
+                        onClick={() => setCatchphraseGuessSeconds((seconds) => Math.max(5, seconds - 1))}
+                        disabled={catchphraseGuessSeconds === 5}
+                        aria-label="Remove one second"
+                      >
+                        −
+                      </button>
+                      <strong>{catchphraseGuessSeconds}s</strong>
+                      <button
+                        type="button"
+                        onClick={() => setCatchphraseGuessSeconds((seconds) => Math.min(30, seconds + 1))}
+                        disabled={catchphraseGuessSeconds === 30}
+                        aria-label="Add one second"
+                      >
+                        +
+                      </button>
+                    </fieldset>
+                  )}
                 </div>
               )}
               {gameType === 'quickfire-30' && (

@@ -63,6 +63,9 @@ function closeRoom({ io, rooms, room, clearQuestionTimer }) {
     room.hostReconnectTimer = null
   }
   clearQuestionTimer(room)
+  if (room.catchphraseGuessTimer) clearTimeout(room.catchphraseGuessTimer)
+  room.catchphraseGuessTimer = null
+  room.catchphraseGuessEndsAt = null
   io.to(room.code).emit('room:closed')
   rooms.delete(room.code)
 }
@@ -136,6 +139,7 @@ function quickfireDescriber(room) {
 
 function prepareRoomGame(room, gameType, settings, clearQuestionTimer) {
   clearQuestionTimer(room)
+  if (room.catchphraseGuessTimer) clearTimeout(room.catchphraseGuessTimer)
   room.gameType = gameType
   room.settings = settingsForGame(gameType, settings)
   room.questions = questionsForGame(gameType, room.usedQuestionIds, room.settings)
@@ -172,7 +176,10 @@ function prepareRoomGame(room, gameType, settings, clearQuestionTimer) {
   room.quickfireLastMove = null
   room.catchphraseBuzzerPlayerId = null
   room.catchphraseTimerRemainingMs = null
+  room.catchphraseGuessTimer = null
+  room.catchphraseGuessEndsAt = null
   room.catchphraseLastGuess = null
+  room.catchphraseGuesses = []
   room.players.forEach((player) => {
     resetPlayer(player, room.settings, true)
   })
@@ -250,6 +257,62 @@ export function registerSocketHandlers({
     room.ladderTimerRemainingMs = null
   }
 
+  function clearCatchphraseGuessTimer(room) {
+    if (room.catchphraseGuessTimer) clearTimeout(room.catchphraseGuessTimer)
+    room.catchphraseGuessTimer = null
+    room.catchphraseGuessEndsAt = null
+  }
+
+  function expireCatchphraseGuess(room, playerId) {
+    if (
+      room.gameType !== 'say-what-you-see' ||
+      room.phase !== 'catchphrase-guessing' ||
+      room.catchphraseBuzzerPlayerId !== playerId
+    ) {
+      return
+    }
+
+    const player = room.players.find((item) => item.id === playerId)
+    if (!player) return
+
+    clearCatchphraseGuessTimer(room)
+    player.hasAnswered = true
+    player.answer = null
+    player.isCorrect = false
+    player.buzzedOut = true
+    const guess = {
+      playerId: player.id,
+      playerName: player.name,
+      answer: 'Timer ran out, guess void',
+      isCorrect: false,
+      timedOut: true,
+    }
+    room.catchphraseLastGuess = guess
+    if (!room.catchphraseGuesses) room.catchphraseGuesses = []
+    room.catchphraseGuesses.push(guess)
+    room.catchphraseBuzzerPlayerId = null
+
+    const remainingGuessers = room.players.filter((item) => !item.buzzedOut)
+    if (!remainingGuessers.length) {
+      revealQuestion(room)
+    } else {
+      room.phase = 'answering'
+      resumeQuestionTimer(room, room.catchphraseTimerRemainingMs || questionDurationMs)
+    }
+    broadcast(room)
+  }
+
+  function startCatchphraseGuessTimer(room, playerId) {
+    clearCatchphraseGuessTimer(room)
+    if (!room.settings.guessTimerEnabled) return
+    const durationMs = (room.settings.guessSeconds || 10) * 1000
+    room.catchphraseGuessEndsAt = Date.now() + durationMs
+    room.catchphraseGuessTimer = setTimeout(
+      () => expireCatchphraseGuess(room, playerId),
+      durationMs,
+    )
+  }
+
   io.on('connection', (socket) => {
     socket.on('room:restore', ({ code, sessionToken } = {}, callback) => {
       const room = getRoom(rooms, code)
@@ -275,7 +338,16 @@ export function registerSocketHandlers({
     socket.on(
       'host:create',
       (
-        { gameType, lifelineCount, lifelinesAnytime, diceMode, roundCount, sessionToken } = {},
+        {
+          gameType,
+          lifelineCount,
+          lifelinesAnytime,
+          diceMode,
+          roundCount,
+          guessTimerEnabled,
+          guessSeconds,
+          sessionToken,
+        } = {},
         callback,
       ) => {
         const code = makeCode(rooms)
@@ -287,6 +359,8 @@ export function registerSocketHandlers({
           lifelinesAnytime,
           diceMode,
           roundCount,
+          guessTimerEnabled,
+          guessSeconds,
         })
         const room = {
           code,
@@ -333,7 +407,10 @@ export function registerSocketHandlers({
           quickfireLastMove: null,
           catchphraseBuzzerPlayerId: null,
           catchphraseTimerRemainingMs: null,
+          catchphraseGuessTimer: null,
+          catchphraseGuessEndsAt: null,
           catchphraseLastGuess: null,
+          catchphraseGuesses: [],
           settings,
         }
         rooms.set(code, room)
@@ -808,6 +885,7 @@ export function registerSocketHandlers({
       room.catchphraseBuzzerPlayerId = player.id
       room.catchphraseTimerRemainingMs = pauseQuestionTimer(room)
       room.phase = 'catchphrase-guessing'
+      startCatchphraseGuessTimer(room, player.id)
       callback?.({ ok: true })
       broadcast(room)
     })
@@ -829,7 +907,16 @@ export function registerSocketHandlers({
       player.answer = cleanAnswer
       player.hasAnswered = true
       const isCorrect = correctAnswer(question, cleanAnswer)
-      room.catchphraseLastGuess = { playerName: player.name, answer: cleanAnswer, isCorrect }
+      clearCatchphraseGuessTimer(room)
+      const guess = {
+        playerId: player.id,
+        playerName: player.name,
+        answer: cleanAnswer,
+        isCorrect,
+      }
+      room.catchphraseLastGuess = guess
+      if (!room.catchphraseGuesses) room.catchphraseGuesses = []
+      room.catchphraseGuesses.push(guess)
       if (isCorrect) {
         player.isCorrect = true
         revealQuestion(room)
@@ -997,6 +1084,7 @@ export function registerSocketHandlers({
         if (!['answering', 'catchphrase-guessing'].includes(room.phase)) {
           return replyError(callback, 'There is nothing to reveal.')
         }
+        clearCatchphraseGuessTimer(room)
         revealQuestion(room)
       } else {
         if (room.phase !== 'answering') {
@@ -1034,7 +1122,9 @@ export function registerSocketHandlers({
         room.bluffOptions = []
         room.catchphraseBuzzerPlayerId = null
         room.catchphraseTimerRemainingMs = null
+        clearCatchphraseGuessTimer(room)
         room.catchphraseLastGuess = null
+        room.catchphraseGuesses = []
         room.ladderResult = null
         room.ladderHiddenOptions = []
         room.ladderPollActive = false
@@ -1124,7 +1214,19 @@ export function registerSocketHandlers({
 
     socket.on(
       'host:select-game',
-      ({ code, gameType, lifelineCount, lifelinesAnytime, diceMode, roundCount } = {}, callback) => {
+      (
+        {
+          code,
+          gameType,
+          lifelineCount,
+          lifelinesAnytime,
+          diceMode,
+          roundCount,
+          guessTimerEnabled,
+          guessSeconds,
+        } = {},
+        callback,
+      ) => {
         const room = getRoom(rooms, code)
         if (!room || room.hostSocketId !== socket.id) {
           return replyError(callback, 'Only the host can choose the next game.')
@@ -1136,7 +1238,7 @@ export function registerSocketHandlers({
         prepareRoomGame(
           room,
           gameType,
-          { lifelineCount, lifelinesAnytime, diceMode, roundCount },
+          { lifelineCount, lifelinesAnytime, diceMode, roundCount, guessTimerEnabled, guessSeconds },
           clearQuestionTimer,
         )
         callback?.({ ok: true })

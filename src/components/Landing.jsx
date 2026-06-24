@@ -57,12 +57,21 @@ export default function Landing({ onHost, onJoin, busy, error }) {
   const [lifelinesAnytime, setLifelinesAnytime] = useState(false)
   const [diceMode, setDiceMode] = useState('digital')
   const [bluffRoundCount, setBluffRoundCount] = useState(6)
+  const [catchphraseTimerEnabled, setCatchphraseTimerEnabled] = useState(false)
+  const [catchphraseGuessSeconds, setCatchphraseGuessSeconds] = useState(10)
 
   const submit = (event) => {
     event.preventDefault()
 
     if (mode === 'host') {
-      onHost(gameType, { lifelineCount, lifelinesAnytime, diceMode, roundCount: bluffRoundCount })
+      onHost(gameType, {
+        lifelineCount,
+        lifelinesAnytime,
+        diceMode,
+        roundCount: bluffRoundCount,
+        guessTimerEnabled: catchphraseTimerEnabled,
+        guessSeconds: catchphraseGuessSeconds,
+      })
       return
     }
 
@@ -323,9 +332,51 @@ export default function Landing({ onHost, onJoin, busy, error }) {
                 </div>
               )}
               {gameType === 'say-what-you-see' && (
-                <div className="selected-game-note catchphrase-note">
-                  The visual puzzle opens to the room. First player to buzz gets the answer box;
-                  a miss puts the puzzle back on the buzzer.
+                <div className="host-settings catchphrase-settings">
+                  <div className="settings-heading">
+                    <div>
+                      <strong>Buzz answer timer</strong>
+                      <span>
+                        {catchphraseTimerEnabled
+                          ? 'Buzzed-in players must answer before the timer runs out.'
+                          : 'Off by default; buzzed-in players can think before answering.'}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      className={`catchphrase-timer-toggle ${catchphraseTimerEnabled ? 'active' : ''}`}
+                      onClick={() => setCatchphraseTimerEnabled((enabled) => !enabled)}
+                      aria-pressed={catchphraseTimerEnabled}
+                    >
+                      {catchphraseTimerEnabled ? 'Timer on' : 'Timer off'}
+                    </button>
+                  </div>
+                  {catchphraseTimerEnabled && (
+                    <fieldset className="stepper catchphrase-timer-stepper" aria-label="Seconds per buzzed guess">
+                      <button
+                        type="button"
+                        onClick={() => setCatchphraseGuessSeconds((seconds) => Math.max(5, seconds - 1))}
+                        disabled={catchphraseGuessSeconds === 5}
+                        aria-label="Remove one second"
+                      >
+                        −
+                      </button>
+                      <strong>{catchphraseGuessSeconds}s</strong>
+                      <button
+                        type="button"
+                        onClick={() => setCatchphraseGuessSeconds((seconds) => Math.min(30, seconds + 1))}
+                        disabled={catchphraseGuessSeconds === 30}
+                        aria-label="Add one second"
+                      >
+                        +
+                      </button>
+                    </fieldset>
+                  )}
+                  <div className="selected-game-note catchphrase-note">
+                    The visual puzzle opens to the room. First player to buzz gets the answer box;
+                    a miss{catchphraseTimerEnabled ? ' or timeout' : ''} puts the puzzle back on
+                    the buzzer.
+                  </div>
                 </div>
               )}
               {gameType === 'bluff-battle' && (

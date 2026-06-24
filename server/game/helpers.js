@@ -31,12 +31,23 @@ export function normalizeBluffRoundCount(value) {
   return Number.isFinite(count) ? Math.min(Math.max(count, 3), 20) : 6
 }
 
+export function normalizeCatchphraseGuessSeconds(value) {
+  const seconds = Number.parseInt(value, 10)
+  return Number.isFinite(seconds) ? Math.min(Math.max(seconds, 5), 30) : 10
+}
+
 export function settingsForGame(gameType, settings = {}) {
   if (gameType === 'majority-rules') return { roundCount: 8 }
   if (gameType === 'bluff-battle') return { roundCount: normalizeBluffRoundCount(settings.roundCount) }
   if (gameType === 'million-ladder') return { roundCount: 15 }
   if (gameType === 'survey-showdown') return { roundCount: 6 }
-  if (gameType === 'say-what-you-see') return { roundCount: 10 }
+  if (gameType === 'say-what-you-see') {
+    return {
+      roundCount: 10,
+      guessTimerEnabled: Boolean(settings.guessTimerEnabled),
+      guessSeconds: normalizeCatchphraseGuessSeconds(settings.guessSeconds),
+    }
+  }
   if (gameType === 'quickfire-30') {
     return {
       diceMode: settings.diceMode === 'manual' ? 'manual' : 'digital',

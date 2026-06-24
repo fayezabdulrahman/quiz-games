@@ -51,6 +51,25 @@
 	 border-color: rgba(125,244,210,.24);
 	 background: rgba(125,244,210,.06);
 }
+ .catchphrase-timer-toggle {
+	 min-width: 104px;
+	 min-height: 42px;
+	 padding: 9px 13px;
+	 color: #b8bfd5;
+	 border: 1px solid rgba(125,244,210,.24);
+	 border-radius: 12px;
+	 background: #11152a;
+	 font-weight: 800;
+}
+ .catchphrase-timer-toggle.active {
+	 color: #071116;
+	 border-color: var(--catchphrase-mint, #7df4d2);
+	 background: var(--catchphrase-mint, #7df4d2);
+}
+ .catchphrase-timer-stepper {
+	 width: fit-content;
+	 margin-top: 12px;
+}
  .catchphrase-shell {
 	 --catchphrase-mint: #7df4d2;
 	 --catchphrase-gold: #ffd35c;
@@ -471,7 +490,7 @@
 	 background: #20263d;
 	 box-shadow: none;
 }
- .catchphrase-buzz-card, .catchphrase-reveal, .catchphrase-host-controls {
+ .catchphrase-buzz-card, .catchphrase-reveal, .catchphrase-host-controls, .catchphrase-guess-board {
 	 display: grid;
 	 gap: 14px;
 	 margin-top: 18px;
@@ -483,6 +502,23 @@
  .catchphrase-buzz-card > strong {
 	 color: var(--catchphrase-mint);
 	 font: 800 1.8rem 'Space Grotesk', sans-serif;
+}
+ .catchphrase-buzz-card-header {
+	 display: flex;
+	 align-items: center;
+	 justify-content: space-between;
+	 gap: 16px;
+}
+ .catchphrase-buzz-card-header strong {
+	 display: block;
+	 margin-top: 5px;
+	 color: var(--catchphrase-mint);
+	 font: 800 1.8rem 'Space Grotesk', sans-serif;
+}
+ .catchphrase-guess-deadline {
+	 margin: 0;
+	 color: #ffd35c;
+	 font-size: .85rem;
 }
  .catchphrase-answer-form {
 	 display: grid;
@@ -497,10 +533,84 @@
  .catchphrase-answer-form input {
 	 min-height: 52px;
 }
- .catchphrase-last-guess {
-	 margin-top: 14px;
-	 color: #ff9b8a;
-	 font-size: .85rem;
+ .catchphrase-guess-board {
+	 background:
+		 linear-gradient(135deg, rgba(125,244,210,.07), transparent 48%),
+		 #11152a;
+}
+ .catchphrase-guess-board.is-empty {
+	 border-style: dashed;
+	 color: #8e96ad;
+}
+ .catchphrase-guess-board.is-empty strong {
+	 display: block;
+	 margin-top: 4px;
+	 color: #c3cadb;
+	 font-size: .95rem;
+}
+ .catchphrase-guess-board-header {
+	 display: flex;
+	 align-items: center;
+	 justify-content: space-between;
+	 gap: 12px;
+}
+ .catchphrase-guess-board-header strong {
+	 display: grid;
+	 place-items: center;
+	 min-width: 34px;
+	 height: 34px;
+	 color: var(--catchphrase-ink);
+	 border-radius: 999px;
+	 background: var(--catchphrase-gold);
+	 font: 900 .95rem 'Space Grotesk', sans-serif;
+}
+ .catchphrase-guess-list {
+	 display: grid;
+	 gap: 8px;
+}
+ .catchphrase-guess-item {
+	 display: grid;
+	 grid-template-columns: minmax(0, .7fr) minmax(0, 1.3fr) auto;
+	 align-items: center;
+	 gap: 10px;
+	 min-height: 48px;
+	 padding: 10px 12px;
+	 border: 1px solid #303650;
+	 border-radius: 12px;
+	 background: rgba(7,11,25,.42);
+}
+ .catchphrase-guess-item span, .catchphrase-guess-item strong {
+	 min-width: 0;
+	 overflow-wrap: anywhere;
+}
+ .catchphrase-guess-item span {
+	 color: #b8bfd5;
+	 font-size: .88rem;
+}
+ .catchphrase-guess-item strong {
+	 color: white;
+	 font-size: 1rem;
+}
+ .catchphrase-guess-item b {
+	 justify-self: end;
+	 padding: 6px 9px;
+	 border-radius: 999px;
+	 color: #ffb2a4;
+	 background: rgba(255,113,87,.12);
+	 font-size: .72rem;
+	 text-transform: uppercase;
+}
+ .catchphrase-guess-item.is-correct {
+	 border-color: rgba(125,244,210,.72);
+	 background: rgba(125,244,210,.12);
+	 box-shadow: 0 0 0 1px rgba(125,244,210,.18);
+}
+ .catchphrase-guess-item.is-correct strong {
+	 color: var(--catchphrase-mint);
+}
+ .catchphrase-guess-item.is-correct b {
+	 color: var(--catchphrase-ink);
+	 background: var(--catchphrase-mint);
 }
  .catchphrase-reveal > strong {
 	 color: var(--catchphrase-gold);
@@ -543,6 +653,10 @@
  .catchphrase-leaderboard .is-me {
 	 border-color: rgba(125,244,210,.46);
 }
+ .catchphrase-leaderboard .is-correct-round {
+	 border-color: rgba(125,244,210,.72);
+	 background: rgba(125,244,210,.1);
+}
  .catchphrase-leaderboard small {
 	 color: #071116;
 	 padding: 4px 7px;
@@ -569,6 +683,10 @@
 		 align-items: flex-start;
 		 flex-direction: column;
 	}
+	 .catchphrase-buzz-card-header {
+		 align-items: flex-start;
+		 flex-direction: column;
+	}
 	 .catchphrase-puzzle {
 		 min-height: 300px;
 		 border-radius: 15px;
@@ -578,8 +696,21 @@
 		 min-height: 38px;
 		 padding: 8px 11px;
 	}
+	 .left-out .shape-one {
+		 width: 140px;
+		 height: 116px;
+	}
+	 .left-out .token-1 {
+		 transform: translate(clamp(-104px, -31vw, -92px), 0);
+	}
 	 .catchphrase-answer-form {
 		 grid-template-columns: 1fr;
+	}
+	 .catchphrase-guess-item {
+		 grid-template-columns: 1fr;
+	}
+	 .catchphrase-guess-item b {
+		 justify-self: start;
 	}
 	 .catchphrase-buzzer {
 		 min-height: 92px;

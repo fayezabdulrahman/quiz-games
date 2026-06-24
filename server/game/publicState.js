@@ -180,6 +180,13 @@ export function createPublicState(room, socketId, questionDurationMs) {
             room.players.find((player) => player.id === room.catchphraseBuzzerPlayerId)?.name ||
             null,
           catchphraseLastGuess: room.catchphraseLastGuess,
+          catchphraseGuesses: room.catchphraseGuesses || [],
+          catchphraseGuessTimerEnabled: Boolean(room.settings.guessTimerEnabled),
+          catchphraseGuessEndsAt: room.catchphraseGuessEndsAt,
+          catchphraseGuessTimeRemainingMs: room.catchphraseGuessEndsAt
+            ? Math.max(0, room.catchphraseGuessEndsAt - Date.now())
+            : 0,
+          catchphraseGuessDurationMs: (room.settings.guessSeconds || 10) * 1000,
         }
       : {}),
     players: room.players.map((player) => playerView(player, revealResponses)),

@@ -80,19 +80,60 @@ function GuessForm({ onGuess }) {
   )
 }
 
+function GuessBoard({ guesses = [] }) {
+  if (!guesses.length) {
+    return (
+      <div className="catchphrase-guess-board is-empty" aria-live="polite">
+        <div>
+          <span className="eyebrow">Guesses</span>
+          <strong>No guesses yet</strong>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="catchphrase-guess-board" aria-live="polite">
+      <div className="catchphrase-guess-board-header">
+        <span className="eyebrow">Guesses</span>
+        <strong>{guesses.length}</strong>
+      </div>
+      <div className="catchphrase-guess-list">
+        {guesses.map((guess, index) => (
+          <div
+            className={`catchphrase-guess-item ${guess.isCorrect ? 'is-correct' : 'is-wrong'}`}
+            key={`${guess.playerId}-${index}-${guess.answer}`}
+          >
+            <span>{guess.playerName}</span>
+            <strong>{guess.answer}</strong>
+            <b>{guess.isCorrect ? 'Correct' : guess.timedOut ? 'Timer ran out' : 'Not quite'}</b>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function Leaderboard({ players, highlightId }) {
   const ordered = [...players].sort((a, b) => b.score - a.score || a.name.localeCompare(b.name))
 
   return (
     <div className="catchphrase-leaderboard">
-      {ordered.map((player, index) => (
-        <div className={player.id === highlightId ? 'is-me' : ''} key={player.id}>
-          <span>{index + 1}</span>
-          <strong>{player.name}</strong>
-          {player.roundPoints > 0 && <small>+1</small>}
-          <b>{player.score}</b>
-        </div>
-      ))}
+      {ordered.map((player, index) => {
+        const className = [
+          player.id === highlightId ? 'is-me' : '',
+          player.roundPoints > 0 ? 'is-correct-round' : '',
+        ].filter(Boolean).join(' ')
+
+        return (
+          <div className={className} key={player.id}>
+            <span>{index + 1}</span>
+            <strong>{player.name}</strong>
+            {player.roundPoints > 0 && <small>+1</small>}
+            <b>{player.score}</b>
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -176,32 +217,46 @@ export default function SayWhatYouSeeScreen({
                 onClick={onBuzz}
                 disabled={!canBuzz}
               >
-                {state.me?.buzzedOut ? 'Already guessed' : 'Buzz in'}
+                {state.me?.buzzedOut ? 'Frozen Out' : 'Buzz in'}
               </button>
             )
           )}
 
           {state.phase === 'catchphrase-guessing' && (
             <div className="catchphrase-buzz-card">
-              <div className="eyebrow">Buzzed in</div>
-              <strong>{state.catchphraseBuzzerName}</strong>
+              <div className="catchphrase-buzz-card-header">
+                <div>
+                  <div className="eyebrow">Buzzed in</div>
+                  <strong>{state.catchphraseBuzzerName}</strong>
+                </div>
+                {state.catchphraseGuessTimerEnabled && state.catchphraseGuessTimeRemainingMs > 0 && (
+                  <Timer
+                    key={state.catchphraseGuessEndsAt}
+                    remainingMs={state.catchphraseGuessTimeRemainingMs}
+                    durationMs={state.catchphraseGuessDurationMs}
+                  />
+                )}
+              </div>
               {state.isHost ? (
                 <button type="button" className="secondary" onClick={onReveal}>
                   Reveal answer
                 </button>
               ) : buzzedMe ? (
-                <GuessForm onGuess={onGuess} />
+                <>
+                  {state.catchphraseGuessTimerEnabled && (
+                    <p className="catchphrase-guess-deadline">
+                      Answer before the timer runs out or your guess is void.
+                    </p>
+                  )}
+                  <GuessForm onGuess={onGuess} />
+                </>
               ) : (
                 <p>Waiting for their answer.</p>
               )}
             </div>
           )}
 
-          {state.catchphraseLastGuess && state.phase === 'answering' && (
-            <div className="catchphrase-last-guess wrong">
-              {state.catchphraseLastGuess.playerName} guessed {state.catchphraseLastGuess.answer}
-            </div>
-          )}
+          <GuessBoard guesses={state.catchphraseGuesses} />
 
           {state.phase === 'revealed' && (
             <>

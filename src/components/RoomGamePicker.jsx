@@ -7,7 +7,15 @@ export default function RoomGamePicker({ state, error, onSelectGame, onCloseRoom
   const [lifelineCount, setLifelineCount] = useState(1)
   const [lifelinesAnytime, setLifelinesAnytime] = useState(false)
   const [diceMode, setDiceMode] = useState('digital')
-  const [bluffRoundCount, setBluffRoundCount] = useState(state.settings?.roundCount || 6)
+  const [majorityRoundCount, setMajorityRoundCount] = useState(
+    state.gameType === 'majority-rules' ? state.settings?.roundCount || 8 : 8,
+  )
+  const [bluffRoundCount, setBluffRoundCount] = useState(
+    state.gameType === 'bluff-battle' ? state.settings?.roundCount || 6 : 6,
+  )
+  const [catchphraseRoundCount, setCatchphraseRoundCount] = useState(
+    state.gameType === 'say-what-you-see' ? state.settings?.roundCount || 10 : 10,
+  )
   const [catchphraseTimerEnabled, setCatchphraseTimerEnabled] = useState(
     Boolean(state.settings?.guessTimerEnabled),
   )
@@ -20,7 +28,14 @@ export default function RoomGamePicker({ state, error, onSelectGame, onCloseRoom
       lifelineCount,
       lifelinesAnytime,
       diceMode,
-      roundCount: bluffRoundCount,
+      roundCount:
+        gameType === 'majority-rules'
+          ? majorityRoundCount
+          : gameType === 'bluff-battle'
+            ? bluffRoundCount
+            : gameType === 'say-what-you-see'
+              ? catchphraseRoundCount
+              : undefined,
       guessTimerEnabled: catchphraseTimerEnabled,
       guessSeconds: catchphraseGuessSeconds,
     })
@@ -173,8 +188,62 @@ export default function RoomGamePicker({ state, error, onSelectGame, onCloseRoom
                   </div>
                 </div>
               )}
+              {gameType === 'majority-rules' && (
+                <div className="host-settings room-picker-settings">
+                  <div className="settings-heading">
+                    <div>
+                      <strong>Majority rounds</strong>
+                      <span>Pick how many prompts to play before the final scores.</span>
+                    </div>
+                    <fieldset className="stepper" aria-label="Majority Rules rounds">
+                      <button
+                        type="button"
+                        onClick={() => setMajorityRoundCount((count) => Math.max(3, count - 1))}
+                        disabled={majorityRoundCount === 3}
+                        aria-label="Remove one Majority Rules round"
+                      >
+                        −
+                      </button>
+                      <strong>{majorityRoundCount}</strong>
+                      <button
+                        type="button"
+                        onClick={() => setMajorityRoundCount((count) => Math.min(20, count + 1))}
+                        disabled={majorityRoundCount === 20}
+                        aria-label="Add one Majority Rules round"
+                      >
+                        +
+                      </button>
+                    </fieldset>
+                  </div>
+                </div>
+              )}
               {gameType === 'say-what-you-see' && (
                 <div className="host-settings room-picker-settings catchphrase-settings">
+                  <div className="settings-heading">
+                    <div>
+                      <strong>Puzzle rounds</strong>
+                      <span>Pick how many visual clues to play before the final scores.</span>
+                    </div>
+                    <fieldset className="stepper" aria-label="Say What You See rounds">
+                      <button
+                        type="button"
+                        onClick={() => setCatchphraseRoundCount((count) => Math.max(3, count - 1))}
+                        disabled={catchphraseRoundCount === 3}
+                        aria-label="Remove one Say What You See round"
+                      >
+                        −
+                      </button>
+                      <strong>{catchphraseRoundCount}</strong>
+                      <button
+                        type="button"
+                        onClick={() => setCatchphraseRoundCount((count) => Math.min(20, count + 1))}
+                        disabled={catchphraseRoundCount === 20}
+                        aria-label="Add one Say What You See round"
+                      >
+                        +
+                      </button>
+                    </fieldset>
+                  </div>
                   <div className="settings-heading">
                     <div>
                       <strong>Buzz answer timer</strong>

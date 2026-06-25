@@ -1158,7 +1158,10 @@ export function registerSocketHandlers({
       if (!room || room.hostSocketId !== socket.id) {
         return replyError(callback, 'Only the host can end the game.')
       }
-      if (room.phase !== 'revealed') {
+      const canEndActiveSurveyRound =
+        room.gameType === 'survey-showdown' &&
+        ['survey-faceoff', 'survey-control', 'survey-playing', 'survey-steal'].includes(room.phase)
+      if (room.phase !== 'revealed' && !canEndActiveSurveyRound) {
         return replyError(callback, 'End the game after revealing the answer.')
       }
       clearQuestionTimer(room)

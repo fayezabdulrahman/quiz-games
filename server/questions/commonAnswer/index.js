@@ -1,5 +1,6 @@
 import { selectPrompts } from '../selectPrompts.js'
 import { extraMajorityPrompts } from './extraPrompts.js'
+import { familyNightMajorityPrompts } from './familyNightPrompts.js'
 
 export const majorityPromptPool = [
   {
@@ -323,6 +324,7 @@ export const majorityPromptPool = [
     options: ['Messaging', 'Streaming', 'Social media', 'Looking things up'],
   },
   ...extraMajorityPrompts,
+  ...familyNightMajorityPrompts,
 ]
 
 export function selectMajorityPrompts(count = 8, excludedIds = new Set()) {

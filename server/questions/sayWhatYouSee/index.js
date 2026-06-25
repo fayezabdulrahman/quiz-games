@@ -1,4 +1,5 @@
 import { selectPrompts } from '../selectPrompts.js'
+import { familyNightSayWhatYouSeePuzzles } from './familyNightPuzzles.js'
 
 export const sayWhatYouSeePuzzles = [
   {
@@ -281,6 +282,7 @@ export const sayWhatYouSeePuzzles = [
     layout: 'inside-job',
     tokens: ['JOB'],
   },
+  ...familyNightSayWhatYouSeePuzzles,
 ]
 
 export function selectSayWhatYouSeePuzzles(count = 10, usedQuestionIds) {

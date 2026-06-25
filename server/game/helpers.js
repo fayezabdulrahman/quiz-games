@@ -31,19 +31,29 @@ export function normalizeBluffRoundCount(value) {
   return Number.isFinite(count) ? Math.min(Math.max(count, 3), 20) : 6
 }
 
+export function normalizeSayWhatYouSeeRoundCount(value) {
+  const count = Number.parseInt(value, 10)
+  return Number.isFinite(count) ? Math.min(Math.max(count, 3), 20) : 10
+}
+
+export function normalizeMajorityRoundCount(value) {
+  const count = Number.parseInt(value, 10)
+  return Number.isFinite(count) ? Math.min(Math.max(count, 3), 20) : 8
+}
+
 export function normalizeCatchphraseGuessSeconds(value) {
   const seconds = Number.parseInt(value, 10)
   return Number.isFinite(seconds) ? Math.min(Math.max(seconds, 5), 30) : 10
 }
 
 export function settingsForGame(gameType, settings = {}) {
-  if (gameType === 'majority-rules') return { roundCount: 8 }
+  if (gameType === 'majority-rules') return { roundCount: normalizeMajorityRoundCount(settings.roundCount) }
   if (gameType === 'bluff-battle') return { roundCount: normalizeBluffRoundCount(settings.roundCount) }
   if (gameType === 'million-ladder') return { roundCount: 15 }
   if (gameType === 'survey-showdown') return { roundCount: 6 }
   if (gameType === 'say-what-you-see') {
     return {
-      roundCount: 10,
+      roundCount: normalizeSayWhatYouSeeRoundCount(settings.roundCount),
       guessTimerEnabled: Boolean(settings.guessTimerEnabled),
       guessSeconds: normalizeCatchphraseGuessSeconds(settings.guessSeconds),
     }
@@ -61,11 +71,13 @@ export function settingsForGame(gameType, settings = {}) {
 }
 
 export function questionsForGame(gameType, usedQuestionIds, settings = {}) {
-  if (gameType === 'majority-rules') return selectMajorityPrompts(8, usedQuestionIds)
+  if (gameType === 'majority-rules') return selectMajorityPrompts(settings.roundCount || 8, usedQuestionIds)
   if (gameType === 'bluff-battle') return selectBluffPrompts(settings.roundCount || 6, usedQuestionIds)
   if (gameType === 'million-ladder') return selectMillionLadderQuestions(usedQuestionIds)
   if (gameType === 'survey-showdown') return selectSurveyShowdownPrompts(6, usedQuestionIds)
-  if (gameType === 'say-what-you-see') return selectSayWhatYouSeePuzzles(10, usedQuestionIds)
+  if (gameType === 'say-what-you-see') {
+    return selectSayWhatYouSeePuzzles(settings.roundCount || 10, usedQuestionIds)
+  }
   if (gameType === 'quickfire-30') return selectQuickfire30Cards(64, usedQuestionIds)
   return selectQuestions(usedQuestionIds)
 }

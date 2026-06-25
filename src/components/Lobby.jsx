@@ -71,7 +71,7 @@ export default function Lobby({
               </>
             ) : state.gameType === 'say-what-you-see' ? (
               <>
-                <span><strong>10</strong> visual puzzles</span>
+                <span><strong>{state.settings.roundCount}</strong> visual puzzles</span>
                 <span>
                   {state.settings.guessTimerEnabled
                     ? `${state.settings.guessSeconds}s to answer after buzzing`

@@ -1,4 +1,5 @@
 import { selectPrompts } from '../selectPrompts.js'
+import { familyNightQuickfire30Cards } from './familyNightCards.js'
 
 const irishPeople = [
   'Saoirse Ronan', 'Paul Mescal', 'Cillian Murphy', 'Katie Taylor', 'Roy Keane',
@@ -115,14 +116,17 @@ const banks = [
   screenAndStories,
 ]
 
-export const quickfire30Pool = Array.from({ length: 80 }, (_, cardIndex) => ({
-  id: `qf30-${String(cardIndex + 1).padStart(3, '0')}`,
-  terms: Array.from({ length: 5 }, (_, termIndex) => {
-    const absoluteIndex = cardIndex * 5 + termIndex
-    const bank = banks[absoluteIndex % banks.length]
-    return bank[Math.floor(absoluteIndex / banks.length)]
-  }),
-}))
+export const quickfire30Pool = [
+  ...Array.from({ length: 80 }, (_, cardIndex) => ({
+    id: `qf30-${String(cardIndex + 1).padStart(3, '0')}`,
+    terms: Array.from({ length: 5 }, (_, termIndex) => {
+      const absoluteIndex = cardIndex * 5 + termIndex
+      const bank = banks[absoluteIndex % banks.length]
+      return bank[Math.floor(absoluteIndex / banks.length)]
+    }),
+  })),
+  ...familyNightQuickfire30Cards,
+]
 
 export function selectQuickfire30Cards(count = quickfire30Pool.length, usedQuestionIds) {
   return selectPrompts(quickfire30Pool, count, usedQuestionIds)

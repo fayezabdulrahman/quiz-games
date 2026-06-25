@@ -147,12 +147,17 @@ export default function SurveyShowdownScreen({
               )}
               {state.isHost && (
                 <div className="survey-host-callout">
-                  <strong>{activePlayer?.name}</strong>{' '}
-                  {isControlChoice
-                    ? `is choosing Play or Pass for ${activeTeam?.name}`
-                    : isFaceoff
-                      ? `is answering the face-off for ${activeTeam?.name}`
-                      : `is answering for ${activeTeam?.name}`}
+                  <div>
+                    <strong>{activePlayer?.name}</strong>{' '}
+                    {isControlChoice
+                      ? `is choosing Play or Pass for ${activeTeam?.name}`
+                      : isFaceoff
+                        ? `is answering the face-off for ${activeTeam?.name}`
+                        : `is answering for ${activeTeam?.name}`}
+                  </div>
+                  <button type="button" className="secondary danger" onClick={onEnd}>
+                    End game
+                  </button>
                 </div>
               )}
             </>

@@ -57,6 +57,8 @@ export default function Landing({ onHost, onJoin, busy, error }) {
   const [lifelinesAnytime, setLifelinesAnytime] = useState(false)
   const [diceMode, setDiceMode] = useState('digital')
   const [bluffRoundCount, setBluffRoundCount] = useState(6)
+  const [majorityRoundCount, setMajorityRoundCount] = useState(8)
+  const [catchphraseRoundCount, setCatchphraseRoundCount] = useState(10)
   const [catchphraseTimerEnabled, setCatchphraseTimerEnabled] = useState(false)
   const [catchphraseGuessSeconds, setCatchphraseGuessSeconds] = useState(10)
 
@@ -68,7 +70,14 @@ export default function Landing({ onHost, onJoin, busy, error }) {
         lifelineCount,
         lifelinesAnytime,
         diceMode,
-        roundCount: bluffRoundCount,
+        roundCount:
+          gameType === 'say-what-you-see'
+            ? catchphraseRoundCount
+            : gameType === 'majority-rules'
+              ? majorityRoundCount
+              : gameType === 'bluff-battle'
+                ? bluffRoundCount
+                : undefined,
         guessTimerEnabled: catchphraseTimerEnabled,
         guessSeconds: catchphraseGuessSeconds,
       })
@@ -215,7 +224,7 @@ export default function Landing({ onHost, onJoin, busy, error }) {
                   <span className="game-card-icon catchphrase-icon">EYE</span>
                   <span>
                     <strong>Say What You See</strong>
-                    <small>Visual puzzles · buzzer race · 10 rounds</small>
+                    <small>Visual puzzles · buzzer race · {catchphraseRoundCount} rounds</small>
                   </span>
                   <span className="selection-dot" />
                 </button>
@@ -251,7 +260,7 @@ export default function Landing({ onHost, onJoin, busy, error }) {
                   <span className="game-card-icon majority-icon">M</span>
                   <span>
                     <strong>Majority Rules</strong>
-                    <small>Match the room · score points · 8 rounds</small>
+                    <small>Match the room · score points · {majorityRoundCount} rounds</small>
                   </span>
                   <span className="selection-dot" />
                 </button>
@@ -326,13 +335,65 @@ export default function Landing({ onHost, onJoin, busy, error }) {
                 </div>
               )}
               {gameType === 'majority-rules' && (
-                <div className="selected-game-note">
-                  Pick the answer you think most of the room will choose. Matching the majority
-                  earns one point.
+                <div className="host-settings majority-settings">
+                  <div className="settings-heading">
+                    <div>
+                      <strong>Majority rounds</strong>
+                      <span>Choose how many room-vote prompts this game will use.</span>
+                    </div>
+                    <fieldset className="stepper" aria-label="Majority Rules rounds">
+                      <button
+                        type="button"
+                        onClick={() => setMajorityRoundCount((count) => Math.max(3, count - 1))}
+                        disabled={majorityRoundCount === 3}
+                        aria-label="Remove one Majority Rules round"
+                      >
+                        −
+                      </button>
+                      <strong>{majorityRoundCount}</strong>
+                      <button
+                        type="button"
+                        onClick={() => setMajorityRoundCount((count) => Math.min(20, count + 1))}
+                        disabled={majorityRoundCount === 20}
+                        aria-label="Add one Majority Rules round"
+                      >
+                        +
+                      </button>
+                    </fieldset>
+                  </div>
+                  <div className="selected-game-note">
+                    Pick the answer you think most of the room will choose. Matching the majority
+                    earns one point.
+                  </div>
                 </div>
               )}
               {gameType === 'say-what-you-see' && (
                 <div className="host-settings catchphrase-settings">
+                  <div className="settings-heading">
+                    <div>
+                      <strong>Puzzle rounds</strong>
+                      <span>Choose how many visual clues to play before final scores.</span>
+                    </div>
+                    <fieldset className="stepper" aria-label="Say What You See rounds">
+                      <button
+                        type="button"
+                        onClick={() => setCatchphraseRoundCount((count) => Math.max(3, count - 1))}
+                        disabled={catchphraseRoundCount === 3}
+                        aria-label="Remove one Say What You See round"
+                      >
+                        −
+                      </button>
+                      <strong>{catchphraseRoundCount}</strong>
+                      <button
+                        type="button"
+                        onClick={() => setCatchphraseRoundCount((count) => Math.min(20, count + 1))}
+                        disabled={catchphraseRoundCount === 20}
+                        aria-label="Add one Say What You See round"
+                      >
+                        +
+                      </button>
+                    </fieldset>
+                  </div>
                   <div className="settings-heading">
                     <div>
                       <strong>Buzz answer timer</strong>

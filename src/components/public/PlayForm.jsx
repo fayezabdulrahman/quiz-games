@@ -93,7 +93,7 @@ export default function PlayForm({ onHost, onJoin, busy, error }) {
           </p>
         )}
         <button type="submit" className="primary wide" disabled={busy}>
-          {busy ? 'Connecting…' : mode === 'host' ? 'Create game room' : 'Join game'}
+          {busy ? 'Connecting…' : mode === 'host' ? 'Create game room' : 'Join room'}
         </button>
       </form>
       <p className="fine-print">Guests join free with a room code. Best with one phone per player.</p>

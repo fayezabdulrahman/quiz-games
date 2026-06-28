@@ -1,7 +1,9 @@
+import GameLogoMark from '../GameLogoMark.jsx'
+
 export default function GameCard({ game }) {
   return (
     <article className={`public-game-card ${game.accent}`}>
-      <span className="public-game-mark">{game.mark}</span>
+      <GameLogoMark gameType={game.id} className="public-game-mark" />
       <div>
         <small>{game.kicker}</small>
         <h3>{game.name}</h3>

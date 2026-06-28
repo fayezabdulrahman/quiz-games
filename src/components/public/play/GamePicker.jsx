@@ -1,4 +1,5 @@
 import { games } from '../../../data/games.js'
+import GameLogoMark from '../../GameLogoMark.jsx'
 
 export default function GamePicker({
   gameType,
@@ -20,7 +21,7 @@ export default function GamePicker({
           className={`game-card-option ${gameType === game.id ? `selected ${game.accent}` : ''}`}
           onClick={() => setGameType(game.id)}
         >
-          <span className={`game-card-icon ${game.accent}-icon`}>{game.mark}</span>
+          <GameLogoMark gameType={game.id} className={`game-card-icon ${game.accent}-icon`} />
           <span>
             <strong>{game.name}</strong>
             <small>

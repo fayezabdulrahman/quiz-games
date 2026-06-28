@@ -6,7 +6,7 @@ export default function JoinFields({ name, code, setName, setCode }) {
         <input
           value={name}
           onChange={(event) => setName(event.target.value)}
-          placeholder="Alex"
+          placeholder="Nickname"
           maxLength={20}
           autoComplete="nickname"
         />

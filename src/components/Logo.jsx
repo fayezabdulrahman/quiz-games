@@ -1,8 +1,10 @@
+import GameLogoMark from './GameLogoMark.jsx'
+
 export default function Logo({ gameType = 'one-percent' }) {
   if (gameType === 'quickfire-30') {
     return (
       <div className="brand brand-quickfire">
-        <span className="brand-quickfire-mark">30</span>
+        <GameLogoMark gameType="quickfire-30" className="brand-quickfire-mark" />
         <span><strong>QUICKFIRE</strong><small>SECONDS</small></span>
       </div>
     )
@@ -11,7 +13,7 @@ export default function Logo({ gameType = 'one-percent' }) {
   if (gameType === 'survey-showdown') {
     return (
       <div className="brand brand-survey">
-        <span className="brand-survey-mark">S</span>
+        <GameLogoMark gameType="survey-showdown" className="brand-survey-mark" />
         <span><strong>SURVEY</strong><small>SHOWDOWN</small></span>
       </div>
     )
@@ -20,7 +22,7 @@ export default function Logo({ gameType = 'one-percent' }) {
   if (gameType === 'say-what-you-see') {
     return (
       <div className="brand brand-catchphrase">
-        <span className="brand-catchphrase-mark">EYE</span>
+        <GameLogoMark gameType="say-what-you-see" className="brand-catchphrase-mark" />
         <span>
           <strong>SAY WHAT</strong>
           <small>YOU SEE</small>
@@ -32,7 +34,7 @@ export default function Logo({ gameType = 'one-percent' }) {
   if (gameType === 'million-ladder') {
     return (
       <div className="brand brand-ladder">
-        <span className="brand-ladder-mark">$</span>
+        <GameLogoMark gameType="million-ladder" className="brand-ladder-mark" />
         <span>
           <strong>MILLION</strong>
           <small>LADDER</small>
@@ -44,7 +46,7 @@ export default function Logo({ gameType = 'one-percent' }) {
   if (gameType === 'bluff-battle') {
     return (
       <div className="brand brand-bluff">
-        <span className="brand-bluff-mark">?</span>
+        <GameLogoMark gameType="bluff-battle" className="brand-bluff-mark" />
         <span>
           <strong>BLUFF</strong>
           <small>BATTLE</small>
@@ -56,7 +58,7 @@ export default function Logo({ gameType = 'one-percent' }) {
   if (gameType === 'majority-rules') {
     return (
       <div className="brand brand-majority">
-        <span className="brand-majority-mark">M</span>
+        <GameLogoMark gameType="majority-rules" className="brand-majority-mark" />
         <span>
           <strong>MAJORITY</strong>
           <small>RULES</small>

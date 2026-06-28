@@ -1,9 +1,9 @@
 import { useState } from 'react'
 
 const navItems = [
-  ['home', 'Home'],
+  ['home', 'How it works'],
   ['games', 'Games'],
-  ['play', 'Play'],
+  ['play', 'Join'],
 ]
 
 export default function PublicNav({ page, setPage }) {
@@ -17,8 +17,7 @@ export default function PublicNav({ page, setPage }) {
   return (
     <header className={`public-nav ${menuOpen ? 'menu-open' : ''}`}>
       <button type="button" className="public-brand" onClick={() => selectPage('home')}>
-        <span>GAME</span>
-        <strong>NIGHT</strong>
+        <strong>Game Night</strong>
       </button>
       <nav id="public-navigation" aria-label="Main navigation">
         {navItems.map(([id, label]) => (
@@ -33,7 +32,7 @@ export default function PublicNav({ page, setPage }) {
         ))}
       </nav>
       <button type="button" className="nav-play-button" onClick={() => selectPage('play')}>
-        Host or join
+        Host a room
       </button>
       <button
         type="button"

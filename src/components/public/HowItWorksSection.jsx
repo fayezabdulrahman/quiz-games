@@ -21,7 +21,7 @@ export default function HowItWorksSection() {
     <section className="public-section shell">
       <div className="section-heading">
         <span className="eyebrow">How it works</span>
-        <h2>Built for rooms full of real people.</h2>
+        <h2>Built for quiz nights that feel alive.</h2>
       </div>
       <div className="steps-grid">
         {steps.map((step) => (

@@ -5,7 +5,7 @@ export const games = [
     mark: '30',
     kicker: 'Describe five. Beat the clock.',
     summary: 'Team up, roll the handicap die, and race around the board by describing fast answer cards.',
-    meta: 'Teams · race board · party chaos',
+    meta: 'Teams · Race board · Party chaos',
     accent: 'quickfire',
   },
   {
@@ -14,7 +14,7 @@ export const games = [
     mark: 'EYE',
     kicker: 'Buzz on the visual clue',
     summary: 'Watch the rebus puzzle, buzz in first, and type the phrase hiding in plain sight.',
-    meta: 'Visual puzzles · buzzer race',
+    meta: 'Visual puzzles · Buzzer race',
     accent: 'catchphrase',
   },
   {
@@ -23,7 +23,7 @@ export const games = [
     mark: '1%',
     kicker: 'Think differently',
     summary: 'Work through increasingly tricky logic questions. Use your pass wisely because one wrong answer can knock you out.',
-    meta: 'Logic · elimination · 10 rounds',
+    meta: 'Logic · Elimination · Multiple rounds',
     accent: 'one-percent',
   },
   {
@@ -32,7 +32,7 @@ export const games = [
     mark: 'S',
     kicker: 'Name the popular answers',
     summary: 'Split into two teams, uncover the survey board, survive three strikes, and steal the bank from your rivals.',
-    meta: 'Teams · strikes · steals',
+    meta: 'Teams · Strikes · Steals',
     accent: 'survey',
   },
   {
@@ -41,7 +41,7 @@ export const games = [
     mark: '?',
     kicker: 'Make fiction sound true',
     summary: 'Invent a convincing fake answer, spot the real one, and earn points whenever another player falls for your bluff.',
-    meta: 'Writing · voting · deception',
+    meta: 'Writing · Voting · Deception',
     accent: 'bluff',
   },
   {
@@ -50,7 +50,7 @@ export const games = [
     mark: 'M',
     kicker: 'Read the room',
     summary: 'Pick the answer you think most players will choose. Matching the room majority scores the point.',
-    meta: 'Room votes · quick rounds',
+    meta: 'Room votes · Quick rounds',
     accent: 'majority',
   },
   {
@@ -59,7 +59,7 @@ export const games = [
     mark: '$',
     kicker: 'Take the hot seat',
     summary: 'One contestant climbs a 15-question ladder while the host runs the show and the audience stands by as a lifeline.',
-    meta: 'Hot seat · host-led · lifeline',
+    meta: 'Hot seat · Host-led · Lifeline',
     accent: 'ladder',
   },
 ]

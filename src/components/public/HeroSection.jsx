@@ -8,15 +8,25 @@ export default function HeroSection({ setPage }) {
       </div>
       <div className="hero-overlay" />
       <div className="hero-content shell">
-        <div className="eyebrow">Your browser-based game show room</div>
-        <h1>One link. One room. A whole night of games.</h1>
-        <p>
-          Host party games for family nights, friend groups, office socials, and quick team breaks.
-          Players join with a room code and use their phones as controllers.
-        </p>
+        <h1>Game Night</h1>
+        <p>The easiest way to host unforgettable game nights.</p>
+        <div className="hero-steps" aria-label="How Game Night works">
+          <span>
+            <b>Pick</b>
+            Pick a game
+          </span>
+          <span>
+            <b>Join</b>
+            Everyone joins
+          </span>
+          <span>
+            <b>Play</b>
+            Play together
+          </span>
+        </div>
         <div className="hero-actions">
           <button type="button" className="primary" onClick={() => setPage('play')}>
-            Host or join
+            Host a room
           </button>
           <button type="button" className="secondary" onClick={() => setPage('games')}>
             Browse games

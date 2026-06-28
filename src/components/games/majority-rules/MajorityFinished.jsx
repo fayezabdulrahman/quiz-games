@@ -1,24 +1,24 @@
-import Logo from './Logo.jsx'
+import Logo from '../../Logo.jsx'
 
-export default function BluffBattleFinished({ state, onRestart, onChangeGame }) {
+export default function MajorityFinished({ state, onRestart, onChangeGame }) {
   const ordered = [...state.players].sort(
     (a, b) => b.score - a.score || a.name.localeCompare(b.name),
   )
   const winningScore = ordered[0]?.score || 0
 
   return (
-    <main className="finish-screen bluff-finish">
-      <Logo gameType="bluff-battle" />
-      <div className="eyebrow">The lies have been counted</div>
-      <h1>{state.winnerNames.length > 1 ? 'Masters of deception' : 'Bluff champion'}</h1>
-      <div className="bluff-winner-score">
+    <main className="finish-screen majority-finish">
+      <Logo gameType="majority-rules" />
+      <div className="eyebrow">The room has spoken</div>
+      <h1>{state.winnerNames.length > 1 ? 'Perfectly matched' : 'Best mind reader'}</h1>
+      <div className="majority-winner-score">
         <strong>{winningScore}</strong>
         <span>{winningScore === 1 ? 'point' : 'points'}</span>
       </div>
       <div className="winner-names">
         {state.winnerNames.map((name) => <span key={name}>{name}</span>)}
       </div>
-      <div className="final-scoreboard bluff-final-scoreboard">
+      <div className="final-scoreboard">
         {ordered.map((player, index) => (
           <div key={player.id}>
             <span>{index + 1}</span>
@@ -30,7 +30,7 @@ export default function BluffBattleFinished({ state, onRestart, onChangeGame }) 
       {state.isHost ? (
         <div className="finish-actions">
           <button type="button" className="primary" onClick={onRestart}>
-            Replay Bluff Battle
+            Replay Majority Rules
           </button>
           <button type="button" className="secondary" onClick={onChangeGame}>
             Choose another game

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import Logo from './Logo.jsx'
 import PlayerList from './PlayerList.jsx'
-import QuickfireTeamSetup from './QuickfireTeamSetup.jsx'
-import SurveyTeamSetup from './SurveyTeamSetup.jsx'
+import QuickfireTeamSetup from './games/quickfire-30/QuickfireTeamSetup.jsx'
+import SurveyTeamSetup from './games/survey-showdown/SurveyTeamSetup.jsx'
 
 export default function Lobby({
   state,

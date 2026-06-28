@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import Logo from './Logo.jsx'
-import PlayerList from './PlayerList.jsx'
+import HostEndGameButton from '../../HostEndGameButton.jsx'
+import Logo from '../../Logo.jsx'
+import PlayerList from '../../PlayerList.jsx'
 
 function Progress({ index, total, difficulty }) {
   return (
@@ -223,9 +224,12 @@ export default function QuestionScreen({ state, error, onAnswer, onPass, onRevea
     <main className="game-shell">
       <header>
         <Logo />
-        <div className="header-room">
-          <span>ROOM</span>
-          <strong>{state.code}</strong>
+        <div className="game-header-actions">
+          <HostEndGameButton isHost={state.isHost} onEnd={onEnd} />
+          <div className="header-room">
+            <span>ROOM</span>
+            <strong>{state.code}</strong>
+          </div>
         </div>
       </header>
       <Progress
@@ -287,11 +291,6 @@ export default function QuestionScreen({ state, error, onAnswer, onPass, onRevea
               <button type="button" className="primary" onClick={onNext}>
                 {isLastQuestion ? 'See final results' : 'Next question'}
               </button>
-              {!isLastQuestion && (
-                <button type="button" className="secondary danger" onClick={onEnd}>
-                  End game
-                </button>
-              )}
             </div>
           )}
         </div>

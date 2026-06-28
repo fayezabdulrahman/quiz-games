@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
  :root {
-	 font-family: 'DM Sans', system-ui, sans-serif;
+	 --font-body: 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+	 --font-display: 'Space Grotesk', 'DM Sans', system-ui, sans-serif;
+	 font-family: var(--font-body);
 	 color: #f7f8ff;
 	 background: #090b18;
 	 font-synthesis: none;
@@ -46,12 +48,12 @@
 	 display: flex;
 	 align-items: center;
 	 gap: .42rem;
-	 font-family: 'Space Grotesk', sans-serif;
+	 font-family: var(--font-display);
 	 font-weight: 700;
 	 line-height: .8;
 }
  .finish-screen h1 {
-	 font-family: 'Space Grotesk', sans-serif;
+	 font-family: var(--font-display);
 	 letter-spacing: -.045em;
 }
  label {
@@ -222,8 +224,28 @@
 	 display: flex;
 	 align-items: center;
 	 justify-content: space-between;
+	 gap: 18px;
 	 padding-bottom: 24px;
 	 border-bottom: 1px solid var(--line);
+}
+ .game-header-actions {
+	 display: flex;
+	 align-items: center;
+	 justify-content: flex-end;
+	 gap: 12px;
+}
+ .host-end-game-button {
+	 min-height: 38px;
+	 padding: 0 14px;
+	 border: 1px solid rgba(255,82,119,.36);
+	 border-radius: 10px;
+	 color: #ff9aad;
+	 background: rgba(255,82,119,.08);
+	 font-weight: 900;
+}
+ .host-end-game-button:hover:not(:disabled) {
+	 border-color: rgba(255,138,160,.58);
+	 background: rgba(255,82,119,.14);
 }
  .live-chip, .header-room {
 	 display: flex;
@@ -401,7 +423,7 @@
 }
  .question-timer strong {
 	 color: white;
-	 font: 700 1.5rem/1 'Space Grotesk', sans-serif;
+	 font: 700 1.5rem/1 var(--font-display);
 }
  .question-timer span {
 	 margin-top: 3px;
@@ -498,7 +520,7 @@
  .correct-answer {
 	 margin: 9px 0 12px;
 	 color: white;
-	 font: 700 clamp(2rem, 5vw, 3.4rem) 'Space Grotesk', sans-serif;
+	 font: 700 clamp(2rem, 5vw, 3.4rem) var(--font-display);
 }
  .result-banner {
 	 margin-top: 20px;
@@ -606,6 +628,18 @@
 	}
 }
  @media (max-width: 520px) {
+	 header {
+		 align-items: flex-start;
+	}
+	 .game-header-actions {
+		 flex-direction: column-reverse;
+		 align-items: flex-end;
+		 gap: 8px;
+	}
+	 .host-end-game-button {
+		 min-height: 34px;
+		 padding-inline: 12px;
+	}
 	 .progress-wrap {
 		 margin: 22px 0 34px;
 	}

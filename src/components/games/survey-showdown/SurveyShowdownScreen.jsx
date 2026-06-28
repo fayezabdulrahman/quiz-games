@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import Logo from './Logo.jsx'
+import HostEndGameButton from '../../HostEndGameButton.jsx'
+import Logo from '../../Logo.jsx'
 
 function TeamCard({ team, players, active, winner }) {
   const members = players.filter((player) => player.teamId === team.id)
@@ -53,7 +54,10 @@ export default function SurveyShowdownScreen({
     <main className="game-shell survey-shell">
       <header>
         <Logo gameType="survey-showdown" />
-        <div className="header-room"><span>ROOM</span><strong>{state.code}</strong></div>
+        <div className="game-header-actions">
+          <HostEndGameButton isHost={state.isHost} onEnd={onEnd} />
+          <div className="header-room"><span>ROOM</span><strong>{state.code}</strong></div>
+        </div>
       </header>
       <div className="survey-topline">
         <span>Round {state.questionIndex + 1} of {state.totalQuestions}</span>
@@ -155,9 +159,6 @@ export default function SurveyShowdownScreen({
                         ? `is answering the face-off for ${activeTeam?.name}`
                         : `is answering for ${activeTeam?.name}`}
                   </div>
-                  <button type="button" className="secondary danger" onClick={onEnd}>
-                    End game
-                  </button>
                 </div>
               )}
             </>
@@ -167,7 +168,6 @@ export default function SurveyShowdownScreen({
               <button type="button" className="primary" onClick={onNext}>
                 {isLastRound ? 'See final scores' : 'Next survey'}
               </button>
-              {!isLastRound && <button type="button" className="secondary danger" onClick={onEnd}>End game</button>}
             </div>
           )}
           {state.phase === 'revealed' && !state.isHost && (

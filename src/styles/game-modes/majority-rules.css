@@ -10,7 +10,7 @@
 	 border-radius: 13px;
 	 color: #10101a;
 	 background: linear-gradient(135deg, #ff8bd9, #8d72ff);
-	 font: 800 1.5rem 'Space Grotesk', sans-serif;
+	 font: 800 1.5rem var(--font-display);
 }
  .brand-majority > span:last-child {
 	 display: grid;
@@ -79,13 +79,13 @@
 	 border-radius: 19px;
 	 color: var(--majority-pink);
 	 background: rgba(255,139,217,.07);
-	 font: 800 1.4rem 'Space Grotesk', sans-serif;
+	 font: 800 1.4rem var(--font-display);
 	 transform: rotate(-3deg);
 }
  .majority-main h1 {
 	 max-width: 820px;
 	 margin: 13px 0 30px;
-	 font: 700 clamp(2.2rem, 5vw, 4.5rem)/1.05 'Space Grotesk', sans-serif;
+	 font: 700 clamp(2.2rem, 5vw, 4.5rem)/1.05 var(--font-display);
 	 letter-spacing: -.05em;
 }
  .majority-timer {
@@ -123,7 +123,7 @@
 }
  .majority-scoreboard h2 {
 	 margin: 6px 0 20px;
-	 font: 600 1.8rem 'Space Grotesk', sans-serif;
+	 font: 600 1.8rem var(--font-display);
 }
  .majority-leaderboard {
 	 display: grid;
@@ -172,7 +172,7 @@
  .majority-answer {
 	 margin: 8px 0 25px;
 	 color: white;
-	 font: 700 clamp(1.8rem, 4vw, 3.2rem) 'Space Grotesk', sans-serif;
+	 font: 700 clamp(1.8rem, 4vw, 3.2rem) var(--font-display);
 }
  .vote-bars {
 	 display: grid;
@@ -223,7 +223,7 @@
 	 transform: rotate(-3deg);
 }
  .majority-winner-score strong {
-	 font: 800 4rem/1 'Space Grotesk', sans-serif;
+	 font: 800 4rem/1 var(--font-display);
 }
  @media (max-width: 800px) {
 	 .majority-options {

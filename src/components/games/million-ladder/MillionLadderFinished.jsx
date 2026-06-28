@@ -2,14 +2,16 @@ import {
   MILLION_LADDER_PRIZES,
   formatPrize,
   guaranteedPrize,
-} from '../game/millionLadder.js'
-import Logo from './Logo.jsx'
+} from '../../../game/millionLadder.js'
+import Logo from '../../Logo.jsx'
 
 export default function MillionLadderFinished({ state, onRestart, onChangeGame }) {
   const completed = state.finishReason === 'completed' && state.ladderReached === 14
   const banked = state.finishReason === 'host-ended'
   const winnings = completed || banked
-    ? MILLION_LADDER_PRIZES[Math.max(0, state.ladderReached)]
+    ? state.ladderReached >= 0
+      ? MILLION_LADDER_PRIZES[state.ladderReached]
+      : 0
     : guaranteedPrize(state.ladderReached)
   const contestantName = state.ladderContestantName || 'The contestant'
 

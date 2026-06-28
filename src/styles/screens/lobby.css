@@ -44,7 +44,7 @@
 	 font-size: 1.1rem;
 }
  .room-code {
-	 font: 700 clamp(4.5rem, 9vw, 7.5rem) 'Space Grotesk', sans-serif;
+	 font: 700 clamp(4.5rem, 9vw, 7.5rem) var(--font-display);
 	 letter-spacing: .12em;
 	 text-indent: .12em;
 	 color: var(--lime);
@@ -117,7 +117,7 @@
 }
  .panel-title h2 {
 	 margin: 5px 0 0;
-	 font: 600 2rem 'Space Grotesk', sans-serif;
+	 font: 600 2rem var(--font-display);
 }
  .pulse {
 	 width: 11px;

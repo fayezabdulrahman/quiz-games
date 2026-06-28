@@ -21,39 +21,43 @@ export function correctAnswer(question, submitted) {
   return answers.some((answer) => normalize(answer) === normalize(submitted))
 }
 
-export function normalizeLifelineCount(value) {
+export function normalizeBoundedInteger(value, { min, max, defaultValue }) {
   const count = Number.parseInt(value, 10)
-  return Number.isFinite(count) ? Math.min(Math.max(count, 0), 10) : 1
-}
-
-export function normalizeBluffRoundCount(value) {
-  const count = Number.parseInt(value, 10)
-  return Number.isFinite(count) ? Math.min(Math.max(count, 3), 20) : 6
-}
-
-export function normalizeSayWhatYouSeeRoundCount(value) {
-  const count = Number.parseInt(value, 10)
-  return Number.isFinite(count) ? Math.min(Math.max(count, 3), 20) : 10
-}
-
-export function normalizeMajorityRoundCount(value) {
-  const count = Number.parseInt(value, 10)
-  return Number.isFinite(count) ? Math.min(Math.max(count, 3), 20) : 8
+  return Number.isFinite(count) ? Math.min(Math.max(count, min), max) : defaultValue
 }
 
 export function normalizeCatchphraseGuessSeconds(value) {
-  const seconds = Number.parseInt(value, 10)
-  return Number.isFinite(seconds) ? Math.min(Math.max(seconds, 5), 30) : 10
+  return normalizeBoundedInteger(value, { min: 5, max: 30, defaultValue: 10 })
 }
 
 export function settingsForGame(gameType, settings = {}) {
-  if (gameType === 'majority-rules') return { roundCount: normalizeMajorityRoundCount(settings.roundCount) }
-  if (gameType === 'bluff-battle') return { roundCount: normalizeBluffRoundCount(settings.roundCount) }
+  if (gameType === 'majority-rules') {
+    return {
+      roundCount: normalizeBoundedInteger(settings.roundCount, {
+        min: 3,
+        max: 20,
+        defaultValue: 8,
+      }),
+    }
+  }
+  if (gameType === 'bluff-battle') {
+    return {
+      roundCount: normalizeBoundedInteger(settings.roundCount, {
+        min: 3,
+        max: 20,
+        defaultValue: 6,
+      }),
+    }
+  }
   if (gameType === 'million-ladder') return { roundCount: 15 }
   if (gameType === 'survey-showdown') return { roundCount: 6 }
   if (gameType === 'say-what-you-see') {
     return {
-      roundCount: normalizeSayWhatYouSeeRoundCount(settings.roundCount),
+      roundCount: normalizeBoundedInteger(settings.roundCount, {
+        min: 3,
+        max: 20,
+        defaultValue: 10,
+      }),
       guessTimerEnabled: Boolean(settings.guessTimerEnabled),
       guessSeconds: normalizeCatchphraseGuessSeconds(settings.guessSeconds),
     }
@@ -65,7 +69,11 @@ export function settingsForGame(gameType, settings = {}) {
     }
   }
   return {
-    lifelineCount: normalizeLifelineCount(settings.lifelineCount),
+    lifelineCount: normalizeBoundedInteger(settings.lifelineCount, {
+      min: 0,
+      max: 10,
+      defaultValue: 1,
+    }),
     lifelinesAnytime: Boolean(settings.lifelinesAnytime),
   }
 }

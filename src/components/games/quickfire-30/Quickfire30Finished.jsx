@@ -1,4 +1,4 @@
-import Logo from './Logo.jsx'
+import Logo from '../../Logo.jsx'
 
 export default function Quickfire30Finished({ state, onRestart, onChangeGame }) {
   const ordered = [...state.quickfireTeams].sort((a, b) => b.position - a.position)

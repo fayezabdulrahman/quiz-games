@@ -10,7 +10,7 @@
 	 border-radius: 50% 50% 50% 12px;
 	 color: #07171a;
 	 background: linear-gradient(135deg, #59f0d0, #50a6ff);
-	 font: 900 1.6rem 'Space Grotesk', sans-serif;
+	 font: 900 1.6rem var(--font-display);
 	 transform: rotate(-5deg);
 }
  .brand-bluff > span:last-child {
@@ -87,14 +87,14 @@
 	 border-radius: 50% 50% 50% 12px;
 	 color: var(--bluff-mint);
 	 background: rgba(89,240,208,.06);
-	 font: 800 .8rem 'Space Grotesk', sans-serif;
+	 font: 800 .8rem var(--font-display);
 	 letter-spacing: .08em;
 	 transform: rotate(-3deg);
 }
  .bluff-main h1 {
 	 max-width: 840px;
 	 margin: 13px 0 28px;
-	 font: 700 clamp(2.15rem, 4.8vw, 4.25rem)/1.06 'Space Grotesk', sans-serif;
+	 font: 700 clamp(2.15rem, 4.8vw, 4.25rem)/1.06 var(--font-display);
 	 letter-spacing: -.05em;
 }
  .bluff-timer {
@@ -176,7 +176,7 @@
 }
  .bluff-scoreboard h2 {
 	 margin: 6px 0 20px;
-	 font: 600 1.8rem 'Space Grotesk', sans-serif;
+	 font: 600 1.8rem var(--font-display);
 }
  .bluff-leaderboard {
 	 display: grid;
@@ -220,7 +220,7 @@
 }
  .bluff-phase-count strong {
 	 color: var(--bluff-mint);
-	 font: 700 2rem 'Space Grotesk', sans-serif;
+	 font: 700 2rem var(--font-display);
 }
  .bluff-phase-count span {
 	 color: #838aa3;
@@ -236,7 +236,7 @@
  .bluff-truth {
 	 margin: 8px 0 10px;
 	 color: white;
-	 font: 700 clamp(2rem, 4vw, 3.3rem) 'Space Grotesk', sans-serif;
+	 font: 700 clamp(2rem, 4vw, 3.3rem) var(--font-display);
 }
  .bluff-results > p {
 	 margin: 0 0 24px;
@@ -310,7 +310,7 @@
 	 transform: rotate(-3deg);
 }
  .bluff-winner-score strong {
-	 font: 800 4rem/1 'Space Grotesk', sans-serif;
+	 font: 800 4rem/1 var(--font-display);
 }
  .bluff-final-scoreboard b {
 	 color: #59f0d0;

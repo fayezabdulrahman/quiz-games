@@ -12,7 +12,7 @@
 	 color: #170e00;
 	 background: linear-gradient(135deg, #fff0a6, #ffb52e);
 	 box-shadow: 0 0 26px rgba(255,181,46,.16);
-	 font: 900 1.45rem 'Space Grotesk', sans-serif;
+	 font: 900 1.45rem var(--font-display);
 }
  .brand-ladder > span:last-child {
 	 display: grid;
@@ -89,7 +89,7 @@
 }
  .ladder-heading > div:first-child strong {
 	 color: var(--ladder-gold);
-	 font: 800 1.55rem 'Space Grotesk', sans-serif;
+	 font: 800 1.55rem var(--font-display);
 }
  .ladder-timer {
 	 background: conic-gradient(var(--ladder-gold) var(--timer-progress), #352d20 0);
@@ -97,7 +97,7 @@
  .ladder-main h1 {
 	 max-width: 840px;
 	 margin: 30px 0;
-	 font: 700 clamp(2.15rem, 4.8vw, 4.2rem)/1.06 'Space Grotesk', sans-serif;
+	 font: 700 clamp(2.15rem, 4.8vw, 4.2rem)/1.06 var(--font-display);
 	 letter-spacing: -.05em;
 }
  .ladder-options {
@@ -140,7 +140,7 @@
  .ladder-locked-answer strong {
 	 margin: 0;
 	 color: var(--ladder-gold);
-	 font: 700 1.15rem 'Space Grotesk', sans-serif;
+	 font: 700 1.15rem var(--font-display);
 	 text-align: left;
 }
  .ladder-lifelines {
@@ -246,7 +246,7 @@
 	 font-size: .73rem;
 }
  .prize-ladder > div strong {
-	 font-family: 'Space Grotesk', sans-serif;
+	 font-family: var(--font-display);
 	 text-align: right;
 }
  .prize-ladder > div.safe {
@@ -314,7 +314,7 @@
 	 color: #ffc247;
 	 background: rgba(255,194,71,.05);
 	 box-shadow: 0 0 70px rgba(255,194,71,.13);
-	 font: 800 clamp(2.8rem, 8vw, 5.8rem) 'Space Grotesk', sans-serif;
+	 font: 800 clamp(2.8rem, 8vw, 5.8rem) var(--font-display);
 	 letter-spacing: -.06em;
 }
  @media (max-width: 800px) {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import Logo from './Logo.jsx'
+import HostEndGameButton from '../../HostEndGameButton.jsx'
+import Logo from '../../Logo.jsx'
 
 function Timer({ remainingMs, durationMs }) {
   const [endsAt] = useState(() => Date.now() + remainingMs)
@@ -99,10 +100,10 @@ function GuessBoard({ guesses = [] }) {
         <strong>{guesses.length}</strong>
       </div>
       <div className="catchphrase-guess-list">
-        {guesses.map((guess, index) => (
+        {guesses.map((guess) => (
           <div
             className={`catchphrase-guess-item ${guess.isCorrect ? 'is-correct' : 'is-wrong'}`}
-            key={`${guess.playerId}-${index}-${guess.answer}`}
+            key={`${guess.playerId}-${guess.answer}-${guess.isCorrect}-${guess.timedOut}`}
           >
             <span>{guess.playerName}</span>
             <strong>{guess.answer}</strong>
@@ -171,7 +172,10 @@ export default function SayWhatYouSeeScreen({
     <main className="game-shell catchphrase-shell">
       <header>
         <Logo gameType="say-what-you-see" />
-        <div className="header-room"><span>ROOM</span><strong>{state.code}</strong></div>
+        <div className="game-header-actions">
+          <HostEndGameButton isHost={state.isHost} onEnd={onEnd} />
+          <div className="header-room"><span>ROOM</span><strong>{state.code}</strong></div>
+        </div>
       </header>
       <div className="progress-wrap">
         <div className="progress-copy">
@@ -266,11 +270,6 @@ export default function SayWhatYouSeeScreen({
                   <button type="button" className="primary" onClick={onNext}>
                     {isLastRound ? 'See final scores' : 'Next puzzle'}
                   </button>
-                  {!isLastRound && (
-                    <button type="button" className="secondary danger" onClick={onEnd}>
-                      End game
-                    </button>
-                  )}
                 </div>
               )}
             </>

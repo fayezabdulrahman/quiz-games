@@ -1,4 +1,4 @@
-import Logo from './Logo.jsx'
+import Logo from '../../Logo.jsx'
 
 function getWinnerMessage(winnerCount) {
   if (winnerCount === 1) {

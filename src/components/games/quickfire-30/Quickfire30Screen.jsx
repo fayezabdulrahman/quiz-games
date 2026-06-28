@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import Logo from './Logo.jsx'
+import HostEndGameButton from '../../HostEndGameButton.jsx'
+import Logo from '../../Logo.jsx'
 
 function Countdown({ endsAt }) {
   const [seconds, setSeconds] = useState(() => Math.max(0, Math.ceil((endsAt - Date.now()) / 1000)))
@@ -101,7 +102,10 @@ export default function Quickfire30Screen({
     <main className="game-shell quickfire-shell">
       <header>
         <Logo gameType="quickfire-30" />
-        <div className="header-room"><span>ROOM</span><strong>{state.code}</strong></div>
+        <div className="game-header-actions">
+          <HostEndGameButton isHost={state.isHost} onEnd={onEnd} />
+          <div className="header-room"><span>ROOM</span><strong>{state.code}</strong></div>
+        </div>
       </header>
       <section className="quickfire-score-strip">
         {state.quickfireTeams.map((team) => (
@@ -227,9 +231,6 @@ export default function Quickfire30Screen({
         )}
 
         {error && <p className="game-error" role="alert">{error}</p>}
-        {state.isHost && state.phase !== 'quickfire-describing' && (
-          <button type="button" className="quickfire-end-button" onClick={onEnd}>End game</button>
-        )}
       </section>
     </main>
   )

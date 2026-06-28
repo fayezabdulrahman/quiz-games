@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import Logo from './Logo.jsx'
+import HostEndGameButton from '../../HostEndGameButton.jsx'
+import Logo from '../../Logo.jsx'
 
 function Timer({ remainingMs, durationMs }) {
   const [endsAt] = useState(() => Date.now() + remainingMs)
@@ -138,7 +139,10 @@ export default function BluffBattleScreen({
     <main className="game-shell bluff-shell">
       <header>
         <Logo gameType="bluff-battle" />
-        <div className="header-room"><span>ROOM</span><strong>{state.code}</strong></div>
+        <div className="game-header-actions">
+          <HostEndGameButton isHost={state.isHost} onEnd={onEnd} />
+          <div className="header-room"><span>ROOM</span><strong>{state.code}</strong></div>
+        </div>
       </header>
       <div className="progress-wrap">
         <div className="progress-copy">
@@ -237,11 +241,6 @@ export default function BluffBattleScreen({
               <button type="button" className="primary" onClick={onNext}>
                 {isLastRound ? 'See final scores' : 'Next round'}
               </button>
-              {!isLastRound && (
-                <button type="button" className="secondary danger" onClick={onEnd}>
-                  End game
-                </button>
-              )}
             </div>
           )}
         </div>

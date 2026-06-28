@@ -10,7 +10,7 @@
 	 border-radius: 14px;
 	 color: #071116;
 	 background: linear-gradient(145deg, #7df4d2, #ffd35c);
-	 font: 900 .78rem 'Space Grotesk', sans-serif;
+	 font: 900 .78rem var(--font-display);
 }
  .brand-catchphrase strong {
 	 font-size: 1rem;
@@ -84,7 +84,7 @@
 }
  .catchphrase-heading h1 {
 	 margin: 7px 0 0;
-	 font: 700 clamp(2.2rem, 6vw, 4.4rem)/.95 'Space Grotesk', sans-serif;
+	 font: 700 clamp(2.2rem, 6vw, 4.4rem)/.95 var(--font-display);
 }
  .catchphrase-round-number {
 	 color: var(--catchphrase-mint);
@@ -121,7 +121,7 @@
 	 border: 1px solid rgba(255,255,255,.14);
 	 border-radius: 12px;
 	 background: rgba(20,24,48,.92);
-	 font: 900 clamp(1.2rem, 4vw, 2.3rem) 'Space Grotesk', sans-serif;
+	 font: 900 clamp(1.2rem, 4vw, 2.3rem) var(--font-display);
 }
  .puzzle-line, .puzzle-shape {
 	 position: absolute;
@@ -482,7 +482,7 @@
 	 color: #071116;
 	 background: linear-gradient(145deg, #7df4d2, #ffd35c);
 	 box-shadow: 0 20px 45px rgba(125,244,210,.16);
-	 font: 900 2rem 'Space Grotesk', sans-serif;
+	 font: 900 2rem var(--font-display);
 	 text-transform: uppercase;
 }
  .catchphrase-buzzer:disabled {
@@ -501,7 +501,7 @@
 }
  .catchphrase-buzz-card > strong {
 	 color: var(--catchphrase-mint);
-	 font: 800 1.8rem 'Space Grotesk', sans-serif;
+	 font: 800 1.8rem var(--font-display);
 }
  .catchphrase-buzz-card-header {
 	 display: flex;
@@ -513,7 +513,7 @@
 	 display: block;
 	 margin-top: 5px;
 	 color: var(--catchphrase-mint);
-	 font: 800 1.8rem 'Space Grotesk', sans-serif;
+	 font: 800 1.8rem var(--font-display);
 }
  .catchphrase-guess-deadline {
 	 margin: 0;
@@ -562,7 +562,7 @@
 	 color: var(--catchphrase-ink);
 	 border-radius: 999px;
 	 background: var(--catchphrase-gold);
-	 font: 900 .95rem 'Space Grotesk', sans-serif;
+	 font: 900 .95rem var(--font-display);
 }
  .catchphrase-guess-list {
 	 display: grid;
@@ -614,7 +614,7 @@
 }
  .catchphrase-reveal > strong {
 	 color: var(--catchphrase-gold);
-	 font: 800 clamp(2rem, 6vw, 3.8rem)/1 'Space Grotesk', sans-serif;
+	 font: 800 clamp(2rem, 6vw, 3.8rem)/1 var(--font-display);
 }
  .catchphrase-reveal p {
 	 margin: 0;
@@ -675,7 +675,7 @@
 }
  .catchphrase-winner-score strong {
 	 color: var(--catchphrase-mint);
-	 font: 900 5rem/.85 'Space Grotesk', sans-serif;
+	 font: 900 5rem/.85 var(--font-display);
 }
 
  @media (max-width: 640px) {

@@ -10,7 +10,7 @@
 	 border-radius: 12px;
 	 color: #071512;
 	 background: linear-gradient(135deg, #d8ff43, #55e6be);
-	 font: 900 1.45rem 'Space Grotesk', sans-serif;
+	 font: 900 1.45rem var(--font-display);
 	 transform: rotate(-3deg);
 }
  .brand-survey > span:last-child {
@@ -213,7 +213,7 @@
  .survey-main h1 {
 	 max-width: 850px;
 	 margin: 12px 0 28px;
-	 font: 700 clamp(2.1rem, 4.7vw, 4.15rem)/1.06 'Space Grotesk', sans-serif;
+	 font: 700 clamp(2.1rem, 4.7vw, 4.15rem)/1.06 var(--font-display);
 	 letter-spacing: -.05em;
 }
  .survey-strikes span {
@@ -224,7 +224,7 @@
 	 border: 1px solid #3b405a;
 	 border-radius: 8px;
 	 color: #555c75;
-	 font: 900 1.4rem 'Space Grotesk', sans-serif;
+	 font: 900 1.4rem var(--font-display);
 }
  .survey-last-guess span {
 	 display: grid;
@@ -285,7 +285,7 @@
 }
  .survey-board > div.revealed b {
 	 color: var(--survey-mint);
-	 font: 800 1.2rem 'Space Grotesk', sans-serif;
+	 font: 800 1.2rem var(--font-display);
 }
  .survey-turn-status {
 	 display: flex;
@@ -325,7 +325,7 @@
 	 border-radius: 10px;
 	 color: #071512;
 	 background: linear-gradient(135deg, #d8ff43, #55e6be);
-	 font: 900 .9rem 'Space Grotesk', sans-serif;
+	 font: 900 .9rem var(--font-display);
 	 letter-spacing: .08em;
 }
  .survey-control-choice {
@@ -407,7 +407,7 @@
 	 font-weight: 800;
 }
  .survey-team-card > div strong {
-	 font: 800 2rem 'Space Grotesk', sans-serif;
+	 font: 800 2rem var(--font-display);
 }
  .survey-team-card p {
 	 margin: 7px 0 0;
@@ -466,7 +466,7 @@
 }
  .survey-final-teams strong {
 	 color: #55e6be;
-	 font: 800 3rem/1 'Space Grotesk', sans-serif;
+	 font: 800 3rem/1 var(--font-display);
 }
  .survey-final-teams small {
 	 color: #80879f;

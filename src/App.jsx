@@ -1,23 +1,27 @@
-import BluffBattleFinished from './components/BluffBattleFinished.jsx'
-import BluffBattleScreen from './components/BluffBattleScreen.jsx'
-import Finished from './components/Finished.jsx'
+import { useState } from 'react'
+import BluffBattleFinished from './components/games/bluff-battle/BluffBattleFinished.jsx'
+import BluffBattleScreen from './components/games/bluff-battle/BluffBattleScreen.jsx'
+import Finished from './components/games/one-percent/Finished.jsx'
 import Landing from './components/Landing.jsx'
 import Lobby from './components/Lobby.jsx'
-import MajorityFinished from './components/MajorityFinished.jsx'
-import MajorityRulesScreen from './components/MajorityRulesScreen.jsx'
-import MillionLadderFinished from './components/MillionLadderFinished.jsx'
-import MillionLadderScreen from './components/MillionLadderScreen.jsx'
-import QuestionScreen from './components/QuestionScreen.jsx'
-import Quickfire30Finished from './components/Quickfire30Finished.jsx'
-import Quickfire30Screen from './components/Quickfire30Screen.jsx'
+import MajorityFinished from './components/games/majority-rules/MajorityFinished.jsx'
+import MajorityRulesScreen from './components/games/majority-rules/MajorityRulesScreen.jsx'
+import MillionLadderFinished from './components/games/million-ladder/MillionLadderFinished.jsx'
+import MillionLadderScreen from './components/games/million-ladder/MillionLadderScreen.jsx'
+import QuestionScreen from './components/games/one-percent/QuestionScreen.jsx'
+import Quickfire30Finished from './components/games/quickfire-30/Quickfire30Finished.jsx'
+import Quickfire30Screen from './components/games/quickfire-30/Quickfire30Screen.jsx'
 import RoomGamePicker from './components/RoomGamePicker.jsx'
-import SayWhatYouSeeFinished from './components/SayWhatYouSeeFinished.jsx'
-import SayWhatYouSeeScreen from './components/SayWhatYouSeeScreen.jsx'
-import SurveyShowdownFinished from './components/SurveyShowdownFinished.jsx'
-import SurveyShowdownScreen from './components/SurveyShowdownScreen.jsx'
+import SayWhatYouSeeFinished from './components/games/say-what-you-see/SayWhatYouSeeFinished.jsx'
+import SayWhatYouSeeScreen from './components/games/say-what-you-see/SayWhatYouSeeScreen.jsx'
+import SurveyShowdownFinished from './components/games/survey-showdown/SurveyShowdownFinished.jsx'
+import SurveyShowdownScreen from './components/games/survey-showdown/SurveyShowdownScreen.jsx'
 import { useGameSession } from './hooks/useGameSession.js'
 
 export default function App() {
+  const [publicPage, setPublicPage] = useState(() =>
+    new URLSearchParams(window.location.search).get('join') ? 'play' : 'home',
+  )
   const {
     state,
     busy,
@@ -53,7 +57,16 @@ export default function App() {
   } = useGameSession()
 
   if (!state) {
-    return <Landing busy={busy} error={error} onHost={hostGame} onJoin={joinGame} />
+    return (
+      <Landing
+        page={publicPage}
+        setPage={setPublicPage}
+        busy={busy}
+        error={error}
+        onHost={hostGame}
+        onJoin={joinGame}
+      />
+    )
   }
 
   if (state.phase === 'lobby') {

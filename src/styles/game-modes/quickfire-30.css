@@ -11,7 +11,7 @@
 	 color: #160d08;
 	 background: linear-gradient(145deg, #ffb34d, #ff644f);
 	 box-shadow: 0 0 0 5px rgba(255,120,79,.1);
-	 font: 900 1rem 'Space Grotesk', sans-serif;
+	 font: 900 1rem var(--font-display);
 }
  .brand-quickfire > span:last-child {
 	 display: grid;
@@ -227,7 +227,7 @@
 	 font-weight: 800;
 }
  .quickfire-team-status > div strong {
-	 font: 800 1.8rem 'Space Grotesk', sans-serif;
+	 font: 800 1.8rem var(--font-display);
 }
  .quickfire-team-status p {
 	 margin: 4px 0 0;
@@ -267,7 +267,7 @@
 	 border-radius: 10px;
 	 color: #69718b;
 	 background: linear-gradient(145deg, #15192f, #101328);
-	 font: 700 .68rem 'Space Grotesk', sans-serif;
+	 font: 700 .68rem var(--font-display);
 }
  .quickfire-space:nth-child(even) {
 	 background: linear-gradient(145deg, #19152d, #111329);
@@ -312,7 +312,7 @@
 }
  .quickfire-turn-heading h1 {
 	 margin: 7px 0 0;
-	 font: 700 clamp(2rem, 5vw, 3.5rem)/1 'Space Grotesk', sans-serif;
+	 font: 700 clamp(2rem, 5vw, 3.5rem)/1 var(--font-display);
 	 letter-spacing: -.045em;
 }
  .quickfire-clock {
@@ -326,7 +326,7 @@
 	 background: #0c1022;
 }
  .quickfire-clock strong {
-	 font: 800 2.3rem/1 'Space Grotesk', sans-serif;
+	 font: 800 2.3rem/1 var(--font-display);
 }
  .quickfire-clock span {
 	 color: #969db5;
@@ -354,7 +354,7 @@
 	 letter-spacing: .11em;
 }
  .quickfire-die-result strong {
-	 font: 900 2.2rem 'Space Grotesk', sans-serif;
+	 font: 900 2.2rem var(--font-display);
 }
  .quickfire-roll-panel, .quickfire-ready-card, .quickfire-listen-card {
 	 display: grid;
@@ -382,7 +382,7 @@
 	 color: #160d08;
 	 background: linear-gradient(145deg, #ffb34d, #ff644f);
 	 box-shadow: 0 18px 40px rgba(255,100,79,.22);
-	 font: 900 1.25rem 'Space Grotesk', sans-serif;
+	 font: 900 1.25rem var(--font-display);
 }
  .quickfire-die.rolling {
 	 animation: quickfire-roll .22s linear infinite;
@@ -398,7 +398,7 @@
 	 border-radius: 15px;
 	 color: white;
 	 background: rgba(255,139,88,.08);
-	 font: 900 1.7rem 'Space Grotesk', sans-serif;
+	 font: 900 1.7rem var(--font-display);
 }
  .quickfire-answer-card {
 	 margin-top: 24px;
@@ -433,7 +433,7 @@
 	 border: 1px solid rgba(110,61,35,.18);
 	 border-radius: 12px;
 	 background: rgba(255,255,255,.52);
-	 font: 700 clamp(.95rem, 2vw, 1.15rem) 'Space Grotesk', sans-serif;
+	 font: 700 clamp(.95rem, 2vw, 1.15rem) var(--font-display);
 }
  .quickfire-answer-card li:last-child {
 	 grid-column: 1 / -1;
@@ -487,21 +487,12 @@
 }
  .quickfire-result-card h2 {
 	 margin: 4px 0;
-	 font: 700 1.8rem 'Space Grotesk', sans-serif;
+	 font: 700 1.8rem var(--font-display);
 }
  .quickfire-result-card p, .quickfire-result-card > span {
 	 margin: 0;
 	 color: #8e95ad;
 	 font-size: .78rem;
-}
- .quickfire-end-button {
-	 display: block;
-	 margin: 18px auto 0;
-	 border: 0;
-	 color: #8b91aa;
-	 background: transparent;
-	 font-size: .72rem;
-	 text-decoration: underline;
 }
  .quickfire-finish {
 	 --qf-coral: #ff7157;
@@ -530,7 +521,7 @@
 	 box-shadow: 0 0 30px rgba(255,139,88,.12);
 }
  .quickfire-final-teams strong {
-	 font: 800 2rem 'Space Grotesk', sans-serif;
+	 font: 800 2rem var(--font-display);
 }
  .quickfire-final-teams small {
 	 grid-column: 2 / -1;

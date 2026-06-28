@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { MILLION_LADDER_PRIZES, formatPrize } from '../game/millionLadder.js'
-import Logo from './Logo.jsx'
+import { MILLION_LADDER_PRIZES, formatPrize } from '../../../game/millionLadder.js'
+import HostEndGameButton from '../../HostEndGameButton.jsx'
+import Logo from '../../Logo.jsx'
 
 function Timer({ remainingMs, durationMs }) {
   const [endsAt] = useState(() => Date.now() + remainingMs)
@@ -148,7 +149,10 @@ export default function MillionLadderScreen({
     <main className="game-shell ladder-shell">
       <header>
         <Logo gameType="million-ladder" />
-        <div className="header-room"><span>ROOM</span><strong>{state.code}</strong></div>
+        <div className="game-header-actions">
+          <HostEndGameButton isHost={state.isHost} onEnd={onEnd} />
+          <div className="header-room"><span>ROOM</span><strong>{state.code}</strong></div>
+        </div>
       </header>
       <div className="progress-wrap">
         <div className="progress-copy">

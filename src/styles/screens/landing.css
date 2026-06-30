@@ -313,30 +313,6 @@
 	gap: 18px;
 }
 
-.account-access-alert {
-	display: grid;
-	gap: 6px;
-	max-width: 720px;
-	margin: 0 0 24px;
-	padding: 16px 18px;
-	border: 1px solid rgba(255, 177, 157, .34);
-	border-radius: 8px;
-	color: #ffe0d7;
-	background: rgba(126, 39, 27, .22);
-	box-shadow: 0 14px 34px rgba(0, 0, 0, .18);
-}
-
-.account-access-alert strong {
-	font-size: .82rem;
-	font-weight: 900;
-	text-transform: uppercase;
-}
-
-.account-access-alert span {
-	color: #f0c2b6;
-	line-height: 1.45;
-}
-
 .top-plan-panel {
 	display: grid;
 	grid-template-columns: auto 1fr;
@@ -653,7 +629,87 @@
 
 .purchase-callout a {
 	justify-self: start;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 210px;
+	padding: 0 20px;
 	text-decoration: none;
+}
+
+.public-toast {
+	position: fixed;
+	right: 24px;
+	bottom: 24px;
+	z-index: 30;
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	align-items: start;
+	gap: 12px;
+	width: min(420px, calc(100vw - 32px));
+	padding: 15px;
+	border: 1px solid rgba(244, 220, 170, .28);
+	border-radius: 8px;
+	color: #f8f1d7;
+	background: rgba(15, 20, 17, .97);
+	box-shadow: 0 18px 45px rgba(0, 0, 0, .35);
+	animation: toast-in .2s ease-out;
+}
+
+.public-toast > span {
+	display: grid;
+	place-items: center;
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	font-size: .82rem;
+	font-weight: 900;
+}
+
+.public-toast strong {
+	display: block;
+	margin-bottom: 4px;
+	font-size: .78rem;
+	font-weight: 900;
+	text-transform: uppercase;
+}
+
+.public-toast p {
+	margin: 0;
+	color: #d9cdae;
+	font-size: .86rem;
+	line-height: 1.45;
+}
+
+.public-toast button {
+	display: grid;
+	place-items: center;
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	border: 1px solid rgba(255, 255, 255, .12);
+	border-radius: 8px;
+	color: #f8f1d7;
+	background: rgba(255, 255, 255, .06);
+	font-size: .9rem;
+	font-weight: 900;
+}
+
+.public-toast-error {
+	border-color: rgba(255, 177, 157, .36);
+	background: rgba(47, 18, 15, .97);
+}
+
+.public-toast-error > span {
+	color: #2f120f;
+	background: #ffb19d;
+}
+
+@keyframes toast-in {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
 }
 
 .tabs {

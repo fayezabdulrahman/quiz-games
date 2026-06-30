@@ -45,13 +45,6 @@ export default function PricingPage({ accountAccess }) {
         </div>
       </div>
 
-      {accountAccess?.error && (
-        <div className="account-access-alert" role="alert">
-          <strong>Account access could not load</strong>
-          <span>{accountAccess.error}</span>
-        </div>
-      )}
-
       {isTopPaidPlan ? (
         <section className="top-plan-panel" aria-label="Current top tier plan">
           <span>Current plan</span>

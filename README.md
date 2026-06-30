@@ -194,7 +194,7 @@ Vercel Functions cannot act as a WebSocket server, so a Vercel-only deployment i
 The repository includes `vercel.json` and `render.yaml` for this split.
 
 1. Create a Render Web Service from the repository using the included Blueprint.
-2. Set Render's `CLIENT_ORIGIN` to the final Vercel URL, such as `https://your-project.vercel.app`.
+2. Set Render's `CLIENT_ORIGIN` to the final Vercel URL, such as `https://your-project.vercel.app`. For local testing against the Render backend, the server also allows the default Vite origins `http://localhost:5173` and `http://127.0.0.1:5173`.
 3. Set Render's `CLERK_SECRET_KEY` to the Clerk backend secret key so the server can verify signed-in users and upsert them into Neon.
 4. Set Render's `DATABASE_URL` to the Neon Postgres connection string.
 5. Deploy the frontend to Vercel.

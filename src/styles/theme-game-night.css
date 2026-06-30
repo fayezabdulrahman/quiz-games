@@ -491,7 +491,8 @@ label {
 
 .purchase-callout a {
 	justify-self: center;
-	min-width: 220px;
+	width: min(100%, 250px);
+	min-width: 0;
 	border-color: var(--secondary-action-line);
 	color: #fff7dd;
 	background: linear-gradient(180deg, var(--secondary-action), var(--secondary-action-dark));

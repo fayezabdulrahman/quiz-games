@@ -1,14 +1,38 @@
 import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import ToastNotice from '../shared/ToastNotice.jsx'
 import PlayForm from './PlayForm.jsx'
 
-export default function PlayPage({ onHost, onJoin, busy, error, accountAccess, demoMode }) {
+function AccountAccessToast({ accountAccess }) {
+  const [dismissedError, setDismissedError] = useState('')
+  const accessError = accountAccess?.error || ''
+  const shouldShow = Boolean(
+    accountAccess?.isSignedIn && accessError && dismissedError !== accessError
+  )
+
+  return shouldShow ? (
+    <ToastNotice
+      tone="error"
+      title="Failed to load account access"
+      message={"We are showing demo mode because your purchased pack could not be loaded."}
+      onDismiss={() => setDismissedError(accessError)}
+    />
+  ) : null
+}
+
+function PlayPage({ onHost, onJoin, busy, error, accountAccess, demoMode }) {
   const hasFullAccess = accountAccess?.access?.hasFullAccess
 
   return (
     <section className="play-page shell">
+      <AccountAccessToast accountAccess={accountAccess} />
       <div className="play-copy">
         <div className="page-kicker">{demoMode ? 'Free demo' : 'Play a game'}</div>
-        <h1>{demoMode ? 'Try the Demo games with your group.' : 'Host a room or join one already created.'}</h1>
+        <h1>
+          {demoMode
+            ? 'Try the Demo games with your group.'
+            : 'Host a room or join one already created.'}
+        </h1>
         <p>
           {demoMode
             ? 'Play Majority Rules and Million Ladder in Demo mode. Guests can join room by code.'
@@ -16,10 +40,12 @@ export default function PlayPage({ onHost, onJoin, busy, error, accountAccess, d
         </p>
         {accountAccess?.isSignedIn && !hasFullAccess && (
           <div className="purchase-callout">
-            <strong>Unlock the full library</strong>
-            <span>Purchase a pack to host every game and use the full built-in question pools.</span>
+            <strong>Unlock All Games</strong>
+            <span>
+              Purchase a plan to host every game and use the full built-in question sets.
+            </span>
             <Link className="primary" to="/pricing">
-              Purchase pack
+              View plans
             </Link>
           </div>
         )}
@@ -40,3 +66,5 @@ export default function PlayPage({ onHost, onJoin, busy, error, accountAccess, d
     </section>
   )
 }
+
+export default PlayPage

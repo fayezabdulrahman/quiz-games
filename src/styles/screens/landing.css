@@ -313,6 +313,30 @@
 	gap: 18px;
 }
 
+.account-access-alert {
+	display: grid;
+	gap: 6px;
+	max-width: 720px;
+	margin: 0 0 24px;
+	padding: 16px 18px;
+	border: 1px solid rgba(255, 177, 157, .34);
+	border-radius: 8px;
+	color: #ffe0d7;
+	background: rgba(126, 39, 27, .22);
+	box-shadow: 0 14px 34px rgba(0, 0, 0, .18);
+}
+
+.account-access-alert strong {
+	font-size: .82rem;
+	font-weight: 900;
+	text-transform: uppercase;
+}
+
+.account-access-alert span {
+	color: #f0c2b6;
+	line-height: 1.45;
+}
+
 .top-plan-panel {
 	display: grid;
 	grid-template-columns: auto 1fr;

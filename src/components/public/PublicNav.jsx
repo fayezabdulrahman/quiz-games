@@ -3,7 +3,7 @@ import { useState } from 'react'
 const navItems = [
   ['home', 'How it works'],
   ['games', 'Games'],
-  ['play', 'Join'],
+  ['pricing', 'Pricing'],
 ]
 
 export default function PublicNav({ page, setPage }) {
@@ -32,7 +32,7 @@ export default function PublicNav({ page, setPage }) {
         ))}
       </nav>
       <button type="button" className="nav-play-button" onClick={() => selectPage('play')}>
-        Host a room
+        Join a room
       </button>
       <button
         type="button"

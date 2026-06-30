@@ -129,7 +129,7 @@ export default function Lobby({
             <div className="lobby-host-actions">
               <button
                 type="button"
-                className="primary wide"
+                className="primary lobby-start-button"
                 onClick={onStart}
                 disabled={
                   ['bluff-battle', 'survey-showdown', 'quickfire-30'].includes(state.gameType)
@@ -158,7 +158,7 @@ export default function Lobby({
               </button>
               <button
                 type="button"
-                className="secondary danger wide"
+                className="secondary danger lobby-close-button"
                 onClick={onCloseRoom}
               >
                 Close room

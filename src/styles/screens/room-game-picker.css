@@ -58,17 +58,24 @@
  .room-picker-settings {
 	 max-width: 780px;
 }
- .room-picker-actions {
-	 display: grid;
+.room-picker-actions {
+	 display: flex;
+	 flex-wrap: wrap;
+	 align-items: center;
+	 justify-content: center;
 	 gap: 12px;
 	 max-width: 780px;
-	 margin-top: 18px;
+	 margin-top: 28px;
 }
- .picker-continue {
-	 width: 100%;
+.picker-continue {
+	 flex: 0 1 220px;
+	 min-width: 180px;
+	 white-space: nowrap;
 }
- .picker-close {
-	 width: 100%;
+.picker-close {
+	 flex: 0 1 220px;
+	 min-width: 180px;
+	 white-space: nowrap;
 }
  .room-picker-layout aside h2 {
 	 margin: 7px 0 22px;
@@ -86,6 +93,15 @@
  @media (max-width: 520px) {
 	 .room-game-grid {
 		 grid-template-columns: 1fr;
+	}
+	 .room-picker-actions {
+		 margin-top: 22px;
+	}
+	 .picker-continue,
+	 .picker-close {
+		 flex-basis: 100%;
+		 width: 100%;
+		 min-width: 0;
 	}
 	 .room-picker-layout h1 {
 		 font-size: 2.7rem;

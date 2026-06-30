@@ -193,18 +193,83 @@ Vercel Functions cannot act as a WebSocket server, so a Vercel-only deployment i
 
 - Vercel: React/Vite frontend
 - Render Web Service: Express/Socket.IO backend
+- Neon: Postgres database for accounts, paid-host entitlements, Stripe records, and custom question content
 
 The repository includes `vercel.json` and `render.yaml` for this split.
 
 1. Create a Render Web Service from the repository using the included Blueprint.
 2. Set Render's `CLIENT_ORIGIN` to the final Vercel URL, such as `https://your-project.vercel.app`.
-3. Deploy the frontend to Vercel.
-4. Set Vercel's `VITE_SOCKET_URL` environment variable to the Render service URL, such as `https://one-percent-club-server.onrender.com`.
-5. Redeploy Vercel after adding the environment variable because Vite embeds it at build time.
+3. Set Render's `DATABASE_URL` to the Neon Postgres connection string.
+4. Deploy the frontend to Vercel.
+5. Set Vercel's `VITE_SOCKET_URL` environment variable to the Render service URL, such as `https://one-percent-club-server.onrender.com`.
+6. Redeploy Vercel after adding the environment variable because Vite embeds it at build time.
 
 For Vercel preview deployments, add their exact origins to `CLIENT_ORIGIN` as a comma-separated list. Leaving `CLIENT_ORIGIN` empty permits all origins and is useful only for initial setup.
 
 Render's free service can sleep after inactivity and may take roughly a minute to wake. Active WebSocket traffic keeps an ongoing game active, but any backend restart or redeploy clears in-memory rooms. Durable rooms would require moving room state to an external datastore and adding player session restoration.
+
+### Neon + Drizzle database
+
+The app uses Drizzle schema files and migrations for Neon Postgres. The database is prepared for Clerk and Stripe, but the current runtime does not require login yet.
+
+Set the Neon connection string in a local `.env` file before running database commands:
+
+```dotenv
+DATABASE_URL=postgresql://neondb_owner:your-password@ep-your-branch-id.region.aws.neon.tech/neondb?sslmode=require
+```
+
+Then run migrations normally:
+
+```bash
+npm run db:migrate
+```
+
+Migrations create the tables. To insert the product catalog and official question pools, run the seed script after migrating:
+
+```bash
+npm run db:seed
+```
+
+Useful commands:
+
+```bash
+npm run db:generate
+npm run db:check
+npm run db:migrate
+npm run db:seed
+npm run db:studio
+```
+
+The first migration creates:
+
+| Table | Purpose |
+| --- | --- |
+| `users` | App-owned user profile keyed by future Clerk `clerk_user_id` |
+| `products` | Sellable or public access entries such as Free Demo, Family Pack, Custom Edition, and Club Pass |
+| `product_game_grants` | Exact game unlocks included in a product |
+| `product_feature_grants` | Non-game permissions and limits, such as room size, custom questions, future games, and official packs |
+| `stripe_customers` | Mapping from an app user to a Stripe customer |
+| `user_entitlements` | The products a signed-in user owns or currently has through subscription |
+| `stripe_subscriptions` | Stripe subscription state and period metadata |
+| `stripe_checkout_sessions` | Checkout audit trail for future Stripe webhooks |
+| `question_sets` | Official built-in pools and host-owned custom packs for a specific game |
+| `questions` | Individual official or custom questions linked to a question set |
+| `user_game_content_preferences` | A host's per-game choice of official questions, mixed official/custom questions, or custom-only questions |
+
+The initial product catalog is represented in `server/db/catalog/pricingTiers.js`:
+
+| Product key | Billing | Access model |
+| --- | --- | --- |
+| `free_demo` | Free | Public access, no sign-up, one launch game, built-in pool, room size cap of 4 |
+| `family_pack_v1` | One-time, EUR 19.99 | The seven launch games and built-in question pools |
+| `custom_edition_v1` | One-time, EUR 39.99 | Family Pack plus custom question creation/import and reusable packs |
+| `club_pass_monthly` | Subscription, EUR 9.99/month | Custom Edition while subscribed, plus future games and official/seasonal/topical packs |
+
+Products have `requires_user` and `requires_entitlement` flags. Free Demo sets both to `false`, so the backend can allow its limited game grants without login. Paid products set both to `true`, so game access should be checked by joining an active `user_entitlements` row to `product_game_grants`. Feature access should be checked through `product_feature_grants`; for example, Club Pass has the `new_games` feature while the v1 one-time packs only have explicit launch-game rows. Questions use `source = official` for seeded built-in pools and `source = user` for host-created packs. User-owned question rows link back to both `owner_user_id` and `owner_clerk_user_id`, so a paid host can own reusable packs while guests continue joining rooms for free by room code.
+
+The current hardcoded game banks can be ported through `server/db/catalog/officialQuestionCatalog.js`. It normalizes the seven existing game-specific shapes into `question_sets` and `questions`, using stable set `slug` values and question `external_id` values so official pools can be safely re-imported as new questions are added.
+
+Content selection has three modes: `official` uses only built-in pools, `mixed` randomly blends active user questions into the official pool, and `user_only` uses only the host's custom questions. Mixed play can be enabled as soon as the host owns the `custom_questions` feature and has at least one active custom question for that game. Custom-only play should be enabled only when the host has enough active user questions to fill that game. `server/db/catalog/contentRequirements.js` defines the first-pass minimums the backend can expose to the UI before allowing `selection_mode = mixed` or `selection_mode = user_only`.
 
 ## Tech stack
 
@@ -214,11 +279,12 @@ Render's free service can sleep after inactivity and may take roughly a minute t
 | Frontend tooling | Vite 6 | Development server and production bundling |
 | Backend | Node.js + Express 5 | HTTP server, health endpoint, and production static hosting |
 | Realtime transport | Socket.IO 4 | Bidirectional room events and state broadcasts |
+| Database | Neon Postgres + Drizzle | Durable users, paid-host entitlements, Stripe records, and custom questions |
 | Styling | CSS | Responsive layout, animation, and visual design |
 | Code quality | ESLint 9 and Biome | Static analysis and linting |
 | Local orchestration | concurrently | Runs the Vite and Node development servers together |
 
-The application uses modern JavaScript ES modules throughout. It does not currently use TypeScript, a database, authentication, or an external state-management library.
+The application uses modern JavaScript ES modules throughout. It does not currently use TypeScript, authentication, or an external state-management library.
 
 ## Run locally
 
@@ -272,6 +338,11 @@ Check that the server is running at `GET /api/health`.
 | `npm run dev` | Run the Vite client and Node server in watch mode |
 | `npm run dev:client` | Run only the Vite development server |
 | `npm run dev:server` | Run only the Node server in watch mode |
+| `npm run db:generate` | Generate Drizzle SQL migrations from `server/db/schema/index.js` |
+| `npm run db:check` | List public tables in the configured Neon database and report missing app tables |
+| `npm run db:migrate` | Apply pending Drizzle migrations to the configured Neon database |
+| `npm run db:seed` | Upsert pricing tiers and official question pools into the configured Neon database |
+| `npm run db:studio` | Open Drizzle Studio for browsing local/Neon data |
 | `npm run build` | Create the production client bundle |
 | `npm start` | Serve the production app and Socket.IO server |
 | `npm run lint` | Run ESLint |

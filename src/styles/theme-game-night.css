@@ -226,7 +226,7 @@ label {
 .hero-content p {
 	max-width: 520px;
 	color: var(--cream);
-	font-size: clamp(1.05rem, 2vw, 1.28rem);
+	font-size: clamp(1.2rem, 2.35vw, 1.58rem);
 	font-weight: 700;
 	line-height: 1.32;
 	text-shadow: 0 3px 20px rgba(0,0,0,.72);
@@ -245,20 +245,20 @@ label {
 	gap: 6px;
 	justify-items: center;
 	color: var(--cream);
-	font-size: .82rem;
+	font-size: .95rem;
 	font-weight: 700;
 }
 
 .hero-steps b {
 	display: grid;
 	place-items: center;
-	width: 42px;
-	height: 42px;
+	width: 48px;
+	height: 48px;
 	border: 1px solid rgba(246, 230, 189, .55);
 	border-radius: 999px;
 	color: var(--gold);
 	background: rgba(10, 15, 12, .56);
-	font-size: .74rem;
+	font-size: .82rem;
 	text-transform: uppercase;
 }
 
@@ -268,13 +268,25 @@ label {
 }
 
 .hero-actions .primary {
+	display: grid;
+	place-items: center;
 	min-width: 210px;
 	min-height: 58px;
 	font-size: 1.18rem;
+	line-height: 1.1;
+	text-align: center;
+}
+
+.hero-actions .hero-host-action {
+	display: none;
 }
 
 .hero-actions .secondary {
+	display: grid;
+	place-items: center;
 	min-height: 58px;
+	line-height: 1.1;
+	text-align: center;
 }
 
 .public-section,
@@ -923,6 +935,40 @@ label {
 	color: var(--gold);
 }
 
+.lobby-host-actions,
+.room-picker-actions {
+	justify-content: center;
+}
+
+.lobby-host-actions .lobby-start-button {
+	border-color: rgba(186, 223, 120, .54);
+	color: #102013;
+	background: linear-gradient(180deg, #cde99b, #82b45d);
+	box-shadow: inset 0 1px 0 rgba(255, 246, 206, .58), 0 14px 30px rgba(80, 120, 54, .24);
+}
+
+.room-picker-actions .picker-continue {
+	border-color: rgba(186, 223, 120, .54);
+	color: #102013;
+	background: linear-gradient(180deg, #cde99b, #82b45d);
+	box-shadow: inset 0 1px 0 rgba(255, 246, 206, .58), 0 14px 30px rgba(80, 120, 54, .24);
+}
+
+.lobby-host-actions .lobby-start-button:hover:not(:disabled),
+.room-picker-actions .picker-continue:hover:not(:disabled) {
+	filter: brightness(1.04);
+}
+
+.lobby-host-actions .lobby-close-button {
+	border-color: rgba(212, 87, 57, .48);
+	background: linear-gradient(180deg, rgba(192, 65, 42, .22), rgba(92, 31, 24, .4));
+}
+
+.room-picker-actions .picker-close {
+	border-color: rgba(212, 87, 57, .48);
+	background: linear-gradient(180deg, rgba(192, 65, 42, .22), rgba(92, 31, 24, .4));
+}
+
 .toast {
 	border-color: var(--line-strong);
 	border-radius: 8px;
@@ -1216,13 +1262,21 @@ aside {
 		font-size: clamp(3.4rem, 18vw, 5.1rem);
 	}
 
+	.hero-content p {
+		font-size: clamp(1.08rem, 4.6vw, 1.32rem);
+	}
+
 	.hero-steps {
 		grid-template-columns: repeat(3, minmax(0, 1fr));
 		gap: 8px;
 	}
 
 	.hero-steps span {
-		font-size: .74rem;
+		font-size: .82rem;
+	}
+
+	.hero-actions .hero-host-action {
+		display: grid;
 	}
 }
 
@@ -1251,9 +1305,9 @@ aside {
 	}
 
 	.hero-steps b {
-		width: 36px;
-		height: 36px;
-		font-size: .64rem;
+		width: 40px;
+		height: 40px;
+		font-size: .68rem;
 	}
 
 	.room-game-grid {

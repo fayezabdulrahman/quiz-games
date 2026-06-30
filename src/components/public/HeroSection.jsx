@@ -25,8 +25,8 @@ export default function HeroSection({ setPage }) {
           </span>
         </div>
         <div className="hero-actions">
-          <button type="button" className="primary" onClick={() => setPage('play')}>
-            Host a room
+          <button type="button" className="primary hero-host-action" onClick={() => setPage('play')}>
+            Join a room
           </button>
           <button type="button" className="secondary" onClick={() => setPage('games')}>
             Browse games

@@ -123,24 +123,29 @@ export function registerSocketHandlers({
       broadcast(room)
     })
 
-    socket.on('host:create', (payload = {}, callback) => {
+    socket.on('host:create', async (payload = {}, callback) => {
       const code = makeCode(rooms)
       const hostSessionToken = cleanSessionToken(payload.sessionToken) || crypto.randomUUID()
       const usedQuestionIds = new Set()
       const gameType = gameTypes.has(payload.gameType) ? payload.gameType : 'one-percent'
       const settings = settingsForGame(gameType, gameSettingsFromPayload(payload))
-      const room = buildRoom({
-        code,
-        gameType,
-        hostSocketId: socket.id,
-        hostSessionToken,
-        settings,
-        usedQuestionIds,
-      })
-      rooms.set(code, room)
-      socket.join(code)
-      callback?.({ ok: true, code, sessionToken: hostSessionToken })
-      broadcast(room)
+      try {
+        const room = await buildRoom({
+          code,
+          gameType,
+          hostSocketId: socket.id,
+          hostSessionToken,
+          settings,
+          usedQuestionIds,
+        })
+        rooms.set(code, room)
+        socket.join(code)
+        callback?.({ ok: true, code, sessionToken: hostSessionToken })
+        broadcast(room)
+      } catch (error) {
+        console.error('Failed to create room', error)
+        replyError(callback, 'Could not load questions for this game.')
+      }
     })
 
     socket.on('player:join', ({ code, name, sessionToken } = {}, callback) => {
@@ -380,7 +385,7 @@ export function registerSocketHandlers({
       broadcast(room)
     })
 
-    socket.on('host:restart', ({ code } = {}, callback) => {
+    socket.on('host:restart', async ({ code } = {}, callback) => {
       const room = getRoom(rooms, code)
       if (!room || room.hostSocketId !== socket.id) {
         return replyError(callback, 'Only the host can restart.')
@@ -388,9 +393,14 @@ export function registerSocketHandlers({
       if (room.phase !== 'finished') {
         return replyError(callback, 'Finish the game before replaying.')
       }
-      prepareRoomGame(room, room.gameType, room.settings, clearQuestionTimer)
-      callback?.({ ok: true })
-      broadcast(room)
+      try {
+        await prepareRoomGame(room, room.gameType, room.settings, clearQuestionTimer)
+        callback?.({ ok: true })
+        broadcast(room)
+      } catch (error) {
+        console.error('Failed to restart room', error)
+        replyError(callback, 'Could not load questions for this game.')
+      }
     })
 
     socket.on('host:close-room', ({ code } = {}, callback) => {
@@ -424,7 +434,7 @@ export function registerSocketHandlers({
       broadcast(room)
     })
 
-    socket.on('host:select-game', (payload = {}, callback) => {
+    socket.on('host:select-game', async (payload = {}, callback) => {
       const room = getRoom(rooms, payload.code)
       if (!room || room.hostSocketId !== socket.id) {
         return replyError(callback, 'Only the host can choose the next game.')
@@ -433,9 +443,14 @@ export function registerSocketHandlers({
         return replyError(callback, 'The game picker is not open.')
       }
       if (!gameTypes.has(payload.gameType)) return replyError(callback, 'Choose an available game.')
-      prepareRoomGame(room, payload.gameType, gameSettingsFromPayload(payload), clearQuestionTimer)
-      callback?.({ ok: true })
-      broadcast(room)
+      try {
+        await prepareRoomGame(room, payload.gameType, gameSettingsFromPayload(payload), clearQuestionTimer)
+        callback?.({ ok: true })
+        broadcast(room)
+      } catch (error) {
+        console.error('Failed to select game', error)
+        replyError(callback, 'Could not load questions for this game.')
+      }
     })
 
     socket.on('disconnect', () => {

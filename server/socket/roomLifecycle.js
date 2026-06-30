@@ -19,7 +19,7 @@ export function closeRoom({ io, rooms, room, clearQuestionTimer }) {
   rooms.delete(room.code)
 }
 
-export function buildRoom({
+export async function buildRoom({
   code,
   gameType,
   hostSocketId,
@@ -27,6 +27,7 @@ export function buildRoom({
   settings,
   usedQuestionIds,
 }) {
+  const questions = await questionsForGame(gameType, usedQuestionIds, settings)
   return {
     code,
     gameType,
@@ -40,7 +41,7 @@ export function buildRoom({
     questionIndex: -1,
     questionEndsAt: null,
     questionTimer: null,
-    questions: questionsForGame(gameType, usedQuestionIds, settings),
+    questions,
     usedQuestionIds,
     roundResults: [],
     majorityAnswers: [],
@@ -80,12 +81,12 @@ export function buildRoom({
   }
 }
 
-export function prepareRoomGame(room, gameType, settings, clearQuestionTimer) {
+export async function prepareRoomGame(room, gameType, settings, clearQuestionTimer) {
   clearQuestionTimer(room)
   clearCatchphraseGuessTimer(room)
   room.gameType = gameType
   room.settings = settingsForGame(gameType, settings)
-  room.questions = questionsForGame(gameType, room.usedQuestionIds, room.settings)
+  room.questions = await questionsForGame(gameType, room.usedQuestionIds, room.settings)
   room.questionIndex = -1
   room.phase = 'lobby'
   room.finishReason = null

@@ -1,5 +1,5 @@
 import { resetPlayerForNextQuestion } from '../game/helpers.js'
-import { selectMillionLadderReplacement } from '../questions/millionLadder/index.js'
+import { selectMillionLadderReplacementQuestion } from '../db/questions/selector.js'
 import { getRoom, replyError } from './utils.js'
 
 export function finishAudienceVoteIfReady(room, resumeQuestionTimer) {
@@ -23,7 +23,7 @@ export function registerMillionLadderHandlers({
   pauseQuestionTimer,
   startRoomQuestionTimer,
 }) {
-  socket.on('host:ladder-lifeline', ({ code, lifeline } = {}, callback) => {
+  socket.on('host:ladder-lifeline', async ({ code, lifeline } = {}, callback) => {
     const room = getRoom(rooms, code)
     const question = room?.questions[room.questionIndex]
     if (!room || room.hostSocketId !== socket.id) {
@@ -65,11 +65,16 @@ export function registerMillionLadderHandlers({
         .forEach(resetPlayerForNextQuestion)
     }
     if (lifeline === 'switchQuestion') {
-      room.questions[room.questionIndex] = selectMillionLadderReplacement(
-        room.questionIndex,
-        room.usedQuestionIds,
-        question.id,
-      )
+      try {
+        room.questions[room.questionIndex] = await selectMillionLadderReplacementQuestion(
+          room.questionIndex,
+          room.usedQuestionIds,
+          question.id,
+        )
+      } catch (error) {
+        console.error('Failed to switch Million Ladder question', error)
+        return replyError(callback, 'Could not load a replacement question.')
+      }
       room.ladderHiddenOptions = []
       room.players.forEach(resetPlayerForNextQuestion)
       startRoomQuestionTimer(room)

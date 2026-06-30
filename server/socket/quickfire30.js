@@ -111,7 +111,7 @@ export function registerQuickfireHandlers({
     broadcast(room)
   })
 
-  socket.on('player:quickfire-draw', ({ code } = {}, callback) => {
+  socket.on('player:quickfire-draw', async ({ code } = {}, callback) => {
     const room = getRoom(rooms, code)
     const player = getSocketPlayer(room, socket)
     if (!room || !player) return replyError(callback, 'You are not in this room.')
@@ -122,7 +122,12 @@ export function registerQuickfireHandlers({
       return replyError(callback, 'Only the current describer can draw the card.')
     }
     if (room.questionIndex >= room.questions.length - 1) {
-      room.questions = questionsForGame('quickfire-30', room.usedQuestionIds)
+      try {
+        room.questions = await questionsForGame('quickfire-30', room.usedQuestionIds)
+      } catch (error) {
+        console.error('Failed to refill Quickfire 30 cards', error)
+        return replyError(callback, 'Could not load another Quickfire card.')
+      }
       room.questionIndex = -1
     }
     room.questionIndex += 1

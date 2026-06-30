@@ -1,11 +1,5 @@
 import crypto from 'node:crypto'
-import { selectBluffPrompts } from '../questions/bluffBattle/index.js'
-import { selectMajorityPrompts } from '../questions/commonAnswer/index.js'
-import { selectMillionLadderQuestions } from '../questions/millionLadder/index.js'
-import { selectQuestions } from '../questions/onePercent/index.js'
-import { selectQuickfire30Cards } from '../questions/quickfire30/index.js'
-import { selectSayWhatYouSeePuzzles } from '../questions/sayWhatYouSee/index.js'
-import { selectSurveyShowdownPrompts } from '../questions/surveyShowdown/index.js'
+import { selectQuestionsForGame } from '../db/questions/selector.js'
 
 export function normalize(value = '') {
   return String(value)
@@ -78,16 +72,8 @@ export function settingsForGame(gameType, settings = {}) {
   }
 }
 
-export function questionsForGame(gameType, usedQuestionIds, settings = {}) {
-  if (gameType === 'majority-rules') return selectMajorityPrompts(settings.roundCount || 8, usedQuestionIds)
-  if (gameType === 'bluff-battle') return selectBluffPrompts(settings.roundCount || 6, usedQuestionIds)
-  if (gameType === 'million-ladder') return selectMillionLadderQuestions(usedQuestionIds)
-  if (gameType === 'survey-showdown') return selectSurveyShowdownPrompts(6, usedQuestionIds)
-  if (gameType === 'say-what-you-see') {
-    return selectSayWhatYouSeePuzzles(settings.roundCount || 10, usedQuestionIds)
-  }
-  if (gameType === 'quickfire-30') return selectQuickfire30Cards(64, usedQuestionIds)
-  return selectQuestions(usedQuestionIds)
+export async function questionsForGame(gameType, usedQuestionIds, settings = {}) {
+  return selectQuestionsForGame(gameType, usedQuestionIds, settings)
 }
 
 export function resetPlayer(player, settings, resetScore = false) {

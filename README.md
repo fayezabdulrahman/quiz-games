@@ -159,7 +159,11 @@ Answers and explanations are withheld from clients until the room enters the rev
 
 ### Game data
 
-`server/questions/onePercent/` contains the difficulty ladder and question pool. The current pool has ten questions at each of the ten difficulty levels. Questions can use:
+The official launch question banks are stored in the database and seeded from a local-only private catalog. The public repo keeps only `server/questions/samplePools.js`, a small harmless fallback set used for local smoke tests and graceful DB fallback.
+
+Private seed content lives under `server/private-question-seeds/`, which is ignored by Git. A local private seed catalog should export `officialQuestionSets` from `server/private-question-seeds/officialQuestionCatalog.js`; `npm run db:seed` imports that file and upserts it into `question_sets` and `questions`.
+
+1% Club questions can use:
 
 - `choice` for selectable answers
 - `input` for free-text answers
@@ -167,15 +171,7 @@ Answers and explanations are withheld from clients until the room enters the rev
 
 Free-text answers are normalized on the server before comparison by trimming whitespace, ignoring case and selected punctuation, and collapsing repeated spaces.
 
-`server/questions/commonAnswer/` contains the Majority Rules opinion pool. Eight prompts are selected per game, with used prompts avoided until the 84-prompt pool is exhausted.
-
-`server/questions/bluffBattle/` contains 80 original Bluff Battle prompts, truths, and reveal explanations. The host can choose 3 to 20 rounds per game.
-
-`server/questions/millionLadder/` contains seven increasingly difficult choices for every prize rung. Used questions are remembered per room so the first seven complete replays do not repeat a rung's question.
-
-`server/questions/surveyShowdown/` contains 72 original surveys with six scored answers and accepted guess variants. Six are selected per game without repeats until the pool is exhausted.
-
-`server/questions/quickfire30/` generates 80 Quickfire 30 cards from balanced term banks. Used cards are avoided until the generated pool is exhausted.
+Runtime selection tries the database first. If no active official questions are available, the server logs a warning and uses the public sample pool only; production should treat that warning as a content/database configuration issue rather than relying on the fallback.
 
 ### Persistence and deployment
 
@@ -225,7 +221,7 @@ Then run migrations normally:
 npm run db:migrate
 ```
 
-Migrations create the tables. To insert the product catalog and official question pools, run the seed script after migrating:
+Migrations create the tables. To insert the product catalog and official question pools, make sure the ignored private seed catalog exists locally, then run the seed script after migrating:
 
 ```bash
 npm run db:seed
@@ -268,7 +264,7 @@ The initial product catalog is represented in `server/db/catalog/pricingTiers.js
 
 Products have `requires_user` and `requires_entitlement` flags. Free Demo sets both to `false`, so the backend can allow its limited game grants without login. Paid products set both to `true`, so game access should be checked by joining an active `user_entitlements` row to `product_game_grants`. Feature access should be checked through `product_feature_grants`; for example, Club Pass has the `new_games` feature while the v1 one-time packs only have explicit launch-game rows. Questions use `source = official` for seeded built-in pools and `source = user` for host-created packs. User-owned question rows link back to both `owner_user_id` and `owner_clerk_user_id`, so a paid host can own reusable packs while guests continue joining rooms for free by room code.
 
-The current hardcoded game banks can be ported through `server/db/catalog/officialQuestionCatalog.js`. It normalizes the seven existing game-specific shapes into `question_sets` and `questions`, using stable set `slug` values and question `external_id` values so official pools can be safely re-imported as new questions are added.
+Official game banks are imported through the ignored `server/private-question-seeds/officialQuestionCatalog.js` file. The tracked `server/db/catalog/officialQuestionCatalog.js` is only the loader, so the public repository does not expose the full question bank. The private catalog should keep stable set `slug` values and question `external_id` values so official pools can be safely re-imported as new questions are added.
 
 Content selection has three modes: `official` uses only built-in pools, `mixed` randomly blends active user questions into the official pool, and `user_only` uses only the host's custom questions. Mixed play can be enabled as soon as the host owns the `custom_questions` feature and has at least one active custom question for that game. Custom-only play should be enabled only when the host has enough active user questions to fill that game. `server/db/catalog/contentRequirements.js` defines the first-pass minimums the backend can expose to the UI before allowing `selection_mode = mixed` or `selection_mode = user_only`.
 

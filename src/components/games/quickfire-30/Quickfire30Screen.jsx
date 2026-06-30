@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import HostEndGameButton from '../../HostEndGameButton.jsx'
-import Logo from '../../Logo.jsx'
+import HostEndGameButton from '../../shared/HostEndGameButton.jsx'
+import Logo from '../../shared/Logo.jsx'
+import Spinner from '../../shared/Spinner.jsx'
 
 function Countdown({ endsAt }) {
   const [seconds, setSeconds] = useState(() => Math.max(0, Math.ceil((endsAt - Date.now()) / 1000)))
@@ -155,7 +156,7 @@ export default function Quickfire30Screen({
               )}
             </div>
           ) : (
-            <div className="waiting-banner"><span className="spinner" />{activePlayer?.name} is rolling the die</div>
+            <div className="waiting-banner"><Spinner />{activePlayer?.name} is rolling the die</div>
           )
         )}
 
@@ -167,7 +168,7 @@ export default function Quickfire30Screen({
               <button type="button" className="primary" onClick={onDraw}>Draw card & start</button>
             </div>
           ) : (
-            <div className="waiting-banner"><span className="spinner" />Waiting for {activePlayer?.name} to draw the card</div>
+            <div className="waiting-banner"><Spinner />Waiting for {activePlayer?.name} to draw the card</div>
           )
         )}
 

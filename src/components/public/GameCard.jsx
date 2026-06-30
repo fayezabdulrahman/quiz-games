@@ -1,4 +1,4 @@
-import GameLogoMark from '../GameLogoMark.jsx'
+import GameLogoMark from '../shared/GameLogoMark.jsx'
 
 export default function GameCard({ game }) {
   return (

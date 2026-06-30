@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { MILLION_LADDER_PRIZES, formatPrize } from '../../../game/millionLadder.js'
-import HostEndGameButton from '../../HostEndGameButton.jsx'
-import Logo from '../../Logo.jsx'
+import HostEndGameButton from '../../shared/HostEndGameButton.jsx'
+import Logo from '../../shared/Logo.jsx'
+import Spinner from '../../shared/Spinner.jsx'
 
 function Timer({ remainingMs, durationMs }) {
   const [endsAt] = useState(() => Date.now() + remainingMs)
@@ -220,7 +221,7 @@ export default function MillionLadderScreen({
               </div>
             ) : isContestant && state.ladderAudienceVotingOpen ? (
               <div className="waiting-banner ladder-audience-wait">
-                <span className="spinner" />
+                <Spinner />
                 The timer is paused while the audience votes
               </div>
             ) : isAudience && state.me?.hasAnswered ? (

@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import HostEndGameButton from '../../HostEndGameButton.jsx'
-import Logo from '../../Logo.jsx'
+import HostEndGameButton from '../../shared/HostEndGameButton.jsx'
+import Logo from '../../shared/Logo.jsx'
+import Spinner from '../../shared/Spinner.jsx'
 
 function TeamCard({ team, players, active, winner }) {
   const members = players.filter((player) => player.teamId === team.id)
@@ -135,7 +136,7 @@ export default function SurveyShowdownScreen({
                 <GuessForm onGuess={onGuess} faceoff={isFaceoff} />
               ) : (
                 <div className="waiting-banner">
-                  <span className="spinner" />
+                  <Spinner />
                   {isFaceoff
                     ? `${activePlayer?.name} is at the face-off`
                     : state.me?.teamId === state.surveyActiveTeamId
@@ -145,7 +146,7 @@ export default function SurveyShowdownScreen({
               ))}
               {!state.isHost && isControlChoice && !isControlChooser && (
                 <div className="waiting-banner">
-                  <span className="spinner" />
+                  <Spinner />
                   {activePlayer?.name} is choosing Play or Pass
                 </div>
               )}

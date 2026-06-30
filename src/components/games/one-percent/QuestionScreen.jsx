@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import HostEndGameButton from '../../HostEndGameButton.jsx'
-import Logo from '../../Logo.jsx'
-import PlayerList from '../../PlayerList.jsx'
+import HostEndGameButton from '../../shared/HostEndGameButton.jsx'
+import Logo from '../../shared/Logo.jsx'
+import PlayerList from '../../shared/PlayerList.jsx'
 
 function Progress({ index, total, difficulty }) {
   return (

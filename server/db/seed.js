@@ -2,7 +2,7 @@ import 'dotenv/config'
 import { fileURLToPath } from 'node:url'
 import { and, eq, notInArray, sql } from 'drizzle-orm'
 import { getDb, schema } from './index.js'
-import { officialQuestionSets } from './catalog/officialQuestionCatalog.js'
+import { loadOfficialQuestionSets } from './catalog/officialQuestionCatalog.js'
 import { pricingTiers } from './catalog/pricingTiers.js'
 
 const {
@@ -109,6 +109,7 @@ async function seedProducts(db) {
 async function seedOfficialQuestions(db) {
   let questionSetCount = 0
   let questionCount = 0
+  const officialQuestionSets = await loadOfficialQuestionSets()
 
   for (const officialSet of officialQuestionSets) {
     const [questionSet] = await db

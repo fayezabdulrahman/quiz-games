@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import HostEndGameButton from '../../HostEndGameButton.jsx'
-import Logo from '../../Logo.jsx'
+import HostEndGameButton from '../../shared/HostEndGameButton.jsx'
+import Logo from '../../shared/Logo.jsx'
 
 function Timer({ remainingMs, durationMs }) {
   const [endsAt] = useState(() => Date.now() + remainingMs)

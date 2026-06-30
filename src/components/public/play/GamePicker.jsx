@@ -1,5 +1,5 @@
 import { games } from '../../../data/games.js'
-import GameLogoMark from '../../GameLogoMark.jsx'
+import GameLogoMark from '../../shared/GameLogoMark.jsx'
 
 export default function GamePicker({
   gameType,

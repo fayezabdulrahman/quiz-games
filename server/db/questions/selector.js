@@ -1,4 +1,4 @@
-import { difficulties } from '../../questions/onePercent/index.js'
+import { difficulties } from '../../questions/samplePools.js'
 import { selectPrompts } from '../../questions/selectPrompts.js'
 import { loadOfficialQuestions } from './repository.js'
 import { localQuestionPools } from './localPools.js'

@@ -13,6 +13,9 @@ build/
 .env.local
 .env.*.local
 
+# Private local seed content
+server/private-question-seeds/
+
 # Logs
 logs/
 *.log

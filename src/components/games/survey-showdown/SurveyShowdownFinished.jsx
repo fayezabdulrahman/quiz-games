@@ -1,4 +1,4 @@
-import Logo from '../../Logo.jsx'
+import Logo from '../../shared/Logo.jsx'
 
 export default function SurveyShowdownFinished({ state, onRestart, onChangeGame }) {
   const ordered = [...state.surveyTeams].sort((a, b) => b.score - a.score)

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import Logo from './Logo.jsx'
-import PlayerList from './PlayerList.jsx'
+import Logo from './shared/Logo.jsx'
+import PlayerList from './shared/PlayerList.jsx'
+import Spinner from './shared/Spinner.jsx'
 import QuickfireTeamSetup from './games/quickfire-30/QuickfireTeamSetup.jsx'
 import SurveyTeamSetup from './games/survey-showdown/SurveyTeamSetup.jsx'
 
@@ -166,7 +167,7 @@ export default function Lobby({
             </div>
           ) : (
             <div className="waiting-banner">
-              <span className="spinner" />
+              <Spinner />
               Waiting for the host to begin
             </div>
           )}

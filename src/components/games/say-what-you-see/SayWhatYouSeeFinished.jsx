@@ -1,4 +1,4 @@
-import Logo from '../../Logo.jsx'
+import Logo from '../../shared/Logo.jsx'
 
 export default function SayWhatYouSeeFinished({ state, onRestart, onChangeGame }) {
   const ordered = [...state.players].sort(

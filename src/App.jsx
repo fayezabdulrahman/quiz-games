@@ -11,24 +11,14 @@ import MillionLadderScreen from './components/games/million-ladder/MillionLadder
 import QuestionScreen from './components/games/one-percent/QuestionScreen.jsx'
 import Quickfire30Finished from './components/games/quickfire-30/Quickfire30Finished.jsx'
 import Quickfire30Screen from './components/games/quickfire-30/Quickfire30Screen.jsx'
-import RoomGamePicker from './components/RoomGamePicker.jsx'
+import RoomGamePicker from './components/room-game-picker/RoomGamePicker.jsx'
 import SayWhatYouSeeFinished from './components/games/say-what-you-see/SayWhatYouSeeFinished.jsx'
 import SayWhatYouSeeScreen from './components/games/say-what-you-see/SayWhatYouSeeScreen.jsx'
+import AppLoadingScreen from './components/shared/AppLoadingScreen.jsx'
 import SurveyShowdownFinished from './components/games/survey-showdown/SurveyShowdownFinished.jsx'
 import SurveyShowdownScreen from './components/games/survey-showdown/SurveyShowdownScreen.jsx'
 import { useAccountAccess } from './hooks/useAccountAccess.js'
 import { useGameSession } from './hooks/useGameSession.js'
-
-function AppLoadingScreen() {
-  return (
-    <main className="app-loading-screen" aria-busy="true" aria-live="polite">
-      <div className="app-loading-card">
-        <span className="app-loading-spinner" />
-        <strong>Loading Game Night</strong>
-      </div>
-    </main>
-  )
-}
 
 export default function App() {
   const { getToken, isSignedIn } = useAuth()

@@ -2,7 +2,7 @@ import { and, asc, eq } from 'drizzle-orm'
 import { getDb, schema } from '../index.js'
 import { mapQuestionRow } from './rowMapper.js'
 
-const { questions } = schema
+const { questions, questionSets } = schema
 
 const DEFAULT_CACHE_MS = 60_000
 const cache = new Map()
@@ -21,13 +21,14 @@ export function clearOfficialQuestionCache(gameType) {
   else cache.clear()
 }
 
-export async function loadOfficialQuestions(gameType) {
+export async function loadOfficialQuestions(gameType, { questionSetSlug } = {}) {
   if (!process.env.DATABASE_URL) return []
 
-  const cached = cache.get(gameType)
+  const cacheKey = questionSetSlug ? `${gameType}:${questionSetSlug}` : gameType
+  const cached = cache.get(cacheKey)
   if (isFresh(cached)) return structuredClone(cached.questions)
 
-  const rows = await getDb()
+  let query = getDb()
     .select({
       id: questions.id,
       gameType: questions.gameType,
@@ -41,17 +42,31 @@ export async function loadOfficialQuestions(gameType) {
       payload: questions.payload,
     })
     .from(questions)
-    .where(
-      and(
-        eq(questions.source, 'official'),
-        eq(questions.status, 'active'),
-        eq(questions.gameType, gameType),
-      ),
+
+  if (questionSetSlug) {
+    query = query.innerJoin(questionSets, eq(questions.questionSetId, questionSets.id))
+  }
+
+  const filters = [
+    eq(questions.source, 'official'),
+    eq(questions.status, 'active'),
+    eq(questions.gameType, gameType),
+  ]
+
+  if (questionSetSlug) {
+    filters.push(
+      eq(questionSets.source, 'official'),
+      eq(questionSets.status, 'active'),
+      eq(questionSets.slug, questionSetSlug),
     )
+  }
+
+  const rows = await query
+    .where(and(...filters))
     .orderBy(asc(questions.sortOrder), asc(questions.externalId))
 
   const mappedQuestions = rows.map(mapQuestionRow).filter(Boolean)
-  cache.set(gameType, {
+  cache.set(cacheKey, {
     loadedAt: Date.now(),
     questions: mappedQuestions,
   })

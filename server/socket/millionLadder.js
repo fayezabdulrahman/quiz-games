@@ -70,6 +70,7 @@ export function registerMillionLadderHandlers({
           room.questionIndex,
           room.usedQuestionIds,
           question.id,
+          room.settings,
         )
       } catch (error) {
         console.error('Failed to switch Million Ladder question', error)

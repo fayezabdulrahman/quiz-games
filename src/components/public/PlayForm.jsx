@@ -1,10 +1,19 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { demoGameTypes } from '../../data/access.js'
 import HostFields from './play/HostFields.jsx'
 import JoinFields from './play/JoinFields.jsx'
 
-export default function PlayForm({ onHost, onJoin, busy, error }) {
+export default function PlayForm({ onHost, onJoin, busy, error, accountAccess, demoMode }) {
   const [mode, setMode] = useState('join')
-  const [gameType, setGameType] = useState('one-percent')
+  const availableGameTypes = useMemo(() => {
+    if (accountAccess?.access?.hasFullAccess && !demoMode) return null
+    return accountAccess?.access?.allowedGameTypes || demoGameTypes
+  }, [accountAccess?.access?.allowedGameTypes, accountAccess?.access?.hasFullAccess, demoMode])
+  const [gameType, setGameType] = useState(() => availableGameTypes?.[0] || 'one-percent')
+  const selectedGameType =
+    availableGameTypes?.length && !availableGameTypes.includes(gameType)
+      ? availableGameTypes[0]
+      : gameType
   const [name, setName] = useState('')
   const [code, setCode] = useState(
     () => new URLSearchParams(window.location.search).get('join')?.slice(0, 4).toUpperCase() || '',
@@ -17,21 +26,24 @@ export default function PlayForm({ onHost, onJoin, busy, error }) {
   const [catchphraseRoundCount, setCatchphraseRoundCount] = useState(10)
   const [catchphraseTimerEnabled, setCatchphraseTimerEnabled] = useState(false)
   const [catchphraseGuessSeconds, setCatchphraseGuessSeconds] = useState(10)
+  const canConfigureMajorityRounds = Boolean(accountAccess?.access?.hasFullAccess && !demoMode)
 
   const submit = (event) => {
     event.preventDefault()
 
     if (mode === 'host') {
-      onHost(gameType, {
+      onHost(selectedGameType, {
         lifelineCount,
         lifelinesAnytime,
         diceMode,
         roundCount:
-          gameType === 'say-what-you-see'
+          selectedGameType === 'say-what-you-see'
             ? catchphraseRoundCount
-            : gameType === 'majority-rules'
-              ? majorityRoundCount
-              : gameType === 'bluff-battle'
+            : selectedGameType === 'majority-rules'
+              ? canConfigureMajorityRounds
+                ? majorityRoundCount
+                : undefined
+              : selectedGameType === 'bluff-battle'
                 ? bluffRoundCount
                 : undefined,
         guessTimerEnabled: catchphraseTimerEnabled,
@@ -67,7 +79,7 @@ export default function PlayForm({ onHost, onJoin, busy, error }) {
         )}
         {mode === 'host' && (
           <HostFields
-            gameType={gameType}
+            gameType={selectedGameType}
             setGameType={setGameType}
             lifelineCount={lifelineCount}
             setLifelineCount={setLifelineCount}
@@ -85,6 +97,8 @@ export default function PlayForm({ onHost, onJoin, busy, error }) {
             setCatchphraseTimerEnabled={setCatchphraseTimerEnabled}
             catchphraseGuessSeconds={catchphraseGuessSeconds}
             setCatchphraseGuessSeconds={setCatchphraseGuessSeconds}
+            availableGameTypes={availableGameTypes}
+            canConfigureMajorityRounds={canConfigureMajorityRounds}
           />
         )}
         {error && (

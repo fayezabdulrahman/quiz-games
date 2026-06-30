@@ -11,5 +11,7 @@ services:
         value: 20.19.0
       - key: CLIENT_ORIGIN
         sync: false
+      - key: CLERK_SECRET_KEY
+        sync: false
       - key: DATABASE_URL
         sync: false

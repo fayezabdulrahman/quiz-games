@@ -1,4 +1,5 @@
 import crypto from 'node:crypto'
+import { resolveHostGameAccess } from '../auth/access.js'
 import {
   createPlayer,
   resetPlayer,
@@ -47,6 +48,10 @@ function gameSettingsFromPayload(payload = {}) {
     guessSeconds,
   } = payload
   return { lifelineCount, lifelinesAnytime, diceMode, roundCount, guessTimerEnabled, guessSeconds }
+}
+
+function withRoomAccess(settings, access) {
+  return access.accessMode === 'demo' ? { ...settings, accessMode: 'demo' } : settings
 }
 
 export function registerSocketHandlers({
@@ -128,13 +133,22 @@ export function registerSocketHandlers({
       const hostSessionToken = cleanSessionToken(payload.sessionToken) || crypto.randomUUID()
       const usedQuestionIds = new Set()
       const gameType = gameTypes.has(payload.gameType) ? payload.gameType : 'one-percent'
-      const settings = settingsForGame(gameType, gameSettingsFromPayload(payload))
       try {
+        const access = await resolveHostGameAccess({ token: payload.authToken, gameType })
+        if (!access.ok) return replyError(callback, access.error)
+        const settings = settingsForGame(
+          gameType,
+          withRoomAccess(gameSettingsFromPayload(payload), access),
+        )
         const room = await buildRoom({
           code,
           gameType,
           hostSocketId: socket.id,
           hostSessionToken,
+          hostClerkUserId: access.clerkUserId,
+          accessMode: access.accessMode,
+          productKey: access.productKey,
+          allowedGameTypes: access.allowedGameTypes,
           settings,
           usedQuestionIds,
         })
@@ -444,7 +458,24 @@ export function registerSocketHandlers({
       }
       if (!gameTypes.has(payload.gameType)) return replyError(callback, 'Choose an available game.')
       try {
-        await prepareRoomGame(room, payload.gameType, gameSettingsFromPayload(payload), clearQuestionTimer)
+        const access = await resolveHostGameAccess({
+          token: payload.authToken,
+          gameType: payload.gameType,
+        })
+        const sameHost =
+          (!room.hostClerkUserId && !access.clerkUserId) || room.hostClerkUserId === access.clerkUserId
+        if (!sameHost) return replyError(callback, 'Log in as this room host to change games.')
+        if (!access.ok) return replyError(callback, access.error)
+        room.hostClerkUserId = access.clerkUserId
+        room.accessMode = access.accessMode
+        room.productKey = access.productKey
+        room.allowedGameTypes = access.allowedGameTypes
+        await prepareRoomGame(
+          room,
+          payload.gameType,
+          withRoomAccess(gameSettingsFromPayload(payload), access),
+          clearQuestionTimer,
+        )
         callback?.({ ok: true })
         broadcast(room)
       } catch (error) {

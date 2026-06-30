@@ -1,6 +1,7 @@
+import { Link } from 'react-router-dom'
 import heroImage from '../../assets/game-night-hero.png'
 
-export default function HeroSection({ setPage }) {
+export default function HeroSection() {
   return (
     <section className="public-hero">
       <div className="hero-media" aria-hidden="true">
@@ -25,12 +26,12 @@ export default function HeroSection({ setPage }) {
           </span>
         </div>
         <div className="hero-actions">
-          <button type="button" className="primary hero-host-action" onClick={() => setPage('play')}>
-            Join a room
-          </button>
-          <button type="button" className="secondary" onClick={() => setPage('games')}>
+          <Link className="primary" to="/games">
             Browse games
-          </button>
+          </Link>
+          <Link className="secondary hero-host-action" to="/demo">
+            Try now
+          </Link>
         </div>
       </div>
     </section>

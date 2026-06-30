@@ -1,10 +1,10 @@
 import HeroSection from './HeroSection.jsx'
 import HowItWorksSection from './HowItWorksSection.jsx'
 
-export default function HomePage({ setPage }) {
+export default function HomePage() {
   return (
     <>
-      <HeroSection setPage={setPage} />
+      <HeroSection />
       <HowItWorksSection />
     </>
   )

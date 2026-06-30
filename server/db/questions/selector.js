@@ -12,13 +12,41 @@ function warnOnce(gameType, error) {
   console.warn(`[questions] Using local ${gameType} questions.${reason}`)
 }
 
-async function questionPoolForGame(gameType) {
+const demoQuestionSetSlugs = {
+  'majority-rules': 'majority-rules-demo-v1',
+  'million-ladder': 'million-ladder-demo-v1',
+}
+
+function localDemoPool(gameType) {
+  const pool = localQuestionPools[gameType] || []
+  if (gameType === 'majority-rules') return structuredClone(pool.slice(0, 8))
+  if (gameType === 'million-ladder') {
+    return structuredClone(
+      Array.from({ length: 15 }, (_, rung) => pool.find((question) => question.rung === rung)).filter(Boolean),
+    )
+  }
+  return []
+}
+
+async function questionPoolForGame(gameType, settings = {}) {
+  const questionSetSlug = settings.accessMode === 'demo' ? demoQuestionSetSlugs[gameType] : null
+
   try {
-    const dbQuestions = await loadOfficialQuestions(gameType)
+    const dbQuestions = await loadOfficialQuestions(gameType, { questionSetSlug })
     if (dbQuestions.length) return dbQuestions
-    warnOnce(gameType, new Error('No active official questions found in the database.'))
+    warnOnce(
+      questionSetSlug || gameType,
+      new Error(
+        questionSetSlug
+          ? `No active official ${questionSetSlug} questions found in the database.`
+          : 'No active official questions found in the database.',
+      ),
+    )
   } catch (error) {
-    warnOnce(gameType, error)
+    warnOnce(questionSetSlug || gameType, error)
+  }
+  if (settings.accessMode === 'demo') {
+    return localDemoPool(gameType)
   }
   return structuredClone(localQuestionPools[gameType] || localQuestionPools['one-percent'])
 }
@@ -54,6 +82,7 @@ function selectMillionLadderForRung(pool, rung, usedQuestionIds, excludedId) {
     })
     available = rungQuestions.filter((question) => question.id !== excludedId)
   }
+  if (!available.length) available = rungQuestions
   const selected = available[Math.floor(Math.random() * available.length)]
   usedQuestionIds.add(selected.id)
   return structuredClone(selected)
@@ -66,7 +95,8 @@ function selectMillionLadderQuestions(pool, usedQuestionIds = new Set()) {
 }
 
 export async function selectQuestionsForGame(gameType, usedQuestionIds, settings = {}) {
-  const pool = await questionPoolForGame(gameType)
+  const pool = await questionPoolForGame(gameType, settings)
+  if (settings.accessMode === 'demo') return structuredClone(pool)
   if (gameType === 'one-percent') return selectOnePercentQuestions(pool, usedQuestionIds)
   if (gameType === 'million-ladder') return selectMillionLadderQuestions(pool, usedQuestionIds)
   if (gameType === 'majority-rules') {
@@ -83,7 +113,12 @@ export async function selectQuestionsForGame(gameType, usedQuestionIds, settings
   return selectOnePercentQuestions(pool, usedQuestionIds)
 }
 
-export async function selectMillionLadderReplacementQuestion(rung, usedQuestionIds, excludedId) {
-  const pool = await questionPoolForGame('million-ladder')
+export async function selectMillionLadderReplacementQuestion(
+  rung,
+  usedQuestionIds,
+  excludedId,
+  settings = {},
+) {
+  const pool = await questionPoolForGame('million-ladder', settings)
   return selectMillionLadderForRung(pool, rung, usedQuestionIds, excludedId)
 }

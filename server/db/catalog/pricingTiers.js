@@ -18,7 +18,7 @@ export const pricingTiers = [
     requiresEntitlement: false,
     priceCents: 0,
     currency: 'EUR',
-    gameGrants: ['one-percent'],
+    gameGrants: ['majority-rules', 'million-ladder'],
     featureGrants: [
       { featureKey: 'host_games' },
       { featureKey: 'room_size_cap', limit: 4 },

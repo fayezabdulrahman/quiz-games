@@ -5,6 +5,7 @@ import cors from 'cors'
 import express from 'express'
 import { createServer } from 'node:http'
 import { Server } from 'socket.io'
+import { resolveAccessFromToken } from './auth/access.js'
 import { corsOrigin, gameTypes, questionDurationMs } from './config.js'
 import { createPublicState } from './game/publicState.js'
 import { createRoundController } from './game/rounds.js'
@@ -31,6 +32,16 @@ registerSocketHandlers({ io, rooms, gameTypes, broadcast, roundController, quest
 
 app.get('/api/health', (_request, response) => {
   response.json({ ok: true, rooms: rooms.size })
+})
+
+app.get('/api/me/access', async (request, response) => {
+  try {
+    const access = await resolveAccessFromToken(request.headers.authorization)
+    response.json({ ok: true, access })
+  } catch (error) {
+    console.error('Failed to resolve account access', error)
+    response.status(401).json({ ok: false, error: 'Could not verify your account session.' })
+  }
 })
 
 if (process.env.NODE_ENV === 'production') {

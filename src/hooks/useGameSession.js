@@ -28,7 +28,7 @@ function clearSavedSession() {
   sessionStorage.removeItem(sessionStorageKey)
 }
 
-export function useGameSession() {
+export function useGameSession({ getAuthToken } = {}) {
   const [state, setState] = useState(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -91,10 +91,12 @@ export function useGameSession() {
 
   const hostGame = async (gameType, settings) => {
     const sessionToken = createSessionToken()
+    const authToken = getAuthToken ? await getAuthToken() : null
     const result = await runBusyAction('host:create', {
       gameType,
       ...settings,
       sessionToken,
+      authToken,
     })
     if (result?.ok) saveSession(result.code, result.sessionToken || sessionToken)
     return result
@@ -153,7 +155,12 @@ export function useGameSession() {
     restartGame: () => action('host:restart', roomPayload()),
     returnToGames: () => action('host:return-to-games', roomPayload()),
     closeRoom,
-    selectRoomGame: (gameType, settings) =>
-      action('host:select-game', { ...roomPayload(), gameType, ...settings }),
+    selectRoomGame: async (gameType, settings) =>
+      action('host:select-game', {
+        ...roomPayload(),
+        gameType,
+        ...settings,
+        authToken: getAuthToken ? await getAuthToken() : null,
+      }),
   }
 }

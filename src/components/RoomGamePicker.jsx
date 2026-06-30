@@ -3,6 +3,9 @@ import Logo from './Logo.jsx'
 import PlayerList from './PlayerList.jsx'
 
 export default function RoomGamePicker({ state, error, onSelectGame, onCloseRoom }) {
+  const allowedGameTypes = new Set(state.allowedGameTypes || [])
+  const canShowGame = (id) => allowedGameTypes.size === 0 || allowedGameTypes.has(id)
+  const canConfigureMajorityRounds = state.accessMode !== 'demo'
   const [gameType, setGameType] = useState(state.gameType)
   const [lifelineCount, setLifelineCount] = useState(1)
   const [lifelinesAnytime, setLifelinesAnytime] = useState(false)
@@ -30,7 +33,9 @@ export default function RoomGamePicker({ state, error, onSelectGame, onCloseRoom
       diceMode,
       roundCount:
         gameType === 'majority-rules'
-          ? majorityRoundCount
+          ? canConfigureMajorityRounds
+            ? majorityRoundCount
+            : undefined
           : gameType === 'bluff-battle'
             ? bluffRoundCount
             : gameType === 'say-what-you-see'
@@ -57,62 +62,76 @@ export default function RoomGamePicker({ state, error, onSelectGame, onCloseRoom
           {state.isHost ? (
             <>
               <div className="room-game-grid">
-                <button
-                  type="button"
-                  className={`room-game-card quickfire ${gameType === 'quickfire-30' ? 'selected' : ''}`}
-                  onClick={() => setGameType('quickfire-30')}
-                >
-                  <Logo gameType="quickfire-30" />
-                  <span>Two teams describe five names against the clock</span>
-                </button>
-                <button
-                  type="button"
-                  className={`room-game-card catchphrase ${gameType === 'say-what-you-see' ? 'selected' : ''}`}
-                  onClick={() => setGameType('say-what-you-see')}
-                >
-                  <Logo gameType="say-what-you-see" />
-                  <span>Visual puzzles, buzzers and fast guesses</span>
-                </button>
-                <button
-                  type="button"
-                  className={`room-game-card ${gameType === 'one-percent' ? 'selected' : ''}`}
-                  onClick={() => setGameType('one-percent')}
-                >
-                  <Logo />
-                  <span>Logic, lifelines and elimination</span>
-                </button>
-                <button
-                  type="button"
-                  className={`room-game-card bluff ${gameType === 'bluff-battle' ? 'selected' : ''}`}
-                  onClick={() => setGameType('bluff-battle')}
-                >
-                  <Logo gameType="bluff-battle" />
-                  <span>Invent fake answers and fool the room</span>
-                </button>
-                <button
-                  type="button"
-                  className={`room-game-card majority ${gameType === 'majority-rules' ? 'selected' : ''}`}
-                  onClick={() => setGameType('majority-rules')}
-                >
-                  <Logo gameType="majority-rules" />
-                  <span>Read the room and score points</span>
-                </button>
-                <button
-                  type="button"
-                  className={`room-game-card ladder ${gameType === 'million-ladder' ? 'selected' : ''}`}
-                  onClick={() => setGameType('million-ladder')}
-                >
-                  <Logo gameType="million-ladder" />
-                  <span>One contestant takes on the prize ladder</span>
-                </button>
-                <button
-                  type="button"
-                  className={`room-game-card survey ${gameType === 'survey-showdown' ? 'selected' : ''}`}
-                  onClick={() => setGameType('survey-showdown')}
-                >
-                  <Logo gameType="survey-showdown" />
-                  <span>Two teams uncover answers, strike out and steal</span>
-                </button>
+                {canShowGame('quickfire-30') && (
+                  <button
+                    type="button"
+                    className={`room-game-card quickfire ${gameType === 'quickfire-30' ? 'selected' : ''}`}
+                    onClick={() => setGameType('quickfire-30')}
+                  >
+                    <Logo gameType="quickfire-30" />
+                    <span>Two teams describe five names against the clock</span>
+                  </button>
+                )}
+                {canShowGame('say-what-you-see') && (
+                  <button
+                    type="button"
+                    className={`room-game-card catchphrase ${gameType === 'say-what-you-see' ? 'selected' : ''}`}
+                    onClick={() => setGameType('say-what-you-see')}
+                  >
+                    <Logo gameType="say-what-you-see" />
+                    <span>Visual puzzles, buzzers and fast guesses</span>
+                  </button>
+                )}
+                {canShowGame('one-percent') && (
+                  <button
+                    type="button"
+                    className={`room-game-card ${gameType === 'one-percent' ? 'selected' : ''}`}
+                    onClick={() => setGameType('one-percent')}
+                  >
+                    <Logo />
+                    <span>Logic, lifelines and elimination</span>
+                  </button>
+                )}
+                {canShowGame('bluff-battle') && (
+                  <button
+                    type="button"
+                    className={`room-game-card bluff ${gameType === 'bluff-battle' ? 'selected' : ''}`}
+                    onClick={() => setGameType('bluff-battle')}
+                  >
+                    <Logo gameType="bluff-battle" />
+                    <span>Invent fake answers and fool the room</span>
+                  </button>
+                )}
+                {canShowGame('majority-rules') && (
+                  <button
+                    type="button"
+                    className={`room-game-card majority ${gameType === 'majority-rules' ? 'selected' : ''}`}
+                    onClick={() => setGameType('majority-rules')}
+                  >
+                    <Logo gameType="majority-rules" />
+                    <span>Read the room and score points</span>
+                  </button>
+                )}
+                {canShowGame('million-ladder') && (
+                  <button
+                    type="button"
+                    className={`room-game-card ladder ${gameType === 'million-ladder' ? 'selected' : ''}`}
+                    onClick={() => setGameType('million-ladder')}
+                  >
+                    <Logo gameType="million-ladder" />
+                    <span>One contestant takes on the prize ladder</span>
+                  </button>
+                )}
+                {canShowGame('survey-showdown') && (
+                  <button
+                    type="button"
+                    className={`room-game-card survey ${gameType === 'survey-showdown' ? 'selected' : ''}`}
+                    onClick={() => setGameType('survey-showdown')}
+                  >
+                    <Logo gameType="survey-showdown" />
+                    <span>Two teams uncover answers, strike out and steal</span>
+                  </button>
+                )}
               </div>
               {gameType === 'one-percent' && (
                 <div className="host-settings room-picker-settings">
@@ -188,7 +207,7 @@ export default function RoomGamePicker({ state, error, onSelectGame, onCloseRoom
                   </div>
                 </div>
               )}
-              {gameType === 'majority-rules' && (
+              {gameType === 'majority-rules' && canConfigureMajorityRounds && (
                 <div className="host-settings room-picker-settings">
                   <div className="settings-heading">
                     <div>
@@ -215,6 +234,11 @@ export default function RoomGamePicker({ state, error, onSelectGame, onCloseRoom
                       </button>
                     </fieldset>
                   </div>
+                </div>
+              )}
+              {gameType === 'majority-rules' && !canConfigureMajorityRounds && (
+                <div className="selected-game-note majority-note">
+                  Majority Rules uses 8 fixed demo rounds. Custom round counts unlock with a paid pack.
                 </div>
               )}
               {gameType === 'say-what-you-see' && (

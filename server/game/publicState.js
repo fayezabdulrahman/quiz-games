@@ -144,6 +144,9 @@ export function createPublicState(room, socketId, questionDurationMs) {
   return {
     code: room.code,
     gameType: room.gameType,
+    accessMode: room.accessMode || 'demo',
+    productKey: room.productKey || 'free_demo',
+    allowedGameTypes: room.allowedGameTypes || [],
     gameName: isMajorityRules
       ? 'Majority Rules'
       : isBluffBattle

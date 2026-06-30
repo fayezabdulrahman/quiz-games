@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { fileURLToPath } from 'node:url'
-import { sql } from 'drizzle-orm'
+import { and, eq, notInArray, sql } from 'drizzle-orm'
 import { getDb, schema } from './index.js'
 import { officialQuestionSets } from './catalog/officialQuestionCatalog.js'
 import { pricingTiers } from './catalog/pricingTiers.js'
@@ -54,6 +54,15 @@ async function seedProducts(db) {
       })
     productCount += 1
 
+    await db
+      .delete(productGameGrants)
+      .where(
+        and(
+          eq(productGameGrants.productKey, tier.key),
+          notInArray(productGameGrants.gameType, tier.gameGrants),
+        ),
+      )
+
     for (const gameType of tier.gameGrants) {
       await db
         .insert(productGameGrants)
@@ -63,6 +72,16 @@ async function seedProducts(db) {
         })
       gameGrantCount += 1
     }
+
+    const featureKeys = tier.featureGrants.map((grant) => grant.featureKey)
+    await db
+      .delete(productFeatureGrants)
+      .where(
+        and(
+          eq(productFeatureGrants.productKey, tier.key),
+          notInArray(productFeatureGrants.featureKey, featureKeys),
+        ),
+      )
 
     for (const grant of tier.featureGrants) {
       await db

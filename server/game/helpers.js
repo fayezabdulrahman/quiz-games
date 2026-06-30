@@ -24,29 +24,36 @@ export function normalizeCatchphraseGuessSeconds(value) {
   return normalizeBoundedInteger(value, { min: 5, max: 30, defaultValue: 10 })
 }
 
+function withAccessMode(normalized, settings) {
+  return settings.accessMode === 'demo' ? { ...normalized, accessMode: 'demo' } : normalized
+}
+
 export function settingsForGame(gameType, settings = {}) {
   if (gameType === 'majority-rules') {
-    return {
-      roundCount: normalizeBoundedInteger(settings.roundCount, {
-        min: 3,
-        max: 20,
-        defaultValue: 8,
-      }),
-    }
+    return withAccessMode({
+      roundCount:
+        settings.accessMode === 'demo'
+          ? 8
+          : normalizeBoundedInteger(settings.roundCount, {
+              min: 3,
+              max: 20,
+              defaultValue: 8,
+            }),
+    }, settings)
   }
   if (gameType === 'bluff-battle') {
-    return {
+    return withAccessMode({
       roundCount: normalizeBoundedInteger(settings.roundCount, {
         min: 3,
         max: 20,
         defaultValue: 6,
       }),
-    }
+    }, settings)
   }
-  if (gameType === 'million-ladder') return { roundCount: 15 }
-  if (gameType === 'survey-showdown') return { roundCount: 6 }
+  if (gameType === 'million-ladder') return withAccessMode({ roundCount: 15 }, settings)
+  if (gameType === 'survey-showdown') return withAccessMode({ roundCount: 6 }, settings)
   if (gameType === 'say-what-you-see') {
-    return {
+    return withAccessMode({
       roundCount: normalizeBoundedInteger(settings.roundCount, {
         min: 3,
         max: 20,
@@ -54,22 +61,22 @@ export function settingsForGame(gameType, settings = {}) {
       }),
       guessTimerEnabled: Boolean(settings.guessTimerEnabled),
       guessSeconds: normalizeCatchphraseGuessSeconds(settings.guessSeconds),
-    }
+    }, settings)
   }
   if (gameType === 'quickfire-30') {
-    return {
+    return withAccessMode({
       diceMode: settings.diceMode === 'manual' ? 'manual' : 'digital',
       boardLength: 30,
-    }
+    }, settings)
   }
-  return {
+  return withAccessMode({
     lifelineCount: normalizeBoundedInteger(settings.lifelineCount, {
       min: 0,
       max: 10,
       defaultValue: 1,
     }),
     lifelinesAnytime: Boolean(settings.lifelinesAnytime),
-  }
+  }, settings)
 }
 
 export async function questionsForGame(gameType, usedQuestionIds, settings = {}) {

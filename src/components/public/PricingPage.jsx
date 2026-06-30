@@ -1,37 +1,37 @@
-const pricingTiers = [
-  {
-    name: 'Free demo',
-    price: 'Free',
-    billing: 'Try the room flow',
-    description: 'A small playable taste for checking that Game Night works with your group.',
-    features: ['1 Playable Game', 'Max 4 players', 'No Account Required'],
-    cta: 'Play Now',
-    action: 'play',
-  },
-  {
-    name: 'Family Pack',
-    price: '€19.99',
-    billing: 'One-time purchase',
-    description: 'The main game-night bundle for hosts who want the full built-in library.',
-    features: ['Unlock all current games', 'Full built-in question pools', 'Free guests forever'],
-    cta: 'Purchase coming soon',
-    featured: true,
-  },
-  {
-    name: 'Custom Edition',
-    price: '€39.99',
-    billing: 'One-time purchase',
-    description: 'For hosts who want to bring their own trivia, inside jokes, and reusable packs.',
-    features: [
-      'Everything in Family Pack',
-      'Create custom questions',
-      'Save reusable custom packs',
-    ],
-    cta: 'Purchase coming soon',
-  },
-]
+import { useNavigate } from 'react-router-dom'
+import { planByKey, planRank, pricingPlans } from '../../data/pricingPlans.js'
 
-export default function PricingPage({ setPage }) {
+const paidPlans = pricingPlans.filter((plan) => plan.key !== 'free_demo')
+const highestPaidPlanRank = Math.max(...paidPlans.map((plan) => planRank[plan.key] || 0))
+
+function nextPaidPlanRank(currentRank) {
+  return paidPlans
+    .map((plan) => planRank[plan.key] || 0)
+    .filter((rank) => rank > currentRank)
+    .sort((a, b) => a - b)[0]
+}
+
+function visiblePlans(accountAccess) {
+  const currentKey = accountAccess?.access?.productKey || 'free_demo'
+  const hasPaidPlan = accountAccess?.access?.hasFullAccess
+  const currentRank = planRank[currentKey] || 0
+  const upgradeRank = nextPaidPlanRank(currentRank)
+
+  return pricingPlans.filter((plan) => {
+    if (!hasPaidPlan) return true
+    const rank = planRank[plan.key] || 0
+    return plan.key === currentKey || rank === upgradeRank
+  })
+}
+
+export default function PricingPage({ accountAccess }) {
+  const navigate = useNavigate()
+  const currentKey = accountAccess?.access?.productKey || 'free_demo'
+  const hasPaidPlan = accountAccess?.access?.hasFullAccess
+  const currentPlan = planByKey(currentKey)
+  const isTopPaidPlan = hasPaidPlan && (planRank[currentKey] || 0) >= highestPaidPlanRank
+  const plans = visiblePlans(accountAccess)
+
   return (
     <section className="public-page pricing-page shell">
       <div className="page-kicker">Pricing</div>
@@ -43,41 +43,62 @@ export default function PricingPage({ setPage }) {
             for now while checkout gets wired in.
           </p>
         </div>
-        {/* <button type="button" className="secondary" onClick={() => setPage('play')}>
-          Try the demo
-        </button> */}
       </div>
 
+      {accountAccess?.error && <p className="form-error">{accountAccess.error}</p>}
+
+      {isTopPaidPlan ? (
+        <section className="top-plan-panel" aria-label="Current top tier plan">
+          <span>Current plan</span>
+          <div>
+            <h2>You've currently purchased our top tier pack.</h2>
+            <p>
+              {currentPlan.name} already includes the full paid Game Night library and every
+              upgrade currently available.
+            </p>
+          </div>
+        </section>
+      ) : null}
+
       <div className="pricing-grid">
-        {pricingTiers.map((tier) => (
-          <article
-            key={tier.name}
-            className={`pricing-card ${tier.featured ? 'featured' : ''}`}
-          >
-            <div className="pricing-card-heading">
-              <div>
-                <h2>{tier.name}</h2>
-                <span>{tier.billing}</span>
-              </div>
-              {tier.featured ? <strong>Best fit</strong> : null}
-            </div>
-            <div className="pricing-price">{tier.price}</div>
-            <p>{tier.description}</p>
-            <ul>
-              {tier.features.map((feature) => (
-                <li key={feature}>{feature}</li>
-              ))}
-            </ul>
-            <button
-              type="button"
-              className={tier.action === 'play' ? 'primary wide' : 'secondary wide'}
-              onClick={tier.action === 'play' ? () => setPage('play') : undefined}
-              disabled={!tier.action}
+        {plans.map((plan) => {
+          const isCurrentPlan = hasPaidPlan && plan.key === currentKey
+          const isUpgrade = hasPaidPlan && (planRank[plan.key] || 0) > (planRank[currentKey] || 0)
+          const buttonLabel = isCurrentPlan ? 'Current plan' : plan.cta
+
+          return (
+            <article
+              key={plan.key}
+              className={`pricing-card ${plan.featured ? 'featured' : ''} ${
+                isCurrentPlan ? 'current' : ''
+              }`}
             >
-              {tier.cta}
-            </button>
-          </article>
-        ))}
+              <div className="pricing-card-heading">
+                <div>
+                  <h2>{plan.name}</h2>
+                  <span>{plan.billing}</span>
+                </div>
+                {isCurrentPlan ? <strong>Current plan</strong> : null}
+                {!isCurrentPlan && plan.featured ? <strong>Most Popular</strong> : null}
+              </div>
+              <div className="pricing-price">{plan.price}</div>
+              <p>{plan.description}</p>
+              <ul>
+                {plan.features.map((feature) => (
+                  <li key={feature}>{feature}</li>
+                ))}
+              </ul>
+              <button
+                type="button"
+                className={plan.action === 'demo' ? 'primary wide' : 'secondary wide'}
+                onClick={plan.action === 'demo' ? () => navigate('/demo') : undefined}
+                disabled={isCurrentPlan || isUpgrade || !plan.action}
+              >
+                {buttonLabel}
+              </button>
+            </article>
+          )
+        })}
       </div>
     </section>
   )

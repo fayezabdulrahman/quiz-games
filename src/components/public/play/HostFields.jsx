@@ -24,6 +24,8 @@ export default function HostFields({
   setCatchphraseTimerEnabled,
   catchphraseGuessSeconds,
   setCatchphraseGuessSeconds,
+  availableGameTypes,
+  canConfigureMajorityRounds,
 }) {
   return (
     <>
@@ -33,6 +35,7 @@ export default function HostFields({
         bluffRoundCount={bluffRoundCount}
         majorityRoundCount={majorityRoundCount}
         catchphraseRoundCount={catchphraseRoundCount}
+        availableGameTypes={availableGameTypes}
       />
       {gameType === 'one-percent' && (
         <OnePercentSettings
@@ -43,16 +46,22 @@ export default function HostFields({
         />
       )}
       {gameType === 'majority-rules' && (
-        <RoundSetting
-          title="Majority rounds"
-          description="Choose how many room-vote prompts this game will use."
-          label="Majority Rules rounds"
-          value={majorityRoundCount}
-          min={3}
-          max={20}
-          onChange={setMajorityRoundCount}
-          note="Pick the answer you think most of the room will choose. Matching the majority earns one point."
-        />
+        canConfigureMajorityRounds ? (
+          <RoundSetting
+            title="Majority rounds"
+            description="Choose how many room-vote prompts this game will use."
+            label="Majority Rules rounds"
+            value={majorityRoundCount}
+            min={3}
+            max={20}
+            onChange={setMajorityRoundCount}
+            note="Pick the answer you think most of the room will choose. Matching the majority earns one point."
+          />
+        ) : (
+          <div className="selected-game-note majority-note">
+            Majority Rules uses 8 fixed demo rounds. Custom round counts unlock with a paid pack.
+          </div>
+        )
       )}
       {gameType === 'say-what-you-see' && (
         <CatchphraseSettings

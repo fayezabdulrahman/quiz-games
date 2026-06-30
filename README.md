@@ -199,10 +199,11 @@ The repository includes `vercel.json` and `render.yaml` for this split.
 
 1. Create a Render Web Service from the repository using the included Blueprint.
 2. Set Render's `CLIENT_ORIGIN` to the final Vercel URL, such as `https://your-project.vercel.app`.
-3. Set Render's `DATABASE_URL` to the Neon Postgres connection string.
-4. Deploy the frontend to Vercel.
-5. Set Vercel's `VITE_SOCKET_URL` environment variable to the Render service URL, such as `https://one-percent-club-server.onrender.com`.
-6. Redeploy Vercel after adding the environment variable because Vite embeds it at build time.
+3. Set Render's `CLERK_SECRET_KEY` to the Clerk backend secret key so the server can verify signed-in users and upsert them into Neon.
+4. Set Render's `DATABASE_URL` to the Neon Postgres connection string.
+5. Deploy the frontend to Vercel.
+6. Set Vercel's `VITE_SOCKET_URL` environment variable to the Render service URL, such as `https://one-percent-club-server.onrender.com`.
+7. Redeploy Vercel after adding the environment variable because Vite embeds it at build time.
 
 For Vercel preview deployments, add their exact origins to `CLIENT_ORIGIN` as a comma-separated list. Leaving `CLIENT_ORIGIN` empty permits all origins and is useful only for initial setup.
 

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useAuth } from '@clerk/react'
 import BluffBattleFinished from './components/games/bluff-battle/BluffBattleFinished.jsx'
 import BluffBattleScreen from './components/games/bluff-battle/BluffBattleScreen.jsx'
 import Finished from './components/games/one-percent/Finished.jsx'
@@ -16,12 +16,23 @@ import SayWhatYouSeeFinished from './components/games/say-what-you-see/SayWhatYo
 import SayWhatYouSeeScreen from './components/games/say-what-you-see/SayWhatYouSeeScreen.jsx'
 import SurveyShowdownFinished from './components/games/survey-showdown/SurveyShowdownFinished.jsx'
 import SurveyShowdownScreen from './components/games/survey-showdown/SurveyShowdownScreen.jsx'
+import { useAccountAccess } from './hooks/useAccountAccess.js'
 import { useGameSession } from './hooks/useGameSession.js'
 
-export default function App() {
-  const [publicPage, setPublicPage] = useState(() =>
-    new URLSearchParams(window.location.search).get('join') ? 'play' : 'home',
+function AppLoadingScreen() {
+  return (
+    <main className="app-loading-screen" aria-busy="true" aria-live="polite">
+      <div className="app-loading-card">
+        <span className="app-loading-spinner" />
+        <strong>Loading Game Night</strong>
+      </div>
+    </main>
   )
+}
+
+export default function App() {
+  const { getToken, isSignedIn } = useAuth()
+  const accountAccess = useAccountAccess()
   const {
     state,
     busy,
@@ -54,17 +65,20 @@ export default function App() {
     returnToGames,
     closeRoom,
     selectRoomGame,
-  } = useGameSession()
+  } = useGameSession({ getAuthToken: isSignedIn ? getToken : null })
+
+  if (!accountAccess.isLoaded || (accountAccess.isSignedIn && accountAccess.loading)) {
+    return <AppLoadingScreen />
+  }
 
   if (!state) {
     return (
       <Landing
-        page={publicPage}
-        setPage={setPublicPage}
         busy={busy}
         error={error}
         onHost={hostGame}
         onJoin={joinGame}
+        accountAccess={accountAccess}
       />
     )
   }

@@ -16,6 +16,17 @@ const set = ({ gameType, title, questions }) => ({
   questions,
 })
 
+const demoSet = ({ gameType, title, questions }) => ({
+  source: 'official',
+  gameType,
+  slug: `${gameType}-demo-v1`,
+  title,
+  status: 'active',
+  isDefaultForGame: false,
+  settings: { accessMode: 'demo', fixedOrder: true },
+  questions,
+})
+
 function canonicalAnswer(answer) {
   return Array.isArray(answer) ? answer[0] : answer || null
 }
@@ -67,6 +78,16 @@ export const officialQuestionSets = [
       })
     ),
   }),
+  demoSet({
+    gameType: 'majority-rules',
+    title: 'Free Demo Majority Rules Set',
+    questions: majorityPromptPool.slice(0, 8).map((question, index) =>
+      baseQuestion('majority-rules', question, 'opinion_choice', {
+        options: question.options,
+        demoOrder: index,
+      })
+    ),
+  }),
   set({
     gameType: 'million-ladder',
     title: 'Official Million Ladder Pool',
@@ -77,6 +98,21 @@ export const officialQuestionSets = [
         options: question.options,
       })
     ),
+  }),
+  demoSet({
+    gameType: 'million-ladder',
+    title: 'Free Demo Million Ladder Set',
+    questions: Array.from({ length: 15 }, (_, rung) =>
+      millionLadderQuestions.find((question) => question.rung === rung)
+    )
+      .filter(Boolean)
+      .map((question) =>
+        baseQuestion('million-ladder', question, 'multiple_choice', {
+          legacyType: question.type,
+          rung: question.rung,
+          options: question.options,
+        })
+      ),
   }),
   set({
     gameType: 'survey-showdown',

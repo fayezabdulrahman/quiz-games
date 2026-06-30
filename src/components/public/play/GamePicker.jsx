@@ -7,14 +7,19 @@ export default function GamePicker({
   bluffRoundCount,
   majorityRoundCount,
   catchphraseRoundCount,
+  availableGameTypes,
 }) {
+  const visibleGames = availableGameTypes
+    ? games.filter((game) => availableGameTypes.includes(game.id))
+    : games
+
   return (
     <div className="game-picker">
       <div className="game-picker-heading">
         <strong>Choose your game</strong>
         <span>Everyone joins after you create the room.</span>
       </div>
-      {games.map((game) => (
+      {visibleGames.map((game) => (
         <button
           key={game.id}
           type="button"

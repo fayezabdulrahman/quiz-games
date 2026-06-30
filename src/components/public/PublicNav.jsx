@@ -1,39 +1,49 @@
+import { Show, SignInButton, UserButton } from '@clerk/react'
 import { useState } from 'react'
+import { Link, NavLink } from 'react-router-dom'
 
 const navItems = [
-  ['home', 'How it works'],
-  ['games', 'Games'],
-  ['pricing', 'Pricing'],
+  ['/', 'How it works'],
+  ['/games', 'Games'],
+  ['/pricing', 'Pricing'],
 ]
 
-export default function PublicNav({ page, setPage }) {
+export default function PublicNav() {
   const [menuOpen, setMenuOpen] = useState(false)
 
-  const selectPage = (id) => {
-    setPage(id)
+  const closeMenu = () => {
     setMenuOpen(false)
   }
 
   return (
     <header className={`public-nav ${menuOpen ? 'menu-open' : ''}`}>
-      <button type="button" className="public-brand" onClick={() => selectPage('home')}>
+      <Link className="public-brand" to="/" onClick={closeMenu}>
         <strong>Game Night</strong>
-      </button>
+      </Link>
       <nav id="public-navigation" aria-label="Main navigation">
-        {navItems.map(([id, label]) => (
-          <button
-            key={id}
-            type="button"
-            className={page === id ? 'active' : ''}
-            onClick={() => selectPage(id)}
+        {navItems.map(([to, label]) => (
+          <NavLink
+            key={to}
+            to={to}
+            end={to === '/'}
+            onClick={closeMenu}
           >
             {label}
-          </button>
+          </NavLink>
         ))}
       </nav>
-      <button type="button" className="nav-play-button" onClick={() => selectPage('play')}>
-        Join a room
-      </button>
+      <Show when="signed-out">
+        <SignInButton mode="redirect">
+          <button type="button" className="nav-play-button">
+            Login
+          </button>
+        </SignInButton>
+      </Show>
+      <Show when="signed-in">
+        <div className="nav-account">
+          <UserButton />
+        </div>
+      </Show>
       <button
         type="button"
         className={`menu-toggle ${menuOpen ? 'open' : ''}`}

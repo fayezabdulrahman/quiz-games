@@ -47,7 +47,14 @@ function gameSettingsFromPayload(payload = {}) {
     guessTimerEnabled,
     guessSeconds,
   } = payload
-  return { lifelineCount, lifelinesAnytime, diceMode, roundCount, guessTimerEnabled, guessSeconds }
+  return {
+    lifelineCount,
+    lifelinesAnytime,
+    diceMode,
+    roundCount,
+    guessTimerEnabled,
+    guessSeconds,
+  }
 }
 
 function withRoomAccess(settings, access) {

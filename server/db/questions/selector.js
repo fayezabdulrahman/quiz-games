@@ -1,4 +1,4 @@
-import { difficulties } from '../../questions/samplePools.js'
+import { difficulties } from '../../questions/sampleQuestions.js'
 import { selectPrompts } from '../../questions/selectPrompts.js'
 import { loadOfficialQuestions } from './repository.js'
 import { localQuestionPools } from './localPools.js'

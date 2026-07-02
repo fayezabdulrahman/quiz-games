@@ -159,7 +159,7 @@ Answers and explanations are withheld from clients until the room enters the rev
 
 ### Game data
 
-The official launch question banks are stored in the database and seeded from a local-only private catalog. The public repo keeps only `server/questions/samplePools.js`, a small harmless fallback set used for local smoke tests and graceful DB fallback.
+The official launch question banks are stored in the database and seeded from a local-only private catalog. The public repo keeps only `server/questions/sampleQuestions.js`, a small harmless fallback set used for local smoke tests and graceful DB fallback.
 
 Private seed content lives under `server/private-question-seeds/`, which is ignored by Git. A local private seed catalog should export `officialQuestionSets` from `server/private-question-seeds/officialQuestionCatalog.js`; `npm run db:seed` imports that file and upserts it into `question_sets` and `questions`.
 

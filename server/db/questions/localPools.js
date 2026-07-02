@@ -1,1 +1,1 @@
-export { sampleQuestionPools as localQuestionPools } from '../../questions/samplePools.js'
+export { sampleQuestionPools as localQuestionPools } from '../../questions/sampleQuestions.js'

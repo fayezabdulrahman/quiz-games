@@ -140,6 +140,19 @@ export function createPublicState(room, socketId, questionDurationMs) {
   const isSayWhatYouSee = room.gameType === 'say-what-you-see'
   const isScoreGame = isMajorityRules || isBluffBattle || isSayWhatYouSee
   const topScore = Math.max(0, ...room.players.map((player) => player.score || 0))
+  const gameName = isMajorityRules
+    ? 'Majority Rules'
+    : isBluffBattle
+      ? 'Bluff Battle'
+      : isMillionLadder
+        ? 'Million Ladder'
+        : isSurveyShowdown
+          ? 'Survey Showdown'
+          : isQuickfire30
+            ? 'Quickfire 30'
+          : isSayWhatYouSee
+            ? 'Say What You See'
+            : 'The 1% Club'
 
   return {
     code: room.code,
@@ -147,19 +160,7 @@ export function createPublicState(room, socketId, questionDurationMs) {
     accessMode: room.accessMode || 'demo',
     productKey: room.productKey || 'free_demo',
     allowedGameTypes: room.allowedGameTypes || [],
-    gameName: isMajorityRules
-      ? 'Majority Rules'
-      : isBluffBattle
-        ? 'Bluff Battle'
-        : isMillionLadder
-          ? 'Million Ladder'
-          : isSurveyShowdown
-            ? 'Survey Showdown'
-            : isQuickfire30
-              ? 'Quickfire 30'
-              : isSayWhatYouSee
-                ? 'Say What You See'
-            : 'The 1% Club',
+    gameName,
     phase: room.phase,
     questionIndex: room.questionIndex,
     totalQuestions: room.questions.length,

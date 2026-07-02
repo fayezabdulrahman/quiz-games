@@ -8,12 +8,13 @@ export default function Stepper({
   onChange,
   suffix = '',
   className = '',
+  step = 1,
 }) {
   return (
     <fieldset className={['stepper', className].filter(Boolean).join(' ')} aria-label={label}>
       <button
         type="button"
-        onClick={() => onChange((current) => Math.max(min, current - 1))}
+        onClick={() => onChange((current) => Math.max(min, current - step))}
         disabled={value === min}
         aria-label={decrementLabel}
       >
@@ -22,7 +23,7 @@ export default function Stepper({
       <strong>{value}{suffix}</strong>
       <button
         type="button"
-        onClick={() => onChange((current) => Math.min(max, current + 1))}
+        onClick={() => onChange((current) => Math.min(max, current + step))}
         disabled={value === max}
         aria-label={incrementLabel}
       >

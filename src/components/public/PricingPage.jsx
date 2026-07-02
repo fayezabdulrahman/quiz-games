@@ -62,7 +62,6 @@ export default function PricingPage({ accountAccess }) {
         {plans.map((plan) => {
           const isCurrentPlan = hasPaidPlan && plan.key === currentKey
           const isUpgrade = hasPaidPlan && (planRank[plan.key] || 0) > (planRank[currentKey] || 0)
-          const buttonLabel = isCurrentPlan ? 'Current plan' : plan.cta
 
           return (
             <article
@@ -86,14 +85,16 @@ export default function PricingPage({ accountAccess }) {
                   <li key={feature}>{feature}</li>
                 ))}
               </ul>
-              <button
-                type="button"
-                className={plan.action === 'demo' ? 'primary wide' : 'secondary wide'}
-                onClick={plan.action === 'demo' ? () => navigate('/demo') : undefined}
-                disabled={isCurrentPlan || isUpgrade || !plan.action}
-              >
-                {buttonLabel}
-              </button>
+              {isCurrentPlan ? null : (
+                <button
+                  type="button"
+                  className={plan.action === 'demo' ? 'primary wide' : 'secondary wide'}
+                  onClick={plan.action === 'demo' ? () => navigate('/demo') : undefined}
+                  disabled={isUpgrade || !plan.action}
+                >
+                  {plan.cta}
+                </button>
+              )}
             </article>
           )
         })}

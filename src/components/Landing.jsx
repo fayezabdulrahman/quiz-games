@@ -18,7 +18,7 @@ export default function Landing({ onHost, onJoin, busy, error, accountAccess }) 
     <main className="public-site">
       <PublicNav />
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<HomePage accountAccess={accountAccess} />} />
         <Route path="/games" element={<GamesPage />} />
         <Route path="/pricing" element={<PricingPage accountAccess={accountAccess} />} />
         <Route

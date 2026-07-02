@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom'
 import heroImage from '../../assets/game-night-hero.png'
 
-export default function HeroSection() {
+export default function HeroSection({ accountAccess }) {
+  const hostActionLabel = accountAccess?.access?.hasFullAccess ? 'Play' : 'Try now'
+
   return (
     <section className="public-hero">
       <div className="hero-media" aria-hidden="true">
@@ -30,7 +32,7 @@ export default function HeroSection() {
             Browse games
           </Link>
           <Link className="secondary hero-host-action" to="/demo">
-            Try now
+            {hostActionLabel}
           </Link>
         </div>
       </div>

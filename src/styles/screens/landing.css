@@ -288,6 +288,10 @@
 	font-family: var(--font-display);
 }
 
+.public-game-card h3 + p {
+	margin-top: 8px;
+}
+
 .steps-grid p,
 .public-game-card p,
 .page-title-row p,

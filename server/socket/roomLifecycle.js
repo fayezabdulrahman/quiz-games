@@ -128,6 +128,8 @@ export async function prepareRoomGame(room, gameType, settings, clearQuestionTim
   room.quickfireLastMove = null
   room.catchphraseBuzzerPlayerId = null
   room.catchphraseTimerRemainingMs = null
+  room.catchphraseGuessTimer = null
+  room.catchphraseGuessEndsAt = null
   room.catchphraseLastGuess = null
   room.catchphraseGuesses = []
   room.players.forEach((player) => {

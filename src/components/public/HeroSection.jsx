@@ -11,8 +11,14 @@ export default function HeroSection({ accountAccess }) {
       </div>
       <div className="hero-overlay" />
       <div className="hero-content shell">
-        <h1>Game Night</h1>
-        <p>The easiest way to host unforgettable game nights.</p>
+        <div className="hero-copy">
+          <h1>Game Night</h1>
+          <p className="hero-line">Host a full party-game night from one browser.</p>
+          <p>
+            Pick from quick quizzes, bluffing games, survey rounds, visual puzzles, and team
+            challenges.
+          </p>
+        </div>
         <div className="hero-steps" aria-label="How Game Night works">
           <span>
             <b>Pick</b>
@@ -34,6 +40,27 @@ export default function HeroSection({ accountAccess }) {
           <Link className="secondary hero-host-action" to="/demo">
             {hostActionLabel}
           </Link>
+        </div>
+        <div className="hero-room-demo" aria-hidden="true">
+          <div className="host-screen">
+            <div className="host-screen-top">
+              <span>Live room</span>
+              <strong>JOIN CODE: 4827</strong>
+            </div>
+            <div className="host-question">
+              <small>Majority Rules</small>
+              <b>Which snack disappears first?</b>
+            </div>
+            <div className="host-answer-board">
+              <span style={{ '--bar-size': '78%' }}>Pizza</span>
+              <span style={{ '--bar-size': '54%' }}>Crisps</span>
+              <span style={{ '--bar-size': '39%' }}>Chocolate</span>
+            </div>
+            <div className="host-player-strip">
+              <span>Alex ready</span>
+              <span>Your answer: Pizza</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>

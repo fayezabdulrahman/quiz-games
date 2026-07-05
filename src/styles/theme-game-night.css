@@ -218,32 +218,46 @@ label {
 }
 
 .hero-content {
-	justify-items: center;
-	gap: 22px;
-	padding: 38px 0 82px;
-	text-align: center;
-	transform: translateY(-3.5vh);
+	grid-template-columns: minmax(0, .95fr) minmax(360px, .8fr);
+	align-items: center;
+	gap: 34px;
+	padding: 52px 0 72px;
+	text-align: left;
+	transform: none;
+}
+
+.hero-copy {
+	display: grid;
+	gap: 16px;
 }
 
 .hero-content h1 {
-	max-width: 780px;
+	max-width: 700px;
 	margin: 0;
 	color: var(--cream);
-	font-family: var(--font-script);
-	font-size: clamp(4.4rem, 11vw, 8.4rem);
-	font-weight: 400;
-	line-height: .86;
+	font-family: var(--font-display);
+	font-size: clamp(3.2rem, 7vw, 6.8rem);
+	font-weight: 900;
+	line-height: .9;
 	letter-spacing: 0;
 	text-shadow: 0 9px 42px rgba(0,0,0,.55);
 }
 
 .hero-content p {
-	max-width: 520px;
+	max-width: 620px;
 	color: var(--cream);
-	font-size: clamp(1.2rem, 2.35vw, 1.58rem);
-	font-weight: 700;
-	line-height: 1.32;
+	font-size: clamp(1rem, 1.55vw, 1.16rem);
+	font-weight: 650;
+	line-height: 1.55;
 	text-shadow: 0 3px 20px rgba(0,0,0,.72);
+}
+
+.hero-content .hero-line {
+	max-width: 670px;
+	color: var(--cream);
+	font-size: clamp(1.42rem, 3vw, 2.3rem);
+	font-weight: 900;
+	line-height: 1.08;
 }
 
 .hero-steps {
@@ -257,7 +271,7 @@ label {
 .hero-steps span {
 	display: grid;
 	gap: 6px;
-	justify-items: center;
+	justify-items: start;
 	color: var(--cream);
 	font-size: .95rem;
 	font-weight: 700;
@@ -277,7 +291,7 @@ label {
 }
 
 .hero-actions {
-	justify-content: center;
+	justify-content: flex-start;
 	margin-top: 2px;
 }
 
@@ -303,6 +317,139 @@ label {
 	padding-inline: 20px;
 	line-height: 1.1;
 	text-align: center;
+}
+
+.hero-room-demo {
+	position: relative;
+	grid-column: 2;
+	grid-row: 1 / span 4;
+	justify-self: end;
+	width: min(100%, 470px);
+	min-height: 380px;
+}
+
+.host-screen {
+	position: absolute;
+	inset: 22px 0 22px 0;
+	display: grid;
+	grid-template-rows: auto auto 1fr auto;
+	gap: 12px;
+	padding: 20px;
+	border: 1px solid rgba(244, 220, 170, .28);
+	border-radius: 8px;
+	background:
+		linear-gradient(145deg, rgba(18, 23, 30, .95), rgba(8, 12, 18, .97)),
+		linear-gradient(135deg, rgba(244, 220, 170, .1), rgba(120, 169, 87, .1));
+	box-shadow: 0 30px 90px rgba(0,0,0,.48), 0 0 0 7px rgba(255,255,255,.035);
+}
+
+.host-screen-top {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 14px;
+}
+
+.host-screen-top span,
+.host-question small {
+	color: #9da7bd;
+	font-size: .72rem;
+	font-weight: 900;
+	letter-spacing: .11em;
+	text-transform: uppercase;
+}
+
+.host-screen-top strong {
+	padding: 9px 11px;
+	border-radius: 8px;
+	color: #111714;
+	background: var(--gold);
+	font-size: .8rem;
+	font-weight: 900;
+	white-space: nowrap;
+}
+
+.host-question {
+	display: grid;
+	gap: 8px;
+	padding: 15px;
+	border: 1px solid rgba(255,255,255,.1);
+	border-radius: 8px;
+	background: rgba(255,255,255,.06);
+}
+
+.host-question b {
+	color: #fff7dd;
+	font-size: clamp(1.08rem, 2vw, 1.48rem);
+	line-height: 1.05;
+}
+
+.host-answer-board {
+	display: grid;
+	align-content: end;
+	gap: 8px;
+}
+
+.host-answer-board span {
+	position: relative;
+	display: flex;
+	align-items: center;
+	min-height: 34px;
+	padding: 0 14px;
+	overflow: hidden;
+	border: 1px solid rgba(255,255,255,.1);
+	border-radius: 8px;
+	color: #fff7dd;
+	background:
+		linear-gradient(90deg, rgba(255, 194, 71, .72) 0 var(--bar-size), rgba(83, 239, 154, .14) var(--bar-size) 100%),
+		rgba(255,255,255,.06);
+	font-weight: 900;
+	font-size: .92rem;
+}
+
+.host-player-strip {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 10px;
+}
+
+.host-player-strip span {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 32px;
+	padding: 0 12px;
+	border: 1px solid rgba(255,255,255,.12);
+	border-radius: 8px;
+	color: #e9eadf;
+	background: rgba(255,255,255,.055);
+	font-size: .72rem;
+	font-weight: 900;
+	text-transform: uppercase;
+}
+
+.host-reassurance {
+	padding-top: 42px;
+}
+
+.reassurance-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 12px;
+}
+
+.reassurance-grid span {
+	display: flex;
+	align-items: center;
+	min-height: 82px;
+	padding: 14px;
+	border: 1px solid rgba(255,255,255,.12);
+	border-radius: 8px;
+	color: #f7eed4;
+	background: rgba(255,255,255,.055);
+	font-size: .94rem;
+	font-weight: 800;
+	line-height: 1.25;
 }
 
 .public-section,
@@ -1244,15 +1391,32 @@ aside {
 	}
 
 	.hero-content {
+		grid-template-columns: 1fr;
 		justify-items: center;
 		padding: 48px 0 58px;
 		text-align: center;
-		transform: translateY(-2vh);
+		transform: none;
+	}
+
+	.hero-room-demo {
+		grid-column: 1;
+		grid-row: auto;
+		justify-self: center;
+		width: min(100%, 470px);
+		min-height: 360px;
 	}
 
 	.hero-steps,
 	.hero-actions {
 		justify-content: center;
+	}
+
+	.hero-steps span {
+		justify-items: center;
+	}
+
+	.reassurance-grid {
+		grid-template-columns: repeat(3, 1fr);
 	}
 
 	.purchase-callout {
@@ -1322,15 +1486,19 @@ aside {
 
 	.hero-content {
 		padding: 34px 0 44px;
-		transform: translateY(-1.5vh);
+		transform: none;
 	}
 
 	.hero-content h1 {
-		font-size: clamp(3.4rem, 18vw, 5.1rem);
+		font-size: clamp(3rem, 15vw, 4.6rem);
 	}
 
 	.hero-content p {
-		font-size: clamp(1.08rem, 4.6vw, 1.32rem);
+		font-size: clamp(1rem, 4vw, 1.16rem);
+	}
+
+	.hero-content .hero-line {
+		font-size: clamp(1.35rem, 6.2vw, 1.92rem);
 	}
 
 	.hero-steps {
@@ -1344,6 +1512,10 @@ aside {
 
 	.hero-actions .hero-host-action {
 		display: grid;
+	}
+
+	.reassurance-grid {
+		grid-template-columns: 1fr;
 	}
 }
 
@@ -1359,11 +1531,39 @@ aside {
 	}
 
 	.public-hero {
-		min-height: clamp(560px, calc(100svh - 70px), 640px);
+		min-height: auto;
 	}
 
 	.hero-content {
 		padding: 28px 0 36px;
+	}
+
+	.hero-room-demo {
+		min-height: 328px;
+	}
+
+	.host-screen {
+		inset: 16px 0;
+		padding: 16px;
+	}
+
+	.host-screen-top {
+		align-items: flex-start;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.host-question {
+		padding: 14px;
+	}
+
+	.host-answer-board span {
+		min-height: 38px;
+	}
+
+	.host-player-strip {
+		grid-template-columns: 1fr;
+		gap: 8px;
 	}
 
 	.hero-actions .primary,
@@ -1376,6 +1576,10 @@ aside {
 		width: 40px;
 		height: 40px;
 		font-size: .68rem;
+	}
+
+	.reassurance-grid {
+		grid-template-columns: 1fr;
 	}
 
 	.room-game-grid {

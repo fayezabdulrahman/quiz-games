@@ -1095,6 +1095,25 @@ label {
 	color: var(--muted-2);
 }
 
+.room-qr-card {
+	border-color: var(--line);
+	border-radius: 8px;
+	background: rgba(246, 230, 189, .07);
+	box-shadow: inset 0 1px 0 rgba(246, 230, 189, .08);
+}
+
+.room-qr-card svg {
+	border-radius: 6px;
+}
+
+.room-qr-card strong {
+	color: var(--cream);
+}
+
+.room-qr-card span {
+	color: var(--muted);
+}
+
 .text-button {
 	color: var(--cream);
 }

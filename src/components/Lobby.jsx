@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Logo from './shared/Logo.jsx'
 import PlayerList from './shared/PlayerList.jsx'
+import RoomJoinQrCode from './shared/RoomJoinQrCode.jsx'
 import Spinner from './shared/Spinner.jsx'
 import QuickfireTeamSetup from './games/quickfire-30/QuickfireTeamSetup.jsx'
 import SurveyTeamSetup from './games/survey-showdown/SurveyTeamSetup.jsx'
@@ -48,6 +49,7 @@ export default function Lobby({
           <div className="join-url">{window.location.host}</div>
           <div className="room-code">{state.code}</div>
           <div className="code-caption">Room code</div>
+          <RoomJoinQrCode joinUrl={joinUrl} roomCode={state.code} />
           <button
             type="button"
             className="text-button"

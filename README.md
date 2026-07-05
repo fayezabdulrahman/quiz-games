@@ -242,7 +242,7 @@ The first migration creates:
 | Table | Purpose |
 | --- | --- |
 | `users` | App-owned user profile keyed by future Clerk `clerk_user_id` |
-| `products` | Sellable or public access entries such as Free Demo, Family Pack, Custom Edition, and Club Pass |
+| `products` | Sellable or public access entries such as Demo, Game Night Pack, archived legacy packs, and Club Pass |
 | `product_game_grants` | Exact game unlocks included in a product |
 | `product_feature_grants` | Non-game permissions and limits, such as room size, custom questions, future games, and official packs |
 | `stripe_customers` | Mapping from an app user to a Stripe customer |
@@ -257,12 +257,13 @@ The initial product catalog is represented in `server/db/catalog/pricingTiers.js
 
 | Product key | Billing | Access model |
 | --- | --- | --- |
-| `free_demo` | Free | Public access, no sign-up, one launch game, built-in pool, room size cap of 4 |
-| `family_pack_v1` | One-time, EUR 19.99 | The seven launch games and built-in question pools |
-| `custom_edition_v1` | One-time, EUR 39.99 | Family Pack plus custom question creation/import and reusable packs |
-| `club_pass_monthly` | Subscription, EUR 9.99/month | Custom Edition while subscribed, plus future games and official/seasonal/topical packs |
+| `free_demo` | Free | Public access, no sign-up, 2 games, built-in demo pools, room size cap of 4 |
+| `game_night_pack_v1` | One-time, EUR 29.99 | The seven launch games, full built-in question pools, custom question creation/import, and reusable packs |
+| `club_pass_monthly` | Subscription, EUR 5/month | All current games while subscribed, custom questions, future games, official/seasonal/topical packs, and early access |
+| `family_pack_v1` | Archived legacy one-time product | Mapped to `game_night_pack_v1` for existing entitlement access |
+| `custom_edition_v1` | Archived legacy one-time product | Mapped to `game_night_pack_v1` for existing entitlement access |
 
-Products have `requires_user` and `requires_entitlement` flags. Free Demo sets both to `false`, so the backend can allow its limited game grants without login. Paid products set both to `true`, so game access should be checked by joining an active `user_entitlements` row to `product_game_grants`. Feature access should be checked through `product_feature_grants`; for example, Club Pass has the `new_games` feature while the v1 one-time packs only have explicit launch-game rows. Questions use `source = official` for seeded built-in pools and `source = user` for host-created packs. User-owned question rows link back to both `owner_user_id` and `owner_clerk_user_id`, so a paid host can own reusable packs while guests continue joining rooms for free by room code.
+Products have `requires_user` and `requires_entitlement` flags. Demo sets both to `false`, so the backend can allow its limited game grants without login. Paid products set both to `true`, so game access should be checked by joining an active `user_entitlements` row to `product_game_grants`. Feature access should be checked through `product_feature_grants`; for example, Club Pass has the `new_games`, official/seasonal/topical pack, and early access features while Game Night Pack has explicit launch-game rows plus custom-question features. Questions use `source = official` for seeded built-in pools and `source = user` for host-created packs. User-owned question rows link back to both `owner_user_id` and `owner_clerk_user_id`, so a paid host can own reusable packs while guests continue joining rooms for free by room code.
 
 Official game banks are imported through the ignored `server/private-question-seeds/officialQuestionCatalog.js` file. The tracked `server/db/catalog/officialQuestionCatalog.js` is only the loader, so the public repository does not expose the full question bank. The private catalog should keep stable set `slug` values and question `external_id` values so official pools can be safely re-imported as new questions are added.
 

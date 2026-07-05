@@ -7,11 +7,15 @@ export const FREE_DEMO_PRODUCT_KEY = 'free_demo'
 export const DEMO_GAME_TYPES = ['majority-rules', 'million-ladder']
 
 const paidPlanRank = {
-  family_pack_v1: 1,
-  custom_edition_v1: 2,
+  game_night_pack_v1: 2,
   club_pass_monthly: 3,
 }
 
+const legacyProductKeyMap = {
+  family_pack_v1: 'game_night_pack_v1',
+  custom_edition_v1: 'game_night_pack_v1',
+}
+const legacyProductKeys = Object.keys(legacyProductKeyMap)
 const activeEntitlementStatuses = ['active', 'trialing']
 const localAuthorizedParties = [
   'http://localhost:5173',
@@ -32,6 +36,10 @@ function cleanToken(token) {
 
 function sortedPlanKeys(planKeys) {
   return [...planKeys].sort((a, b) => (paidPlanRank[b] || 0) - (paidPlanRank[a] || 0))
+}
+
+function canonicalProductKey(productKey) {
+  return legacyProductKeyMap[productKey] || productKey
 }
 
 function defaultAccess(clerkUserId = null) {
@@ -123,12 +131,17 @@ async function paidAccessForUser(clerkUserId, userId) {
       and(
         eq(userEntitlements.clerkUserId, clerkUserId),
         inArray(userEntitlements.status, activeEntitlementStatuses),
-        eq(products.status, 'active'),
+        or(
+          eq(products.status, 'active'),
+          inArray(userEntitlements.productKey, legacyProductKeys),
+        ),
         or(isNull(userEntitlements.expiresAt), gt(userEntitlements.expiresAt, now)),
       ),
     )
 
-  const paidPlanKeys = sortedPlanKeys(new Set(rows.map((row) => row.productKey)))
+  const paidPlanKeys = sortedPlanKeys(
+    new Set(rows.map((row) => canonicalProductKey(row.productKey))),
+  )
   if (!paidPlanKeys.length) return { ...defaultAccess(clerkUserId), userId }
 
   return {

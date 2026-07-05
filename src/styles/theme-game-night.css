@@ -1581,8 +1581,14 @@ aside {
 	}
 
 	.host-player-strip {
-		grid-template-columns: 1fr;
-		gap: 8px;
+		grid-template-columns: 1fr 1fr;
+		gap: 7px;
+	}
+
+	.host-player-strip span {
+		min-height: 30px;
+		padding: 0 8px;
+		font-size: .62rem;
 	}
 
 	.hero-actions .primary,

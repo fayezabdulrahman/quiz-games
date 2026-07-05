@@ -37,10 +37,10 @@ export default function PricingPage({ accountAccess }) {
       <div className="page-kicker">Pricing</div>
       <div className="page-title-row">
         <div>
-          <h1>Buy once. Share the fun for free.</h1>
+          <h1>Buy once or subscribe. Guests play free.</h1>
           <p>
-            Game Night is priced around the host, not the whole room. Purchase buttons are parked
-            for now while checkout gets wired in.
+            Game Night is priced around the host, not the whole room. Paid buttons are parked for
+            now while checkout gets wired in.
           </p>
         </div>
       </div>
@@ -49,7 +49,7 @@ export default function PricingPage({ accountAccess }) {
         <section className="top-plan-panel" aria-label="Current top tier plan">
           <span>Current plan</span>
           <div>
-            <h2>You've currently purchased our top tier pack.</h2>
+            <h2>You currently have our top tier plan.</h2>
             <p>
               {currentPlan.name} already includes the full paid Game Night library and every
               upgrade currently available.

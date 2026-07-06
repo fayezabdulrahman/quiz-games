@@ -1,7 +1,10 @@
 import { difficulties } from '../../questions/sampleQuestions.js'
+import { customOnlyReadiness } from '../../../shared/customQuestionSchemas.js'
 import { selectPrompts } from '../../questions/selectPrompts.js'
 import { loadOfficialQuestions } from './repository.js'
 import { localQuestionPools } from './localPools.js'
+import { listActiveUserQuestions, normalizeSelectionMode } from './customPacks.js'
+import { mapQuestionRow } from './rowMapper.js'
 
 const fallbackWarnings = new Set()
 
@@ -28,7 +31,7 @@ function localDemoPool(gameType) {
   return []
 }
 
-async function questionPoolForGame(gameType, settings = {}) {
+async function officialQuestionPoolForGame(gameType, settings = {}) {
   const questionSetSlug = settings.accessMode === 'demo' ? demoQuestionSetSlugs[gameType] : null
 
   try {
@@ -49,6 +52,46 @@ async function questionPoolForGame(gameType, settings = {}) {
     return localDemoPool(gameType)
   }
   return structuredClone(localQuestionPools[gameType] || localQuestionPools['one-percent'])
+}
+
+async function userQuestionPoolForGame(gameType, settings = {}, context = {}) {
+  if (!context.ownerUserId) return []
+  const questionSetId =
+    settings.contentSelectionMode === 'user_only' ? settings.preferredQuestionSetId : null
+  const rows = await listActiveUserQuestions(
+    { userId: context.ownerUserId },
+    gameType,
+    questionSetId,
+  )
+  return rows.map(mapQuestionRow).filter(Boolean)
+}
+
+async function questionPoolForGame(gameType, settings = {}, context = {}) {
+  if (settings.accessMode === 'demo') return officialQuestionPoolForGame(gameType, settings)
+
+  const selectionMode = normalizeSelectionMode(settings.contentSelectionMode)
+  if (selectionMode === 'official' || !context.ownerUserId) {
+    return officialQuestionPoolForGame(gameType, settings)
+  }
+
+  const userPool = await userQuestionPoolForGame(gameType, settings, context)
+  if (selectionMode === 'mixed') {
+    if (!userPool.length) {
+      throw new Error('Mixed mode needs at least one active custom question for this game.')
+    }
+    const officialPool = await officialQuestionPoolForGame(gameType, settings)
+    return [...officialPool, ...userPool]
+  }
+
+  const readiness = customOnlyReadiness(gameType, userPool)
+  if (!readiness.ready) {
+    throw new Error(
+      gameType === 'million-ladder'
+        ? `Custom-only Million Ladder needs active questions for rungs ${readiness.missingRungs.join(', ')}.`
+        : `Custom-only needs ${readiness.minimumActiveQuestions} active questions for this game.`,
+    )
+  }
+  return userPool
 }
 
 function selectOnePercentQuestions(pool, usedQuestionIds = new Set()) {
@@ -94,8 +137,8 @@ function selectMillionLadderQuestions(pool, usedQuestionIds = new Set()) {
   )
 }
 
-export async function selectQuestionsForGame(gameType, usedQuestionIds, settings = {}) {
-  const pool = await questionPoolForGame(gameType, settings)
+export async function selectQuestionsForGame(gameType, usedQuestionIds, settings = {}, context = {}) {
+  const pool = await questionPoolForGame(gameType, settings, context)
   if (settings.accessMode === 'demo') return structuredClone(pool)
   if (gameType === 'one-percent') return selectOnePercentQuestions(pool, usedQuestionIds)
   if (gameType === 'million-ladder') return selectMillionLadderQuestions(pool, usedQuestionIds)
@@ -118,7 +161,8 @@ export async function selectMillionLadderReplacementQuestion(
   usedQuestionIds,
   excludedId,
   settings = {},
+  context = {},
 ) {
-  const pool = await questionPoolForGame('million-ladder', settings)
+  const pool = await questionPoolForGame('million-ladder', settings, context)
   return selectMillionLadderForRung(pool, rung, usedQuestionIds, excludedId)
 }

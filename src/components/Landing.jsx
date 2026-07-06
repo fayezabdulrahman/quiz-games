@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import GamesPage from './public/GamesPage.jsx'
 import HomePage from './public/HomePage.jsx'
+import PacksPage from './public/PacksPage.jsx'
 import PlayPage from './public/PlayPage.jsx'
 import PricingPage from './public/PricingPage.jsx'
 import PublicFooter from './public/PublicFooter.jsx'
@@ -14,6 +15,10 @@ export default function Landing({ onHost, onJoin, busy, error, accountAccess }) 
     return <Navigate to={`/play${location.search}`} replace />
   }
 
+  if (accountAccess?.isSignedIn && location.pathname === '/') {
+    return <Navigate to="/play" replace />
+  }
+
   return (
     <main className="public-site">
       <PublicNav />
@@ -21,6 +26,7 @@ export default function Landing({ onHost, onJoin, busy, error, accountAccess }) 
         <Route path="/" element={<HomePage accountAccess={accountAccess} />} />
         <Route path="/games" element={<GamesPage />} />
         <Route path="/pricing" element={<PricingPage accountAccess={accountAccess} />} />
+        <Route path="/packs" element={<PacksPage accountAccess={accountAccess} />} />
         <Route
           path="/play"
           element={
@@ -50,7 +56,10 @@ export default function Landing({ onHost, onJoin, busy, error, accountAccess }) 
             )
           }
         />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route
+          path="*"
+          element={<Navigate to={accountAccess?.isSignedIn ? '/play' : '/'} replace />}
+        />
       </Routes>
       <PublicFooter />
     </main>

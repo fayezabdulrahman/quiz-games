@@ -9,6 +9,7 @@ import { resolveAccessFromToken } from './auth/access.js'
 import { corsOrigin, gameTypes, questionDurationMs } from './config.js'
 import { createPublicState } from './game/publicState.js'
 import { createRoundController } from './game/rounds.js'
+import { customQuestionsRouter } from './routes/customQuestions.js'
 import { registerSocketHandlers } from './socket/registerHandlers.js'
 
 const app = express()
@@ -42,6 +43,14 @@ app.get('/api/me/access', async (request, response) => {
     console.error('Failed to resolve account access', error)
     response.status(401).json({ ok: false, error: 'Could not verify your account session.' })
   }
+})
+
+app.use('/api/me', customQuestionsRouter)
+
+app.use('/api/{*splat}', (error, _request, response, next) => {
+  void next
+  console.error('API request failed', error)
+  response.status(500).json({ ok: false, error: 'The account server could not complete that request.' })
 })
 
 if (process.env.NODE_ENV === 'production') {

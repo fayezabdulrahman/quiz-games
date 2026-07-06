@@ -1,4 +1,5 @@
 import { gameMap } from '../../../data/games.js'
+import ContentSelector from '../../content/ContentSelector.jsx'
 import RoundSetting from '../RoundSetting.jsx'
 import CatchphraseSettings from './CatchphraseSettings.jsx'
 import GamePicker from './GamePicker.jsx'
@@ -26,6 +27,11 @@ export default function HostFields({
   setCatchphraseGuessSeconds,
   availableGameTypes,
   canConfigureMajorityRounds,
+  canManageCustomQuestions,
+  contentSelectionMode,
+  setContentSelectionMode,
+  preferredQuestionSetId,
+  setPreferredQuestionSetId,
 }) {
   return (
     <>
@@ -93,6 +99,14 @@ export default function HostFields({
       {gameType === 'quickfire-30' && (
         <QuickfireSettings diceMode={diceMode} setDiceMode={setDiceMode} />
       )}
+      <ContentSelector
+        gameType={gameType}
+        enabled={canManageCustomQuestions}
+        selectionMode={contentSelectionMode}
+        setSelectionMode={setContentSelectionMode}
+        preferredQuestionSetId={preferredQuestionSetId}
+        setPreferredQuestionSetId={setPreferredQuestionSetId}
+      />
     </>
   )
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import ContentSelector from '../content/ContentSelector.jsx'
 import GameOptionGrid from './GameOptionGrid.jsx'
 import GameSettings from './GameSettings.jsx'
 import PlayerList from '../shared/PlayerList.jsx'
@@ -26,6 +27,12 @@ export default function RoomGamePicker({ state, error, onSelectGame, onCloseRoom
   const [catchphraseGuessSeconds, setCatchphraseGuessSeconds] = useState(
     state.settings?.guessSeconds || 10,
   )
+  const [contentSelectionMode, setContentSelectionMode] = useState(
+    state.settings?.contentSelectionMode || 'official',
+  )
+  const [preferredQuestionSetId, setPreferredQuestionSetId] = useState(
+    state.settings?.preferredQuestionSetId || null,
+  )
 
   const continueToLobby = () => {
     onSelectGame(gameType, {
@@ -44,6 +51,8 @@ export default function RoomGamePicker({ state, error, onSelectGame, onCloseRoom
               : undefined,
       guessTimerEnabled: catchphraseTimerEnabled,
       guessSeconds: catchphraseGuessSeconds,
+      contentSelectionMode,
+      preferredQuestionSetId,
     })
   }
 
@@ -86,6 +95,15 @@ export default function RoomGamePicker({ state, error, onSelectGame, onCloseRoom
                 setCatchphraseGuessSeconds={setCatchphraseGuessSeconds}
                 diceMode={diceMode}
                 setDiceMode={setDiceMode}
+              />
+              <ContentSelector
+                gameType={gameType}
+                enabled={Boolean(state.canManageCustomQuestions)}
+                selectionMode={contentSelectionMode}
+                setSelectionMode={setContentSelectionMode}
+                preferredQuestionSetId={preferredQuestionSetId}
+                setPreferredQuestionSetId={setPreferredQuestionSetId}
+                compact
               />
               {error && <p className="form-error" role="alert">{error}</p>}
               <div className="room-picker-actions">

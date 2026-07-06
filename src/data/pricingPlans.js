@@ -5,7 +5,7 @@ export const pricingPlans = [
     price: 'Free',
     billing: 'Try the room flow',
     description: 'A small playable taste for checking that Game Night works with your group.',
-    features: ['2 Playable games', 'Max 4 players', 'No Account Required'],
+    features: ['2 Playable games', 'Max 4 players', 'No account required'],
     cta: 'Start for free',
     action: 'demo',
   },
@@ -16,7 +16,6 @@ export const pricingPlans = [
     billing: 'One-time purchase',
     description: 'The main game-night bundle for hosts who want the full current library.',
     features: [
-      'All 7 current games',
       'Full built-in question sets for each game',
       'Custom questions included',
       'Free unlimited guests',
@@ -31,8 +30,7 @@ export const pricingPlans = [
     billing: 'Subscription',
     description: 'For hosts who want the current library while subscribed plus future releases.',
     features: [
-      'All current games while subscribed',
-      'Custom questions included',
+      'Everything from Game Night Pack',
       'Future games and early access',
       'Official, seasonal, and topical packs',
     ],

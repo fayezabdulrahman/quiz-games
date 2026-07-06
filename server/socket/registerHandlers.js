@@ -46,6 +46,9 @@ function gameSettingsFromPayload(payload = {}) {
     roundCount,
     guessTimerEnabled,
     guessSeconds,
+    contentSelectionMode,
+    preferredQuestionSetId,
+    questionSetId,
   } = payload
   return {
     lifelineCount,
@@ -54,6 +57,8 @@ function gameSettingsFromPayload(payload = {}) {
     roundCount,
     guessTimerEnabled,
     guessSeconds,
+    contentSelectionMode,
+    preferredQuestionSetId: preferredQuestionSetId || questionSetId || null,
   }
 }
 
@@ -152,9 +157,11 @@ export function registerSocketHandlers({
           gameType,
           hostSocketId: socket.id,
           hostSessionToken,
+          hostUserId: access.userId,
           hostClerkUserId: access.clerkUserId,
           accessMode: access.accessMode,
           productKey: access.productKey,
+          featureKeys: access.featureKeys,
           allowedGameTypes: access.allowedGameTypes,
           settings,
           usedQuestionIds,
@@ -474,8 +481,10 @@ export function registerSocketHandlers({
         if (!sameHost) return replyError(callback, 'Log in as this room host to change games.')
         if (!access.ok) return replyError(callback, access.error)
         room.hostClerkUserId = access.clerkUserId
+        room.hostUserId = access.userId
         room.accessMode = access.accessMode
         room.productKey = access.productKey
+        room.featureKeys = access.featureKeys
         room.allowedGameTypes = access.allowedGameTypes
         await prepareRoomGame(
           room,

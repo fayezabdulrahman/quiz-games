@@ -48,6 +48,7 @@ function defaultAccess(clerkUserId = null) {
     userId: null,
     productKey: FREE_DEMO_PRODUCT_KEY,
     paidPlanKeys: [],
+    featureKeys: [],
     accessMode: 'demo',
     allowedGameTypes: DEMO_GAME_TYPES,
     hasFullAccess: false,
@@ -117,7 +118,7 @@ async function upsertUser(clerkUserId) {
 async function paidAccessForUser(clerkUserId, userId) {
   if (!process.env.DATABASE_URL) return defaultAccess(clerkUserId)
 
-  const { productGameGrants, products, userEntitlements } = schema
+  const { productFeatureGrants, productGameGrants, products, userEntitlements } = schema
   const now = new Date()
   const rows = await getDb()
     .select({
@@ -144,11 +145,17 @@ async function paidAccessForUser(clerkUserId, userId) {
   )
   if (!paidPlanKeys.length) return { ...defaultAccess(clerkUserId), userId }
 
+  const featureRows = await getDb()
+    .select({ featureKey: productFeatureGrants.featureKey })
+    .from(productFeatureGrants)
+    .where(inArray(productFeatureGrants.productKey, paidPlanKeys))
+
   return {
     clerkUserId,
     userId,
     productKey: paidPlanKeys[0],
     paidPlanKeys,
+    featureKeys: [...new Set(featureRows.map((row) => row.featureKey))],
     accessMode: 'full',
     allowedGameTypes: [...new Set(rows.map((row) => row.gameType))],
     hasFullAccess: true,

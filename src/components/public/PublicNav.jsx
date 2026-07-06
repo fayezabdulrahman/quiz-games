@@ -3,7 +3,6 @@ import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 
 const navItems = [
-  ['/', 'How it works'],
   ['/games', 'Games'],
   ['/pricing', 'Pricing'],
 ]
@@ -21,6 +20,16 @@ export default function PublicNav() {
         <strong>Game Night</strong>
       </Link>
       <nav id="public-navigation" aria-label="Main navigation">
+        <Show when="signed-out">
+          <NavLink to="/" end onClick={closeMenu}>
+            How it works
+          </NavLink>
+        </Show>
+        <Show when="signed-in">
+          <NavLink to="/play" onClick={closeMenu}>
+            Play
+          </NavLink>
+        </Show>
         {navItems.map(([to, label]) => (
           <NavLink
             key={to}
@@ -31,6 +40,11 @@ export default function PublicNav() {
             {label}
           </NavLink>
         ))}
+        <Show when="signed-in">
+          <NavLink className="nav-account-link" to="/packs" onClick={closeMenu}>
+            My Packs
+          </NavLink>
+        </Show>
       </nav>
       <Show when="signed-out">
         <SignInButton mode="redirect">

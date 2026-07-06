@@ -24,22 +24,28 @@ export async function buildRoom({
   gameType,
   hostSocketId,
   hostSessionToken,
+  hostUserId,
   hostClerkUserId,
   accessMode,
   productKey,
+  featureKeys,
   allowedGameTypes,
   settings,
   usedQuestionIds,
 }) {
-  const questions = await questionsForGame(gameType, usedQuestionIds, settings)
+  const questions = await questionsForGame(gameType, usedQuestionIds, settings, {
+    ownerUserId: hostUserId,
+  })
   return {
     code,
     gameType,
     hostSocketId,
     hostSessionToken,
+    hostUserId,
     hostClerkUserId,
     accessMode,
     productKey,
+    featureKeys,
     allowedGameTypes,
     hostReconnectTimer: null,
     socketIds: new Set([hostSocketId]),
@@ -94,7 +100,9 @@ export async function prepareRoomGame(room, gameType, settings, clearQuestionTim
   clearCatchphraseGuessTimer(room)
   room.gameType = gameType
   room.settings = settingsForGame(gameType, settings)
-  room.questions = await questionsForGame(gameType, room.usedQuestionIds, room.settings)
+  room.questions = await questionsForGame(gameType, room.usedQuestionIds, room.settings, {
+    ownerUserId: room.hostUserId,
+  })
   room.questionIndex = -1
   room.phase = 'lobby'
   room.finishReason = null

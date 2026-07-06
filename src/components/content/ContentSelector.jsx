@@ -1,0 +1,155 @@
+import { useAuth } from '@clerk/react'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { contentOptionsPath, contentRequest } from '../../lib/contentApi.js'
+import Spinner from '../shared/Spinner.jsx'
+
+const modeLabels = {
+  official: 'Official',
+  mixed: 'Mixed',
+  user_only: 'Custom-only',
+}
+
+export default function ContentSelector({
+  gameType,
+  enabled,
+  selectionMode,
+  setSelectionMode,
+  preferredQuestionSetId,
+  setPreferredQuestionSetId,
+  compact = false,
+}) {
+  const { getToken } = useAuth()
+  const [options, setOptions] = useState(null)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadOptions() {
+      if (!enabled || !gameType) {
+        setOptions(null)
+        setError('')
+        setSelectionMode('official')
+        setPreferredQuestionSetId(null)
+        return
+      }
+      setLoading(true)
+      setError('')
+      try {
+        const token = await getToken()
+        const result = await contentRequest(contentOptionsPath(gameType), { token })
+        if (cancelled) return
+        setOptions(result.options)
+        const savedMode = result.options?.preference?.selectionMode || 'official'
+        const safeMode = result.options?.modes?.[savedMode]?.enabled ? savedMode : 'official'
+        setSelectionMode(safeMode)
+        setPreferredQuestionSetId(result.options?.preference?.preferredQuestionSetId || null)
+      } catch (loadError) {
+        if (cancelled) return
+        setOptions(null)
+        setSelectionMode('official')
+        setPreferredQuestionSetId(null)
+        setError(loadError?.message || 'Could not load custom packs.')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+
+    loadOptions()
+    return () => {
+      cancelled = true
+    }
+  }, [enabled, gameType, getToken, setPreferredQuestionSetId, setSelectionMode])
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function savePreference() {
+      if (!enabled || !options || !gameType) return
+      try {
+        const token = await getToken()
+        await contentRequest(`/api/me/content-preferences/${gameType}`, {
+          token,
+          method: 'PUT',
+          body: { selectionMode, preferredQuestionSetId },
+        })
+      } catch (saveError) {
+        if (!cancelled) setError(saveError?.message || 'Could not save content preference.')
+      }
+    }
+
+    savePreference()
+    return () => {
+      cancelled = true
+    }
+  }, [enabled, gameType, getToken, options, preferredQuestionSetId, selectionMode])
+
+  if (!enabled) return null
+
+  const packs = options?.packs || []
+  const activePacks = packs.filter((pack) => pack.counts?.active > 0)
+
+  return (
+    <section className={`content-selector ${compact ? 'compact' : ''}`}>
+      <div className="content-selector-heading">
+        <div>
+          <strong>Content</strong>
+          <span>Choose the questions for this game.</span>
+        </div>
+        <Link to="/packs">Manage packs</Link>
+      </div>
+      {error && <p className="form-error">{error}</p>}
+      <div className="content-options-area">
+        {loading && (
+          <div className="content-loading">
+            <Spinner className="spinner content-spinner" label="Loading custom packs" />
+            <span>Loading packs</span>
+          </div>
+        )}
+      <div className="content-mode-grid">
+        {Object.entries(modeLabels).map(([mode, label]) => {
+          const modeOption = options?.modes?.[mode]
+          const disabled = modeOption && !modeOption.enabled
+          return (
+            <button
+              type="button"
+              key={mode}
+              className={selectionMode === mode ? 'active' : ''}
+              disabled={disabled}
+              onClick={() => setSelectionMode(mode)}
+            >
+              <strong>{label}</strong>
+              <small>
+                {modeOption?.reason ||
+                  (mode === 'official'
+                    ? 'Built-in packs only'
+                    : mode === 'mixed'
+                      ? 'Blend official and yours'
+                      : 'Only your active pack')}
+              </small>
+            </button>
+          )
+        })}
+      </div>
+      </div>
+      {selectionMode === 'user_only' && (
+        <label className="content-pack-select">
+          <span>Custom pack</span>
+          <select
+            value={preferredQuestionSetId || ''}
+            onChange={(event) => setPreferredQuestionSetId(event.target.value || null)}
+          >
+            <option value="">All active custom questions</option>
+            {activePacks.map((pack) => (
+              <option key={pack.id} value={pack.id}>
+                {pack.title} ({pack.counts.active} active)
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
+    </section>
+  )
+}

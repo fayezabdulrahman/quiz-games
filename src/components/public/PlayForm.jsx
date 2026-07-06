@@ -26,7 +26,14 @@ export default function PlayForm({ onHost, onJoin, busy, error, accountAccess, d
   const [catchphraseRoundCount, setCatchphraseRoundCount] = useState(10)
   const [catchphraseTimerEnabled, setCatchphraseTimerEnabled] = useState(false)
   const [catchphraseGuessSeconds, setCatchphraseGuessSeconds] = useState(10)
+  const [contentSelectionMode, setContentSelectionMode] = useState('official')
+  const [preferredQuestionSetId, setPreferredQuestionSetId] = useState(null)
   const canConfigureMajorityRounds = Boolean(accountAccess?.access?.hasFullAccess && !demoMode)
+  const canManageCustomQuestions = Boolean(
+    accountAccess?.isSignedIn &&
+      !demoMode &&
+      accountAccess?.access?.featureKeys?.includes('custom_questions'),
+  )
 
   const submit = (event) => {
     event.preventDefault()
@@ -48,6 +55,8 @@ export default function PlayForm({ onHost, onJoin, busy, error, accountAccess, d
                 : undefined,
         guessTimerEnabled: catchphraseTimerEnabled,
         guessSeconds: catchphraseGuessSeconds,
+        contentSelectionMode,
+        preferredQuestionSetId,
       })
       return
     }
@@ -99,6 +108,11 @@ export default function PlayForm({ onHost, onJoin, busy, error, accountAccess, d
             setCatchphraseGuessSeconds={setCatchphraseGuessSeconds}
             availableGameTypes={availableGameTypes}
             canConfigureMajorityRounds={canConfigureMajorityRounds}
+            canManageCustomQuestions={canManageCustomQuestions}
+            contentSelectionMode={contentSelectionMode}
+            setContentSelectionMode={setContentSelectionMode}
+            preferredQuestionSetId={preferredQuestionSetId}
+            setPreferredQuestionSetId={setPreferredQuestionSetId}
           />
         )}
         {error && (

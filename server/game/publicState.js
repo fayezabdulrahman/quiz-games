@@ -160,6 +160,7 @@ export function createPublicState(room, socketId, questionDurationMs) {
     accessMode: room.accessMode || 'demo',
     productKey: room.productKey || 'free_demo',
     allowedGameTypes: room.allowedGameTypes || [],
+    canManageCustomQuestions: Boolean(room.featureKeys?.includes('custom_questions')),
     gameName,
     phase: room.phase,
     questionIndex: room.questionIndex,

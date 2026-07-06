@@ -1,5 +1,6 @@
 import crypto from 'node:crypto'
 import { selectQuestionsForGame } from '../db/questions/selector.js'
+import { normalizeSelectionMode } from '../db/questions/customPacks.js'
 
 export function normalize(value = '') {
   return String(value)
@@ -25,7 +26,16 @@ export function normalizeCatchphraseGuessSeconds(value) {
 }
 
 function withAccessMode(normalized, settings) {
-  return settings.accessMode === 'demo' ? { ...normalized, accessMode: 'demo' } : normalized
+  const contentSettings =
+    settings.accessMode === 'demo'
+      ? {}
+      : {
+          contentSelectionMode: normalizeSelectionMode(settings.contentSelectionMode),
+          preferredQuestionSetId: settings.preferredQuestionSetId || null,
+        }
+  return settings.accessMode === 'demo'
+    ? { ...normalized, accessMode: 'demo', contentSelectionMode: 'official', preferredQuestionSetId: null }
+    : { ...normalized, ...contentSettings }
 }
 
 export function settingsForGame(gameType, settings = {}) {
@@ -79,8 +89,8 @@ export function settingsForGame(gameType, settings = {}) {
   }, settings)
 }
 
-export async function questionsForGame(gameType, usedQuestionIds, settings = {}) {
-  return selectQuestionsForGame(gameType, usedQuestionIds, settings)
+export async function questionsForGame(gameType, usedQuestionIds, settings = {}, context = {}) {
+  return selectQuestionsForGame(gameType, usedQuestionIds, settings, context)
 }
 
 export function resetPlayer(player, settings, resetScore = false) {

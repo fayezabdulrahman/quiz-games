@@ -123,7 +123,12 @@ export function registerQuickfireHandlers({
     }
     if (room.questionIndex >= room.questions.length - 1) {
       try {
-        room.questions = await questionsForGame('quickfire-30', room.usedQuestionIds)
+        room.questions = await questionsForGame(
+          'quickfire-30',
+          room.usedQuestionIds,
+          room.settings,
+          { ownerUserId: room.hostUserId },
+        )
       } catch (error) {
         console.error('Failed to refill Quickfire 30 cards', error)
         return replyError(callback, 'Could not load another Quickfire card.')

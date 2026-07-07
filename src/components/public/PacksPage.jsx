@@ -1,7 +1,7 @@
 import { SignInButton, useAuth } from '@clerk/react'
 import { useEffect, useState } from 'react'
 import { games } from '../../data/games.js'
-import { contentRequest, questionPacksPath } from '../../lib/contentApi.js'
+import { contentFormRequest, contentRequest, questionPacksPath } from '../../lib/contentApi.js'
 import { validateCustomQuestion } from '../../../shared/customQuestionSchemas.js'
 import ComposingPackDetail from './packs/ComposingPackDetail.jsx'
 import DeleteConfirmationModal from './packs/DeleteConfirmationModal.jsx'
@@ -34,6 +34,38 @@ export default function PacksPage({ accountAccess }) {
   const tokenRequest = async (path, options) => {
     const token = await getToken()
     return contentRequest(path, { ...options, token })
+  }
+
+  const uploadQuestionImage = async (file) => {
+    const token = await getToken()
+    const body = new FormData()
+    body.append('image', file)
+    const result = await contentFormRequest('/api/me/question-assets', { token, body })
+    return result.media
+  }
+
+  const deleteQuestionImage = async (storageKey) => {
+    if (!storageKey) return
+    await tokenRequest('/api/me/question-assets', {
+      method: 'DELETE',
+      body: { storageKey },
+    })
+  }
+
+  const mediaStorageKeys = (media = []) =>
+    Array.from(
+      new Set(
+        (Array.isArray(media) ? media : [])
+          .map((item) => item?.storageKey)
+          .filter(Boolean),
+      ),
+    )
+
+  const deleteQuestionMedia = async (questions = []) => {
+    const storageKeys = questions.flatMap((question) =>
+      mediaStorageKeys(question?.form?.media || question?.payload?.media),
+    )
+    await Promise.all(storageKeys.map(deleteQuestionImage))
   }
 
   const loadPacks = async () => {
@@ -156,7 +188,8 @@ export default function PacksPage({ accountAccess }) {
     setError('')
   }
 
-  const closeComposingPack = () => {
+  const closeComposingPack = async (deleteImages = true) => {
+    if (deleteImages) await deleteQuestionMedia(pendingPackQuestions)
     setComposingPack(false)
     setDraftPackTitle('')
     setPendingPackQuestions([])
@@ -191,7 +224,7 @@ export default function PacksPage({ accountAccess }) {
         })
       }
       await loadPacks()
-      closeComposingPack()
+      await closeComposingPack(false)
       setSelectedPackId(result.pack.id)
       await loadPack(result.pack.id)
       return result.pack
@@ -233,6 +266,12 @@ export default function PacksPage({ accountAccess }) {
 
   const savePendingQuestion = (payload) => {
     const validation = validateCustomQuestion(gameType, payload.form)
+    const previousKeys = mediaStorageKeys(editorQuestion?.form?.media || editorQuestion?.payload?.media)
+    const nextKeys = new Set(mediaStorageKeys(payload.form?.media))
+    const removedKeys = previousKeys.filter((storageKey) => !nextKeys.has(storageKey))
+    Promise.all(removedKeys.map(deleteQuestionImage)).catch((deleteError) => {
+      setError(deleteError?.message || 'Could not delete a removed image.')
+    })
     const pendingQuestion = {
       id: editorQuestion?.id || `local-${crypto.randomUUID()}`,
       localId: editorQuestion?.localId || editorQuestion?.id || `local-${crypto.randomUUID()}`,
@@ -299,7 +338,8 @@ export default function PacksPage({ accountAccess }) {
     })
   }
 
-  const deletePendingQuestion = (question) => {
+  const deletePendingQuestion = async (question) => {
+    await deleteQuestionMedia([question])
     setPendingPackQuestions((current) => current.filter((item) => item.localId !== question.localId))
     if ((editorQuestion?.localId || editorQuestion?.id) === (question.localId || question.id)) stopEditing()
     return true
@@ -439,12 +479,14 @@ export default function PacksPage({ accountAccess }) {
                 selectedGame={selectedGame}
                 onClose={closeComposingPack}
                 onDeleteQuestion={requestDeletePendingQuestion}
+                onDeleteImage={deleteQuestionImage}
                 onEditQuestion={editQuestion}
                 onSavePack={savePack}
                 onSaveQuestion={saveQuestion}
                 onSetDraftPackTitle={setDraftPackTitle}
                 onStartQuestion={startQuestion}
                 onStopEditing={stopEditing}
+                onUploadImage={uploadQuestionImage}
               />
             ) : (
               <SavedPackDetail
@@ -455,11 +497,13 @@ export default function PacksPage({ accountAccess }) {
                 selectedPack={selectedPack}
                 onDeletePack={requestDeletePack}
                 onDeleteQuestion={requestDeleteQuestion}
+                onDeleteImage={deleteQuestionImage}
                 onEditQuestion={editQuestion}
                 onSaveQuestion={saveQuestion}
                 onStartQuestion={startQuestion}
                 onStopEditing={stopEditing}
                 onUpdatePackStatus={updatePackStatus}
+                onUploadImage={uploadQuestionImage}
               />
             )}
           </main>

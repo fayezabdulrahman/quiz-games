@@ -11,6 +11,7 @@ export default function ComposingPackDetail({
   pendingPackQuestions,
   selectedGame,
   onClose,
+  onDeleteImage,
   onDeleteQuestion,
   onEditQuestion,
   onSavePack,
@@ -18,6 +19,7 @@ export default function ComposingPackDetail({
   onSetDraftPackTitle,
   onStartQuestion,
   onStopEditing,
+  onUploadImage,
 }) {
   return (
     <>
@@ -48,7 +50,9 @@ export default function ComposingPackDetail({
           gameType={gameType}
           question={editorQuestion}
           onCancel={onStopEditing}
+          onDeleteImage={onDeleteImage}
           onSave={onSaveQuestion}
+          onUploadImage={onUploadImage}
         />
       ) : (
         <div className="pack-inline-actions">

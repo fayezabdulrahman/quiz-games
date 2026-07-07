@@ -10,12 +10,14 @@ export default function SavedPackDetail({
   gameType,
   selectedPack,
   onDeletePack,
+  onDeleteImage,
   onDeleteQuestion,
   onEditQuestion,
   onSaveQuestion,
   onStartQuestion,
   onStopEditing,
   onUpdatePackStatus,
+  onUploadImage,
 }) {
   return (
     <>
@@ -57,7 +59,9 @@ export default function SavedPackDetail({
           gameType={gameType}
           question={editorQuestion}
           onCancel={onStopEditing}
+          onDeleteImage={onDeleteImage}
           onSave={onSaveQuestion}
+          onUploadImage={onUploadImage}
         />
       )}
 

@@ -20,7 +20,7 @@ const io = new Server(server, {
 const rooms = new Map()
 
 app.use(cors({ origin: corsOrigin, credentials: true }))
-app.use(express.json())
+app.use(express.json({ limit: '8mb' }))
 
 function broadcast(room) {
   for (const socketId of room.socketIds) {
@@ -50,7 +50,10 @@ app.use('/api/me', customQuestionsRouter)
 app.use('/api/{*splat}', (error, _request, response, next) => {
   void next
   console.error('API request failed', error)
-  response.status(500).json({ ok: false, error: 'The account server could not complete that request.' })
+  response.status(error?.status || 500).json({
+    ok: false,
+    error: error?.message || 'The account server could not complete that request.',
+  })
 })
 
 if (process.env.NODE_ENV === 'production') {

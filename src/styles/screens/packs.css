@@ -312,6 +312,187 @@
   gap: 10px;
 }
 
+.question-image-builder {
+  display: grid;
+  gap: 10px;
+}
+
+.question-image-toggle {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  min-height: 70px;
+  padding: 14px 16px;
+  border: 1px solid rgba(246, 230, 189, .18);
+  border-radius: 8px;
+  color: var(--cream);
+  text-align: left;
+  background:
+    linear-gradient(145deg, rgba(246, 230, 189, .08), rgba(255, 255, 255, .025)),
+    rgba(255, 255, 255, .045);
+}
+
+.question-image-toggle::after {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform .18s ease;
+}
+
+.question-image-builder.expanded .question-image-toggle::after {
+  transform: rotate(225deg);
+}
+
+.question-image-toggle span:first-child {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.question-image-toggle strong {
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.question-image-toggle small,
+.question-image-builder small,
+.question-image-error {
+  color: var(--muted);
+  font-size: .82rem;
+  line-height: 1.4;
+}
+
+.question-image-toggle-meta {
+  justify-self: end;
+  padding: 5px 9px;
+  border: 1px solid rgba(246, 230, 189, .18);
+  border-radius: 999px;
+  color: var(--cream);
+  font-size: .78rem;
+  font-weight: 900;
+  white-space: nowrap;
+  background: rgba(0, 0, 0, .16);
+}
+
+.question-image-error {
+  color: #ffb39b;
+  font-weight: 900;
+}
+
+.question-image-panel,
+.question-image-list {
+  display: grid;
+  gap: 10px;
+}
+
+.question-image-dropzone {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  place-items: center;
+  min-height: 210px;
+  padding: 26px;
+  border: 2px dashed rgba(246, 230, 189, .26);
+  border-radius: 8px;
+  color: var(--cream);
+  text-align: center;
+  background: rgba(255, 255, 255, .035);
+}
+
+.question-image-dropzone.dragging,
+.question-image-dropzone:hover {
+  border-color: rgba(246, 230, 189, .56);
+  background: rgba(246, 230, 189, .07);
+}
+
+.question-image-dropzone input[type="file"] {
+  position: absolute;
+  inset: 0;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.question-image-dropzone strong {
+  font-size: 1.08rem;
+}
+
+.question-image-dropzone > span:not(.question-image-upload-icon) {
+  color: var(--muted);
+}
+
+.question-image-dropzone button {
+  margin-top: 6px;
+  min-width: 150px;
+}
+
+.question-image-upload-icon {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border: 1px solid rgba(246, 230, 189, .2);
+  border-radius: 50%;
+  color: var(--cream);
+  background: rgba(255, 255, 255, .055);
+}
+
+.question-image-upload-icon svg {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.2;
+}
+
+.question-image-url-row,
+.question-image-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.question-image-url-row button,
+.question-image-item button {
+  min-width: 104px;
+}
+
+.question-image-item {
+  grid-template-columns: 96px minmax(0, 1fr) auto;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .045);
+}
+
+.question-image-thumb {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 70px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .9);
+}
+
+.question-image-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 5px;
+}
+
 .pack-icon-button {
   position: relative;
   display: inline-grid;
@@ -706,6 +887,16 @@
 
   .packs-heading h1 {
     font-size: clamp(2rem, 9vw, 2.8rem);
+  }
+
+  .question-image-url-row,
+  .question-image-item {
+    grid-template-columns: 1fr;
+  }
+
+  .question-image-url-row button,
+  .question-image-item button {
+    width: 100%;
   }
 
   .packs-page .pack-game-grid {

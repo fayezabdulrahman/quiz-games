@@ -81,6 +81,9 @@ export const GAME_QUESTION_BUILDERS = {
 const MAX_PROMPT_LENGTH = 360
 const MAX_TEXT_LENGTH = 160
 const MAX_EXPLANATION_LENGTH = 420
+const MAX_IMAGE_ATTACHMENTS = 4
+const MAX_IMAGE_SRC_LENGTH = 2_000
+const MAX_STORAGE_KEY_LENGTH = 512
 
 function cleanText(value, maxLength = MAX_TEXT_LENGTH) {
   return String(value || '').trim().replace(/\s+/g, ' ').slice(0, maxLength)
@@ -88,6 +91,21 @@ function cleanText(value, maxLength = MAX_TEXT_LENGTH) {
 
 function cleanLongText(value, maxLength = MAX_PROMPT_LENGTH) {
   return String(value || '').trim().replace(/\s+/g, ' ').slice(0, maxLength)
+}
+
+function cleanImageMedia(input = []) {
+  return (Array.isArray(input) ? input : [])
+    .map((item) => ({
+      type: 'image',
+      src: String(item?.src || '').trim(),
+      alt: cleanText(item?.alt || item?.name || 'Question image', 120),
+      storageKey: cleanText(item?.storageKey, MAX_STORAGE_KEY_LENGTH),
+    }))
+    .filter((item) => {
+      if (!item.src || item.src.length > MAX_IMAGE_SRC_LENGTH) return false
+      return /^https?:\/\//i.test(item.src)
+    })
+    .slice(0, MAX_IMAGE_ATTACHMENTS)
 }
 
 function cleanList(values, maxItems, maxLength = MAX_TEXT_LENGTH) {
@@ -116,7 +134,12 @@ function baseForm(input = {}) {
     prompt: cleanLongText(input.prompt),
     answer: cleanText(input.answer),
     explanation: cleanLongText(input.explanation, MAX_EXPLANATION_LENGTH),
+    media: cleanImageMedia(input.media),
   }
+}
+
+function mediaPayload(form) {
+  return form.media?.length ? { media: form.media } : {}
 }
 
 function validatePrompt(form, errors) {
@@ -161,6 +184,7 @@ function buildOnePercent(input) {
       explanation: form.explanation || null,
       difficulty: form.difficulty,
       payload: {
+        ...mediaPayload(form),
         legacyType: form.type,
         detail: form.detail || null,
         options: form.type === 'choice' ? form.options : null,
@@ -196,6 +220,7 @@ function buildMillionLadder(input) {
       explanation: form.explanation || null,
       difficulty: null,
       payload: {
+        ...mediaPayload(form),
         legacyType: 'choice',
         rung: Number.isInteger(form.rung) ? form.rung - 1 : null,
         options: form.options,
@@ -222,7 +247,7 @@ function buildBluffBattle(input) {
       answer: form.answer || null,
       explanation: form.explanation || null,
       difficulty: null,
-      payload: { inputMode: form.inputMode },
+      payload: { ...mediaPayload(form), inputMode: form.inputMode },
     },
   }
 }
@@ -246,7 +271,7 @@ function buildMajorityRules(input) {
       answer: null,
       explanation: form.explanation || null,
       difficulty: null,
-      payload: { options: form.options },
+      payload: { ...mediaPayload(form), options: form.options },
     },
   }
 }
@@ -289,7 +314,7 @@ function buildSurveyShowdown(input) {
       answer: null,
       explanation: form.explanation || null,
       difficulty: null,
-      payload: { answers },
+      payload: { ...mediaPayload(form), answers },
     },
   }
 }
@@ -335,6 +360,7 @@ function buildSayWhatYouSee(input) {
       explanation: form.explanation || null,
       difficulty: null,
       payload: {
+        ...mediaPayload(form),
         acceptedAnswers,
         layout: form.layout,
         tokens: form.tokens,
@@ -385,6 +411,7 @@ export function formFromQuestion(question) {
       answer: question.answer || '',
       acceptedAnswers: payload.acceptedAnswers || (question.answer ? [question.answer] : []),
       explanation: question.explanation || '',
+      media: cleanImageMedia(payload.media),
     }
   }
   if (question?.gameType === 'million-ladder') {
@@ -394,6 +421,7 @@ export function formFromQuestion(question) {
       options: payload.options || ['', '', '', ''],
       answer: question.answer || '',
       explanation: question.explanation || '',
+      media: cleanImageMedia(payload.media),
     }
   }
   if (question?.gameType === 'bluff-battle') {
@@ -402,6 +430,7 @@ export function formFromQuestion(question) {
       answer: question.answer || '',
       inputMode: payload.inputMode || 'text',
       explanation: question.explanation || '',
+      media: cleanImageMedia(payload.media),
     }
   }
   if (question?.gameType === 'majority-rules') {
@@ -409,6 +438,7 @@ export function formFromQuestion(question) {
       prompt: question.prompt || '',
       options: payload.options || ['', '', '', ''],
       explanation: question.explanation || '',
+      media: cleanImageMedia(payload.media),
     }
   }
   if (question?.gameType === 'survey-showdown') {
@@ -416,6 +446,7 @@ export function formFromQuestion(question) {
       prompt: question.prompt || '',
       answers: payload.answers || [],
       explanation: question.explanation || '',
+      media: cleanImageMedia(payload.media),
     }
   }
   if (question?.gameType === 'quickfire-30') {
@@ -428,6 +459,7 @@ export function formFromQuestion(question) {
       explanation: question.explanation || '',
       layout: payload.layout || 'square-one',
       tokens: payload.tokens || ['', ''],
+      media: cleanImageMedia(payload.media),
     }
   }
   return {}

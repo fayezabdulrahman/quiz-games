@@ -12,6 +12,7 @@ function baseQuestion(row) {
     prompt: row.prompt,
     answer: row.answer,
     explanation: row.explanation,
+    media: arrayOrNull(row.payload?.media) || [],
   }
 }
 

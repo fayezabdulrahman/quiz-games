@@ -1,3 +1,4 @@
+import QuestionMedia from '../../shared/QuestionMedia.jsx'
 import { isIncompleteDraft, questionKindLabel, questionTitle, statusLabels } from './packData.js'
 import { IconButton } from './packUi.jsx'
 
@@ -8,6 +9,7 @@ export default function QuestionList({ busy = false, emptyMessage, questions, on
         <div key={question.id || question.localId} className="question-row">
           <div>
             <strong>{questionTitle(question)}</strong>
+            <QuestionMedia media={question.payload?.media || question.form?.media} className="compact" />
             <span className="question-meta">
               <span className={`question-status-pill ${isIncompleteDraft(question) ? 'incomplete' : question.status}`}>
                 {isIncompleteDraft(question) ? 'Incomplete draft' : statusLabels[question.status]}

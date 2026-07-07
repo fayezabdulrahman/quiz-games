@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import HostEndGameButton from '../../shared/HostEndGameButton.jsx'
 import Logo from '../../shared/Logo.jsx'
 import PlayerList from '../../shared/PlayerList.jsx'
+import QuestionMedia from '../../shared/QuestionMedia.jsx'
 
 function Progress({ index, total, difficulty }) {
   return (
@@ -264,6 +265,7 @@ export default function QuestionScreen({ state, error, onAnswer, onPass, onRevea
           </div>
           <h1>{state.question.prompt}</h1>
           {state.question.detail && <div className="question-detail">{state.question.detail}</div>}
+          <QuestionMedia media={state.question.media} />
           {error && <p className="game-error" role="alert">{error}</p>}
           {state.phase === 'answering' ? (
             state.isHost ? (

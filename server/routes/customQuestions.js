@@ -1,4 +1,5 @@
 import express from 'express'
+import multer from 'multer'
 import { formFromQuestion } from '../../shared/customQuestionSchemas.js'
 import { resolveAccessFromToken } from '../auth/access.js'
 import {
@@ -13,8 +14,34 @@ import {
   updateUserPack,
   upsertUserQuestion,
 } from '../db/questions/customPacks.js'
+import {
+  assertOwnedStorageKey,
+  cleanupQuestionImages,
+  uploadQuestionImage,
+} from '../storage/r2.js'
 
 export const customQuestionsRouter = express.Router()
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 1_200_000,
+    files: 1,
+  },
+})
+
+function uploadQuestionAsset(request, response, next) {
+  upload.single('image')(request, response, (error) => {
+    if (!error) {
+      next()
+      return
+    }
+    if (error instanceof multer.MulterError && error.code === 'LIMIT_FILE_SIZE') {
+      response.status(400).json({ ok: false, error: 'Each uploaded image must be under 1.2 MB.' })
+      return
+    }
+    next(error)
+  })
+}
 
 function sendResult(response, result) {
   if (!result?.ok) {
@@ -62,6 +89,29 @@ async function requireCustomQuestionAccess(request, response, next) {
 }
 
 customQuestionsRouter.use(requireCustomQuestionAccess)
+
+customQuestionsRouter.post('/question-assets', uploadQuestionAsset, async (request, response, next) => {
+  try {
+    const media = await uploadQuestionImage(request.access, request.file)
+    response.json({ ok: true, media })
+  } catch (error) {
+    next(error)
+  }
+})
+
+customQuestionsRouter.delete('/question-assets', async (request, response, next) => {
+  try {
+    const storageKey = String(request.body?.storageKey || '').trim()
+    if (!assertOwnedStorageKey(request.access, storageKey)) {
+      response.status(400).json({ ok: false, error: 'Choose one of your uploaded images.' })
+      return
+    }
+    const result = await cleanupQuestionImages(request.access, [storageKey])
+    response.json({ ok: true, ...result })
+  } catch (error) {
+    next(error)
+  }
+})
 
 customQuestionsRouter.get('/question-packs', async (request, response, next) => {
   try {

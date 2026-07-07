@@ -79,6 +79,7 @@ function publicQuestion(room, question, socketId) {
     return {
       id: question.id,
       prompt: question.prompt,
+      media: question.media || [],
       answers: question.answers.map((answer, index) => ({
         id: index,
         revealed: room.surveyRevealedAnswerIds.includes(index),
@@ -109,6 +110,7 @@ function publicQuestion(room, question, socketId) {
     inputMode: question.inputMode,
     prompt: question.prompt,
     detail: question.detail,
+    media: question.media || [],
     options:
       room.gameType === 'million-ladder'
         ? question.options.filter((option) => !room.ladderHiddenOptions.includes(option))

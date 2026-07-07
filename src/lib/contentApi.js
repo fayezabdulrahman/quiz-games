@@ -22,6 +22,18 @@ export async function contentRequest(path, { token, method = 'GET', body } = {})
   return readJson(response)
 }
 
+export async function contentFormRequest(path, { token, method = 'POST', body } = {}) {
+  const response = await fetch(apiUrl(path), {
+    method,
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    credentials: 'include',
+    body,
+  })
+  return readJson(response)
+}
+
 export function contentOptionsPath(gameType) {
   return `/api/me/content-options?gameType=${encodeURIComponent(gameType)}`
 }

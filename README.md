@@ -193,13 +193,18 @@ Vercel Functions cannot act as a WebSocket server, so a Vercel-only deployment i
 
 The repository includes `vercel.json` and `render.yaml` for this split.
 
+Use Node 20 or newer for the backend runtime. The Cloudflare R2 upload path uses the current AWS S3 client package, which declares a Node 20+ engine.
+
 1. Create a Render Web Service from the repository using the included Blueprint.
 2. Set Render's `CLIENT_ORIGIN` to the final Vercel URL, such as `https://your-project.vercel.app`. For local testing against the Render backend, the server also allows the default Vite origins `http://localhost:5173` and `http://127.0.0.1:5173`.
 3. Set Render's `CLERK_SECRET_KEY` to the Clerk backend secret key so the server can verify signed-in users and upsert them into Neon.
 4. Set Render's `DATABASE_URL` to the Neon Postgres connection string.
-5. Deploy the frontend to Vercel.
-6. Set Vercel's `VITE_SOCKET_URL` environment variable to the Render service URL, such as `https://one-percent-club-server.onrender.com`.
-7. Redeploy Vercel after adding the environment variable because Vite embeds it at build time.
+5. For custom question image uploads, set Render's Cloudflare R2 variables:
+   `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, and `R2_PUBLIC_BASE_URL`.
+   `R2_PUBLIC_BASE_URL` should be the public bucket URL, preferably a custom domain connected to the bucket.
+6. Deploy the frontend to Vercel.
+7. Set Vercel's `VITE_SOCKET_URL` environment variable to the Render service URL, such as `https://one-percent-club-server.onrender.com`.
+8. Redeploy Vercel after adding the environment variable because Vite embeds it at build time.
 
 For Vercel preview deployments, add their exact origins to `CLIENT_ORIGIN` as a comma-separated list. Leaving `CLIENT_ORIGIN` empty permits all origins and is useful only for initial setup.
 
@@ -213,6 +218,16 @@ Set the Neon connection string in a local `.env` file before running database co
 
 ```dotenv
 DATABASE_URL=postgresql://neondb_owner:your-password@ep-your-branch-id.region.aws.neon.tech/neondb?sslmode=require
+```
+
+Set Cloudflare R2 variables locally before testing custom question image uploads:
+
+```dotenv
+R2_ACCOUNT_ID=your-cloudflare-account-id
+R2_ACCESS_KEY_ID=your-r2-access-key-id
+R2_SECRET_ACCESS_KEY=your-r2-secret-access-key
+R2_BUCKET_NAME=your-r2-bucket
+R2_PUBLIC_BASE_URL=https://your-public-r2-domain.example.com
 ```
 
 Then run migrations normally:

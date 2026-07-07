@@ -6,6 +6,7 @@ import {
   GAME_QUESTION_BUILDERS,
   validateCustomQuestion,
 } from '../../../shared/customQuestionSchemas.js'
+import { cleanupQuestionImages, mediaStorageKeys } from '../../storage/r2.js'
 import { getDb, schema } from '../index.js'
 
 const { questionSets, questions, userGameContentPreferences } = schema
@@ -65,6 +66,15 @@ function questionSelect() {
     createdAt: questions.createdAt,
     updatedAt: questions.updatedAt,
   }
+}
+
+function questionMediaKeys(question) {
+  return mediaStorageKeys(question?.payload?.media)
+}
+
+function removedMediaKeys(previousQuestion, nextPayload) {
+  const nextKeys = new Set(mediaStorageKeys(nextPayload?.media))
+  return questionMediaKeys(previousQuestion).filter((key) => !nextKeys.has(key))
 }
 
 export function isSupportedGame(gameType) {
@@ -201,6 +211,11 @@ export async function updateUserPack(access, packId, input = {}) {
 export async function deleteUserPack(access, packId) {
   const pack = await getUserPack(access, packId)
   if (!pack) return { ok: false, status: 404, error: 'Pack not found.' }
+  const packQuestions = await getDb()
+    .select({ payload: questions.payload })
+    .from(questions)
+    .where(and(eq(questions.questionSetId, pack.id), eq(questions.ownerUserId, access.userId)))
+  const storageKeys = packQuestions.flatMap(questionMediaKeys)
 
   await getDb()
     .update(userGameContentPreferences)
@@ -218,6 +233,7 @@ export async function deleteUserPack(access, packId) {
     .returning({ id: questionSets.id })
 
   if (!deleted) return { ok: false, status: 404, error: 'Pack not found.' }
+  await cleanupQuestionImages(access, storageKeys)
   return { ok: true }
 }
 
@@ -265,7 +281,7 @@ export async function upsertUserQuestion(access, packId, input = {}, questionId 
 
   if (questionId) {
     const [existing] = await getDb()
-      .select({ id: questions.id })
+      .select({ id: questions.id, payload: questions.payload })
       .from(questions)
       .where(
         and(
@@ -275,12 +291,14 @@ export async function upsertUserQuestion(access, packId, input = {}, questionId 
         ),
       )
     if (!existing) return { ok: false, status: 404, error: 'Question not found.' }
+    const keysToDelete = removedMediaKeys(existing, questionValues.payload)
 
     const [updated] = await getDb()
       .update(questions)
       .set(questionValues)
       .where(eq(questions.id, existing.id))
       .returning(questionSelect())
+    await cleanupQuestionImages(access, keysToDelete)
     return { ok: true, question: updated, warnings: validation.warnings }
   }
 
@@ -298,6 +316,18 @@ export async function deleteUserQuestion(access, packId, questionId) {
   const pack = await getUserPack(access, packId)
   if (!pack) return { ok: false, status: 404, error: 'Pack not found.' }
 
+  const [existing] = await getDb()
+    .select({ payload: questions.payload })
+    .from(questions)
+    .where(
+      and(
+        eq(questions.id, questionId),
+        eq(questions.questionSetId, pack.id),
+        eq(questions.ownerUserId, access.userId),
+      ),
+    )
+  const storageKeys = questionMediaKeys(existing)
+
   const [deleted] = await getDb()
     .delete(questions)
     .where(
@@ -310,6 +340,7 @@ export async function deleteUserQuestion(access, packId, questionId) {
     .returning({ id: questions.id })
 
   if (!deleted) return { ok: false, status: 404, error: 'Question not found.' }
+  await cleanupQuestionImages(access, storageKeys)
   return { ok: true }
 }
 

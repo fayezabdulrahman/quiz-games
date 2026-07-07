@@ -36,7 +36,7 @@ function PlayPage({ onHost, onJoin, busy, error, accountAccess, demoMode }) {
         <p>
           {demoMode
             ? 'Play Majority Rules and Million Ladder in Demo mode. Guests can join room by code.'
-            : 'The host chooses the game and controls the room. Players just enter their name and room code, then their phone becomes the controller.'}
+            : 'The host chooses the game and controls the room. Players just enter their name and room code, then their device becomes the controller.'}
         </p>
         {accountAccess?.isSignedIn && !hasFullAccess && (
           <div className="purchase-callout">
@@ -49,11 +49,6 @@ function PlayPage({ onHost, onJoin, busy, error, accountAccess, demoMode }) {
             </Link>
           </div>
         )}
-        <div className="play-benefits">
-          <span>Family game nights</span>
-          <span>Friend groups</span>
-          <span>Office socials</span>
-        </div>
       </div>
       <PlayForm
         onHost={onHost}

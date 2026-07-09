@@ -1,5 +1,5 @@
 import { SignInButton, useAuth } from '@clerk/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { games } from '../../data/games.js'
 import { contentFormRequest, contentRequest, questionPacksPath } from '../../lib/contentApi.js'
 import { validateCustomQuestion } from '../../../shared/customQuestionSchemas.js'
@@ -25,6 +25,8 @@ export default function PacksPage({ accountAccess }) {
   const [busy, setBusy] = useState(false)
   const [packsLoading, setPacksLoading] = useState(false)
   const [deleteConfirmation, setDeleteConfirmation] = useState(null)
+  const editorScrollRef = useRef(null)
+  const shouldScrollToEditorRef = useRef(false)
   const selectedGame = games.find((game) => game.id === gameType)
 
   const canManage = Boolean(
@@ -149,6 +151,14 @@ export default function PacksPage({ accountAccess }) {
     }
   }, [selectedPackId, getToken])
 
+  useEffect(() => {
+    if (!editing || !shouldScrollToEditorRef.current) return
+    shouldScrollToEditorRef.current = false
+    window.requestAnimationFrame(() => {
+      editorScrollRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }, [editing, editorQuestion])
+
   const resetPackWorkspace = () => {
     setSelectedPack(null)
     setEditing(false)
@@ -172,6 +182,7 @@ export default function PacksPage({ accountAccess }) {
   }
 
   const startQuestion = () => {
+    shouldScrollToEditorRef.current = true
     setEditorQuestion(null)
     setEditing(true)
   }
@@ -181,6 +192,7 @@ export default function PacksPage({ accountAccess }) {
     setSelectedPackId(null)
     setSelectedPack(null)
     setEditorQuestion(null)
+    shouldScrollToEditorRef.current = true
     setEditing(true)
     setComposingPack(true)
     setDraftPackTitle('')
@@ -299,6 +311,7 @@ export default function PacksPage({ accountAccess }) {
   }
 
   const editQuestion = (question) => {
+    shouldScrollToEditorRef.current = true
     setEditorQuestion(question)
     setEditing(true)
   }
@@ -472,6 +485,7 @@ export default function PacksPage({ accountAccess }) {
               <ComposingPackDetail
                 busy={busy}
                 draftPackTitle={draftPackTitle}
+                editorRef={editorScrollRef}
                 editorQuestion={editorQuestion}
                 editing={editing}
                 gameType={gameType}
@@ -491,6 +505,7 @@ export default function PacksPage({ accountAccess }) {
             ) : (
               <SavedPackDetail
                 busy={busy}
+                editorRef={editorScrollRef}
                 editorQuestion={editorQuestion}
                 editing={editing}
                 gameType={gameType}

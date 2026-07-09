@@ -5,6 +5,7 @@ import { IconButton } from './packUi.jsx'
 
 export default function SavedPackDetail({
   busy,
+  editorRef,
   editorQuestion,
   editing,
   gameType,
@@ -55,14 +56,16 @@ export default function SavedPackDetail({
       </div>
 
       {editing && (
-        <QuestionEditor
-          gameType={gameType}
-          question={editorQuestion}
-          onCancel={onStopEditing}
-          onDeleteImage={onDeleteImage}
-          onSave={onSaveQuestion}
-          onUploadImage={onUploadImage}
-        />
+        <div ref={editorRef} className="question-editor-anchor">
+          <QuestionEditor
+            gameType={gameType}
+            question={editorQuestion}
+            onCancel={onStopEditing}
+            onDeleteImage={onDeleteImage}
+            onSave={onSaveQuestion}
+            onUploadImage={onUploadImage}
+          />
+        </div>
       )}
 
       <QuestionList

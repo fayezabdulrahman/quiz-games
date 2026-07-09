@@ -5,6 +5,7 @@ import { Field, IconButton } from './packUi.jsx'
 export default function ComposingPackDetail({
   busy,
   draftPackTitle,
+  editorRef,
   editorQuestion,
   editing,
   gameType,
@@ -46,14 +47,16 @@ export default function ComposingPackDetail({
         />
       </Field>
       {editing ? (
-        <QuestionEditor
-          gameType={gameType}
-          question={editorQuestion}
-          onCancel={onStopEditing}
-          onDeleteImage={onDeleteImage}
-          onSave={onSaveQuestion}
-          onUploadImage={onUploadImage}
-        />
+        <div ref={editorRef} className="question-editor-anchor">
+          <QuestionEditor
+            gameType={gameType}
+            question={editorQuestion}
+            onCancel={onStopEditing}
+            onDeleteImage={onDeleteImage}
+            onSave={onSaveQuestion}
+            onUploadImage={onUploadImage}
+          />
+        </div>
       ) : (
         <div className="pack-inline-actions">
           <IconButton

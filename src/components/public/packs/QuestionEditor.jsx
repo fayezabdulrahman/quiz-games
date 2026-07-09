@@ -6,6 +6,7 @@ import {
   SAY_WHAT_YOU_SEE_LAYOUTS,
   validateCustomQuestion,
 } from '../../../../shared/customQuestionSchemas.js'
+import Spinner from '../../shared/Spinner.jsx'
 import { Field, IconButton } from './packUi.jsx'
 
 function inputList(values, count) {
@@ -14,9 +15,8 @@ function inputList(values, count) {
 
 function splitLines(value) {
   return String(value || '')
+    .replace(/\r\n?/g, '\n')
     .split('\n')
-    .map((item) => item.trim())
-    .filter(Boolean)
 }
 
 function joinLines(values) {
@@ -36,8 +36,10 @@ function ImageAttachments({ media = [], onChange, onDeleteImage, onUploadImage }
   const [error, setError] = useState('')
   const [isExpanded, setIsExpanded] = useState(media.length > 0)
   const [isDragging, setIsDragging] = useState(false)
+  const [uploadingCount, setUploadingCount] = useState(0)
 
   const remainingSlots = Math.max(0, 4 - media.length)
+  const isUploading = uploadingCount > 0
 
   const updateItem = (index, patch) => {
     onChange(media.map((item, itemIndex) => (itemIndex === index ? { ...item, ...patch } : item)))
@@ -96,11 +98,15 @@ function ImageAttachments({ media = [], onChange, onDeleteImage, onUploadImage }
     }
 
     let uploaded = []
+    setError('')
+    setUploadingCount(acceptedFiles.length)
     try {
       uploaded = await Promise.all(acceptedFiles.map((file) => onUploadImage(file)))
     } catch (uploadError) {
       setError(uploadError?.message || 'Could not upload that image.')
       return
+    } finally {
+      setUploadingCount(0)
     }
 
     if (uploaded.length) {
@@ -117,6 +123,7 @@ function ImageAttachments({ media = [], onChange, onDeleteImage, onUploadImage }
   const dropImages = async (event) => {
     event.preventDefault()
     setIsDragging(false)
+    if (isUploading) return
     await processFiles(event.dataTransfer.files)
   }
 
@@ -140,13 +147,16 @@ function ImageAttachments({ media = [], onChange, onDeleteImage, onUploadImage }
       {isExpanded && (
         <div className="question-image-panel">
           <div
-            className={`question-image-dropzone ${isDragging ? 'dragging' : ''}`}
+            className={`question-image-dropzone ${isDragging ? 'dragging' : ''} ${isUploading ? 'uploading' : ''}`}
+            aria-busy={isUploading}
             onDragEnter={(event) => {
               event.preventDefault()
+              if (isUploading) return
               setIsDragging(true)
             }}
             onDragOver={(event) => {
               event.preventDefault()
+              if (isUploading) return
               setIsDragging(true)
             }}
             onDragLeave={() => setIsDragging(false)}
@@ -157,22 +167,27 @@ function ImageAttachments({ media = [], onChange, onDeleteImage, onUploadImage }
               type="file"
               accept="image/png,image/jpeg,image/webp,image/gif"
               multiple
+              disabled={isUploading}
               onChange={uploadImages}
             />
-            <span className="question-image-upload-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <path d="M12 16V5M8 9l4-4 4 4M5 16v3h14v-3" />
-              </svg>
-            </span>
-            <strong>Drag and drop images here</strong>
-            <span>or choose files from your device</span>
+            {isUploading ? (
+              <Spinner className="question-image-upload-spinner" label="Uploading image" />
+            ) : (
+              <span className="question-image-upload-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="M12 16V5M8 9l4-4 4 4M5 16v3h14v-3" />
+                </svg>
+              </span>
+            )}
+            <strong>{isUploading ? `Uploading ${uploadingCount} image${uploadingCount === 1 ? '' : 's'}` : 'Drag and drop images here'}</strong>
+            <span>{isUploading ? 'Your preview will appear here once the upload finishes.' : 'or choose files from your device'}</span>
             <button
               type="button"
               className="secondary"
-              disabled={remainingSlots === 0}
+              disabled={remainingSlots === 0 || isUploading}
               onClick={() => fileInputRef.current?.click()}
             >
-              Choose images
+              {isUploading ? 'Uploading...' : 'Choose images'}
             </button>
             <small>PNG, JPEG, WebP, or GIF. {remainingSlots} slot{remainingSlots === 1 ? '' : 's'} left.</small>
           </div>
@@ -183,7 +198,7 @@ function ImageAttachments({ media = [], onChange, onDeleteImage, onUploadImage }
               placeholder="https://example.com/question-image.png"
               onChange={(event) => setImageUrl(event.target.value)}
             />
-            <button type="button" className="secondary" disabled={media.length >= 4} onClick={addImageUrl}>
+            <button type="button" className="secondary" disabled={media.length >= 4 || isUploading} onClick={addImageUrl}>
               Add URL
             </button>
           </div>

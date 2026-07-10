@@ -17,6 +17,7 @@ import './styles/game-modes/survey-showdown.css'
 import './styles/game-modes/quickfire-30.css'
 import './styles/game-modes/say-what-you-see.css'
 import './styles/theme-game-night.css'
+import './styles/components/host-player-manager.css'
 
 const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 

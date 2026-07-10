@@ -44,9 +44,8 @@ function Leaderboard({ players, highlightId }) {
   )
 }
 
-function BluffForm({ inputMode, onSubmit }) {
+function BluffForm({ onSubmit }) {
   const [bluff, setBluff] = useState('')
-  const expectsNumber = inputMode === 'numeric'
 
   const submit = (event) => {
     event.preventDefault()
@@ -61,9 +60,8 @@ function BluffForm({ inputMode, onSubmit }) {
         value={bluff}
         onChange={(event) => setBluff(event.target.value)}
         maxLength={100}
-        placeholder={expectsNumber ? 'Enter a convincing number…' : 'Make it convincing…'}
+        placeholder="Make it convincing…"
         autoComplete="off"
-        inputMode={inputMode}
       />
       <div>
         <span>{bluff.length}/100</span>
@@ -194,7 +192,7 @@ export default function BluffBattleScreen({
                 <div><strong>Bluff locked</strong><span>Keep a straight face while everyone else writes.</span></div>
               </div>
             ) : (
-              <BluffForm inputMode={state.question.inputMode} onSubmit={onSubmitBluff} />
+              <BluffForm onSubmit={onSubmitBluff} />
             )
           )}
 

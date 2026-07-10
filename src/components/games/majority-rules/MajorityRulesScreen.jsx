@@ -46,28 +46,40 @@ function Leaderboard({ players, highlightId }) {
 
 function Results({ state }) {
   const maxVotes = Math.max(1, ...state.question.results.map((result) => result.votes))
+  const totalVotes = state.question.results.reduce((sum, result) => sum + result.votes, 0)
+  const hasMajority = state.question.majorityAnswers.length === 1
+  const isSplit = totalVotes > 0 && !hasMajority
   const matched = state.me?.roundPoints > 0
 
   return (
     <div className="majority-results">
       <div className="eyebrow">
-        {state.question.majorityAnswers.length > 1 ? 'The room is split' : 'The majority chose'}
+        {isSplit ? 'The room is split' : hasMajority ? 'The majority chose' : 'No votes submitted'}
       </div>
       <div className="majority-answer">
-        {state.question.majorityAnswers.length
-          ? state.question.majorityAnswers.join(' & ')
-          : 'No votes submitted'}
+        {hasMajority
+          ? state.question.majorityAnswers[0]
+          : isSplit
+            ? 'No majority, no points'
+            : 'No votes submitted'}
       </div>
       <div className="vote-bars">
         {state.question.results.map((result) => (
           <div
-            className={state.question.majorityAnswers.includes(result.option) ? 'winner' : ''}
+            className={hasMajority && state.question.majorityAnswers.includes(result.option) ? 'winner' : ''}
             key={result.option}
           >
             <div className="vote-copy">
               <strong>{result.option}</strong>
               <span>{result.votes} {result.votes === 1 ? 'vote' : 'votes'}</span>
             </div>
+            {result.voterNames?.length > 0 && (
+              <div className="vote-voters" aria-label={`${result.option} voters`}>
+                {result.voterNames.map((name) => (
+                  <span key={name}>{name}</span>
+                ))}
+              </div>
+            )}
             <div className="vote-track">
               <span style={{ width: `${(result.votes / maxVotes) * 100}%` }} />
             </div>
@@ -76,7 +88,11 @@ function Results({ state }) {
       </div>
       {!state.isHost && (
         <div className={`result-banner ${matched ? 'right' : 'wrong'}`}>
-          {matched ? 'You read the room — one point!' : 'You missed the majority this time.'}
+          {matched
+            ? 'You read the room - one point!'
+            : isSplit
+              ? 'No majority this round - no points awarded.'
+              : 'You missed the majority this time.'}
         </div>
       )}
     </div>

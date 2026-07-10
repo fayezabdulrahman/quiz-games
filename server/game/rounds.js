@@ -17,21 +17,28 @@ export function createRoundController({ broadcast, questionDurationMs }) {
 
     if (room.gameType === 'majority-rules') {
       const counts = new Map(question.options.map((option) => [option, 0]))
+      const voterNames = new Map(question.options.map((option) => [option, []]))
       room.players.forEach((player) => {
         if (player.hasAnswered && counts.has(player.answer)) {
           counts.set(player.answer, counts.get(player.answer) + 1)
+          voterNames.get(player.answer).push(player.name)
         }
       })
       const largestCount = Math.max(0, ...counts.values())
-      room.majorityAnswers =
+      const topAnswers =
         largestCount > 0
           ? [...counts.entries()]
               .filter(([, count]) => count === largestCount)
               .map(([option]) => option)
           : []
+      room.majorityAnswers =
+        topAnswers.length === 1
+          ? topAnswers
+          : []
       room.roundResults = question.options.map((option) => ({
         option,
         votes: counts.get(option),
+        voterNames: voterNames.get(option),
       }))
       room.players.forEach((player) => {
         player.roundPoints =

@@ -440,6 +440,39 @@ export function registerSocketHandlers({
       closeRoom({ io, rooms, room, clearQuestionTimer })
     })
 
+    socket.on('host:kick-player', ({ code, playerId } = {}, callback) => {
+      const room = getRoom(rooms, code)
+      if (!room || room.hostSocketId !== socket.id) {
+        return replyError(callback, 'Only the host can remove players.')
+      }
+
+      const playerIndex = room.players.findIndex((player) => player.id === playerId)
+      if (playerIndex === -1) return replyError(callback, 'That player is no longer in the room.')
+
+      const [player] = room.players.splice(playerIndex, 1)
+      room.socketIds.delete(player.socketId)
+      room.surveyTeams.forEach((team) => {
+        team.playerIds = team.playerIds.filter((id) => id !== player.id)
+      })
+      room.quickfireTeams.forEach((team) => {
+        team.playerIds = team.playerIds.filter((id) => id !== player.id)
+      })
+      if (room.surveyActivePlayerId === player.id) room.surveyActivePlayerId = null
+      if (room.quickfireActivePlayerId === player.id) room.quickfireActivePlayerId = null
+      if (room.catchphraseBuzzerPlayerId === player.id) room.catchphraseBuzzerPlayerId = null
+      if (player.ladderRole === 'contestant' && room.players.length) {
+        room.players[0].ladderRole = 'contestant'
+      }
+
+      if (player.socketId) {
+        io.to(player.socketId).emit('room:kicked')
+        io.sockets.sockets.get(player.socketId)?.leave(room.code)
+      }
+      finishAudienceVoteIfReady(room, resumeQuestionTimer)
+      callback?.({ ok: true })
+      broadcast(room)
+    })
+
     socket.on('host:return-to-games', ({ code } = {}, callback) => {
       const room = getRoom(rooms, code)
       if (!room || room.hostSocketId !== socket.id) {

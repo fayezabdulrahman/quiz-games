@@ -186,13 +186,31 @@
 	 color: #959bb2;
 	 font-size: .8rem;
 }
- .vote-copy strong {
+.vote-copy strong {
 	 color: #d9dcec;
 }
- .vote-bars .winner .vote-copy strong {
+.vote-bars .winner .vote-copy strong {
 	 color: var(--majority-pink);
 }
- .vote-track {
+ .vote-voters {
+	 display: flex;
+	 flex-wrap: wrap;
+	 gap: 6px;
+	 margin: -1px 0 9px;
+}
+ .vote-voters span {
+	 max-width: 100%;
+	 padding: 4px 8px;
+	 border: 1px solid rgba(255,255,255,.12);
+	 border-radius: 999px;
+	 color: #f3f0ff;
+	 background: rgba(255,255,255,.07);
+	 font-size: .74rem;
+	 font-weight: 800;
+	 line-height: 1.1;
+	 overflow-wrap: anywhere;
+}
+.vote-track {
 	 height: 8px;
 	 overflow: hidden;
 	 border-radius: 8px;

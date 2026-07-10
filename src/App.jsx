@@ -15,6 +15,7 @@ import RoomGamePicker from './components/room-game-picker/RoomGamePicker.jsx'
 import SayWhatYouSeeFinished from './components/games/say-what-you-see/SayWhatYouSeeFinished.jsx'
 import SayWhatYouSeeScreen from './components/games/say-what-you-see/SayWhatYouSeeScreen.jsx'
 import AppLoadingScreen from './components/shared/AppLoadingScreen.jsx'
+import HostPlayerManager from './components/shared/HostPlayerManager.jsx'
 import SurveyShowdownFinished from './components/games/survey-showdown/SurveyShowdownFinished.jsx'
 import SurveyShowdownScreen from './components/games/survey-showdown/SurveyShowdownScreen.jsx'
 import { useAccountAccess } from './hooks/useAccountAccess.js'
@@ -54,6 +55,7 @@ export default function App() {
     restartGame,
     returnToGames,
     closeRoom,
+    kickPlayer,
     selectRoomGame,
   } = useGameSession({ getAuthToken: isSignedIn ? getToken : null })
 
@@ -72,6 +74,8 @@ export default function App() {
       />
     )
   }
+
+  const renderRoom = () => {
 
   if (state.phase === 'lobby') {
     return (
@@ -234,5 +238,13 @@ export default function App() {
       onNext={nextQuestion}
       onEnd={endGame}
     />
+  )
+  }
+
+  return (
+    <>
+      {renderRoom()}
+      <HostPlayerManager state={state} onKick={kickPlayer} />
+    </>
   )
 }

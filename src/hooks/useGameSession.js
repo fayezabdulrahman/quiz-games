@@ -45,6 +45,11 @@ export function useGameSession({ getAuthToken } = {}) {
       setError(closingRoomRef.current ? '' : 'The host closed the room.')
       closingRoomRef.current = false
     }
+    const onKicked = () => {
+      clearSavedSession()
+      setState(null)
+      setError('The host removed you from the room.')
+    }
     const restoreSession = async () => {
       const savedSession = readSavedSession()
       if (!savedSession?.code || !savedSession?.sessionToken) return
@@ -56,12 +61,14 @@ export function useGameSession({ getAuthToken } = {}) {
     socket.connect()
     socket.on('room:state', onState)
     socket.on('room:closed', onClosed)
+    socket.on('room:kicked', onKicked)
     socket.on('connect', restoreSession)
     if (socket.connected) restoreSession()
 
     return () => {
       socket.off('room:state', onState)
       socket.off('room:closed', onClosed)
+      socket.off('room:kicked', onKicked)
       socket.off('connect', restoreSession)
       socket.disconnect()
     }
@@ -155,6 +162,7 @@ export function useGameSession({ getAuthToken } = {}) {
     restartGame: () => action('host:restart', roomPayload()),
     returnToGames: () => action('host:return-to-games', roomPayload()),
     closeRoom,
+    kickPlayer: (playerId) => action('host:kick-player', { ...roomPayload(), playerId }),
     selectRoomGame: async (gameType, settings) =>
       action('host:select-game', {
         ...roomPayload(),

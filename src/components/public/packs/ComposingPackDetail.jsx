@@ -15,6 +15,7 @@ export default function ComposingPackDetail({
   onDeleteImage,
   onDeleteQuestion,
   onEditQuestion,
+  onGenerateQuestion,
   onSavePack,
   onSaveQuestion,
   onSetDraftPackTitle,
@@ -53,6 +54,7 @@ export default function ComposingPackDetail({
             question={editorQuestion}
             onCancel={onStopEditing}
             onDeleteImage={onDeleteImage}
+            onGenerate={onGenerateQuestion}
             onSave={onSaveQuestion}
             onUploadImage={onUploadImage}
           />

@@ -7,6 +7,7 @@ import {
   validateCustomQuestion,
 } from '../../../../shared/customQuestionSchemas.js'
 import Spinner from '../../shared/Spinner.jsx'
+import DeleteConfirmationModal from './DeleteConfirmationModal.jsx'
 import { Field, IconButton } from './packUi.jsx'
 
 function inputList(values, count) {
@@ -327,7 +328,19 @@ function SurveyAnswers({ answers, onChange }) {
   )
 }
 
-export default function QuestionEditor({ gameType, question, onCancel, onDeleteImage, onSave, onUploadImage }) {
+function hasMeaningfulContent(form) {
+  return Object.entries(form || {}).some(([key, value]) => {
+    if (['media', 'type', 'inputMode', 'layout', 'difficulty', 'rung'].includes(key)) return false
+    if (Array.isArray(value)) return value.some((item) =>
+      typeof item === 'object'
+        ? Object.values(item || {}).some((nested) => Array.isArray(nested) ? nested.some(Boolean) : Boolean(nested))
+        : Boolean(item),
+    )
+    return Boolean(value)
+  })
+}
+
+export default function QuestionEditor({ gameType, question, onCancel, onDeleteImage, onGenerate, onSave, onUploadImage }) {
   const [form, setForm] = useState(() =>
     question?.form ? question.form : question ? formFromQuestion(question) : emptyQuestionForm(gameType),
   )
@@ -335,6 +348,10 @@ export default function QuestionEditor({ gameType, question, onCancel, onDeleteI
     new Set((form.media || []).map((item) => item?.storageKey).filter(Boolean)),
   )
   const temporaryStorageKeys = useRef(new Set())
+  const [aiTopic, setAiTopic] = useState('')
+  const [aiError, setAiError] = useState('')
+  const [generating, setGenerating] = useState(false)
+  const [confirmGeneration, setConfirmGeneration] = useState(false)
   const update = (patch) => setForm((current) => ({ ...current, ...patch }))
   const validation = useMemo(() => validateCustomQuestion(gameType, form), [form, gameType])
 
@@ -362,6 +379,28 @@ export default function QuestionEditor({ gameType, question, onCancel, onDeleteI
     onSave({ form, status })
   }
 
+  const performGeneration = async () => {
+    setConfirmGeneration(false)
+    setGenerating(true)
+    setAiError('')
+    try {
+      const result = await onGenerate({ gameType, topic: aiTopic.trim() })
+      setForm((current) => ({ ...result.form, media: current.media || [] }))
+    } catch (error) {
+      setAiError(error?.message || 'Could not generate a question right now.')
+    } finally {
+      setGenerating(false)
+    }
+  }
+
+  const generate = () => {
+    if (hasMeaningfulContent(form)) {
+      setConfirmGeneration(true)
+      return
+    }
+    performGeneration()
+  }
+
   return (
     <section className="question-editor">
       <div className="pack-section-heading">
@@ -371,6 +410,36 @@ export default function QuestionEditor({ gameType, question, onCancel, onDeleteI
         </div>
         <IconButton label="Close" icon="close" onClick={cancel} />
       </div>
+
+      {gameType !== 'say-what-you-see' && (
+        <div className="question-ai-panel">
+          <div className="question-ai-copy">
+            <strong>Need some inspiration?</strong>
+            <span>Add an optional topic, or leave it blank for a surprise question.</span>
+          </div>
+          <div className="question-ai-controls">
+            <input
+              value={aiTopic}
+              maxLength={300}
+              disabled={generating}
+              placeholder="e.g. 90s football, family-friendly"
+              onChange={(event) => setAiTopic(event.target.value)}
+            />
+            <button type="button" className="question-ai-button" disabled={generating} onClick={generate}>
+              {generating ? <><Spinner label="Generating question" /> Generating...</> : <>
+                <svg className="question-ai-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 2l1.35 4.65L18 8l-4.65 1.35L12 14l-1.35-4.65L6 8l4.65-1.35L12 2Z" />
+                  <path d="M18.5 13l.8 2.7 2.7.8-2.7.8-.8 2.7-.8-2.7-2.7-.8 2.7-.8.8-2.7Z" />
+                  <path d="M5 14l.65 2.35L8 17l-2.35.65L5 20l-.65-2.35L2 17l2.35-.65L5 14Z" />
+                </svg>
+                Generate with AI
+              </>}
+            </button>
+          </div>
+          <small>AI can make mistakes. Review the question and answer before saving.</small>
+          {aiError && <span className="question-ai-error" role="alert">{aiError}</span>}
+        </div>
+      )}
 
       {['one-percent', 'million-ladder', 'bluff-battle', 'majority-rules', 'survey-showdown'].includes(gameType) && (
         <>
@@ -510,6 +579,19 @@ export default function QuestionEditor({ gameType, question, onCancel, onDeleteI
           onClick={() => save('active')}
         />
       </div>
+      <DeleteConfirmationModal
+        confirmation={confirmGeneration ? {
+          title: 'Replace this question?',
+          description: 'The AI-generated question will replace your current question fields.',
+          detail: 'Your attached images will be kept.',
+          confirmLabel: 'Generate question',
+          busyLabel: 'Generating...',
+          variant: 'primary',
+        } : null}
+        busy={generating}
+        onCancel={() => setConfirmGeneration(false)}
+        onConfirm={performGeneration}
+      />
     </section>
   )
 }

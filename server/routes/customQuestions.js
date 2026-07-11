@@ -1,6 +1,8 @@
 import express from 'express'
 import multer from 'multer'
 import { formFromQuestion } from '../../shared/customQuestionSchemas.js'
+import { generateQuestionForm } from '../ai/githubModels.js'
+import { AI_SUPPORTED_GAMES } from '../ai/questionGenerationSpecs.js'
 import { resolveAccessFromToken } from '../auth/access.js'
 import {
   contentOptionsForGame,
@@ -19,6 +21,7 @@ import {
   cleanupQuestionImages,
   uploadQuestionImage,
 } from '../storage/r2.js'
+import { aiDailyLimit, recordSuccessfulGeneration, successfulGenerationsToday } from '../db/questions/aiUsage.js'
 
 export const customQuestionsRouter = express.Router()
 const upload = multer({
@@ -89,6 +92,30 @@ async function requireCustomQuestionAccess(request, response, next) {
 }
 
 customQuestionsRouter.use(requireCustomQuestionAccess)
+
+customQuestionsRouter.post('/question-generation', async (request, response, next) => {
+  try {
+    const gameType = String(request.body?.gameType || '')
+    if (!AI_SUPPORTED_GAMES.has(gameType)) {
+      response.status(400).json({ ok: false, error: 'AI generation is not available for this game.' })
+      return
+    }
+    const limit = aiDailyLimit()
+    if (await successfulGenerationsToday(request.access.userId) >= limit) {
+      response.status(429).json({ ok: false, error: `You have used today’s ${limit} AI generations. Try again tomorrow.` })
+      return
+    }
+    const form = await generateQuestionForm({ gameType, topic: request.body?.topic })
+    const usage = await recordSuccessfulGeneration(request.access.userId)
+    if (!usage.allowed) {
+      response.status(429).json({ ok: false, error: `You have used today’s ${limit} AI generations. Try again tomorrow.` })
+      return
+    }
+    response.json({ ok: true, form, usage })
+  } catch (error) {
+    next(error)
+  }
+})
 
 customQuestionsRouter.post('/question-assets', uploadQuestionAsset, async (request, response, next) => {
   try {

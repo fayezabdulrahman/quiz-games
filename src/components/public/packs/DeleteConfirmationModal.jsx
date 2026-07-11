@@ -31,8 +31,8 @@ export default function DeleteConfirmationModal({ confirmation, busy, onCancel, 
           <button type="button" className="secondary" disabled={busy} onClick={onCancel}>
             Cancel
           </button>
-          <button type="button" className="danger" disabled={busy} onClick={onConfirm}>
-            {busy ? 'Deleting...' : confirmation.confirmLabel}
+          <button type="button" className={confirmation.variant || 'danger'} disabled={busy} onClick={onConfirm}>
+            {busy ? (confirmation.busyLabel || 'Deleting...') : confirmation.confirmLabel}
           </button>
         </div>
       </section>

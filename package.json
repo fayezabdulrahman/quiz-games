@@ -15,6 +15,7 @@
     "db:studio": "drizzle-kit studio",
     "lint": "eslint .",
     "lint:biome": "biome lint .",
+    "test": "node --test",
     "start": "NODE_ENV=production node server/index.js"
   },
   "dependencies": {
@@ -28,6 +29,7 @@
     "drizzle-orm": "^0.45.2",
     "express": "^5.1.0",
     "multer": "^2.2.0",
+    "openai": "^6.46.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

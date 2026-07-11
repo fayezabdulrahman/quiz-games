@@ -54,6 +54,12 @@ export default function PacksPage({ accountAccess }) {
     })
   }
 
+  const generateQuestion = async ({ gameType: targetGameType, topic }) =>
+    tokenRequest('/api/me/question-generation', {
+      method: 'POST',
+      body: { gameType: targetGameType, topic },
+    })
+
   const mediaStorageKeys = (media = []) =>
     Array.from(
       new Set(
@@ -495,6 +501,7 @@ export default function PacksPage({ accountAccess }) {
                 onDeleteQuestion={requestDeletePendingQuestion}
                 onDeleteImage={deleteQuestionImage}
                 onEditQuestion={editQuestion}
+                onGenerateQuestion={generateQuestion}
                 onSavePack={savePack}
                 onSaveQuestion={saveQuestion}
                 onSetDraftPackTitle={setDraftPackTitle}
@@ -514,6 +521,7 @@ export default function PacksPage({ accountAccess }) {
                 onDeleteQuestion={requestDeleteQuestion}
                 onDeleteImage={deleteQuestionImage}
                 onEditQuestion={editQuestion}
+                onGenerateQuestion={generateQuestion}
                 onSaveQuestion={saveQuestion}
                 onStartQuestion={startQuestion}
                 onStopEditing={stopEditing}

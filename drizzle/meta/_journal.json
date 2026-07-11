@@ -8,6 +8,13 @@
       "when": 1782764721869,
       "tag": "0000_zippy_randall_flagg",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1783805061100,
+      "tag": "0001_closed_doctor_doom",
+      "breakpoints": true
     }
   ]
 }

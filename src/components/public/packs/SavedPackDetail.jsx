@@ -14,6 +14,7 @@ export default function SavedPackDetail({
   onDeleteImage,
   onDeleteQuestion,
   onEditQuestion,
+  onGenerateQuestion,
   onSaveQuestion,
   onStartQuestion,
   onStopEditing,
@@ -62,6 +63,7 @@ export default function SavedPackDetail({
             question={editorQuestion}
             onCancel={onStopEditing}
             onDeleteImage={onDeleteImage}
+            onGenerate={onGenerateQuestion}
             onSave={onSaveQuestion}
             onUploadImage={onUploadImage}
           />

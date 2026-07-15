@@ -7,10 +7,11 @@ export default function CatchphraseSettings({
   setCatchphraseTimerEnabled,
   catchphraseGuessSeconds,
   setCatchphraseGuessSeconds,
+  showRoundSetting = true,
 }) {
   return (
     <div className="host-settings catchphrase-settings">
-      <RoundSettingInner
+      {showRoundSetting && <RoundSettingInner
         title="Puzzle rounds"
         description="Choose how many visual clues to play before final scores."
         label="Say What You See rounds"
@@ -18,7 +19,7 @@ export default function CatchphraseSettings({
         min={3}
         max={20}
         onChange={setCatchphraseRoundCount}
-      />
+      />}
       <div className="settings-heading">
         <div>
           <strong>Buzz answer timer</strong>

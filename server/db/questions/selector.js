@@ -94,8 +94,9 @@ async function questionPoolForGame(gameType, settings = {}, context = {}) {
   return userPool
 }
 
-function selectOnePercentQuestions(pool, usedQuestionIds = new Set()) {
-  return difficulties.map((difficulty) => {
+function selectOnePercentQuestions(pool, usedQuestionIds = new Set(), roundCount = 10) {
+  const selectedDifficulties = difficulties.slice(0, roundCount)
+  return selectedDifficulties.map((difficulty) => {
     const unusedQuestions = pool.filter(
       (question) => question.difficulty === difficulty && !usedQuestionIds.has(question.id),
     )
@@ -131,24 +132,23 @@ function selectMillionLadderForRung(pool, rung, usedQuestionIds, excludedId) {
   return structuredClone(selected)
 }
 
-function selectMillionLadderQuestions(pool, usedQuestionIds = new Set()) {
-  return Array.from({ length: 15 }, (_, rung) =>
+function selectMillionLadderQuestions(pool, usedQuestionIds = new Set(), roundCount = 15) {
+  return Array.from({ length: roundCount }, (_, rung) =>
     selectMillionLadderForRung(pool, rung, usedQuestionIds),
   )
 }
 
 export async function selectQuestionsForGame(gameType, usedQuestionIds, settings = {}, context = {}) {
   const pool = await questionPoolForGame(gameType, settings, context)
-  if (settings.accessMode === 'demo') return structuredClone(pool)
-  if (gameType === 'one-percent') return selectOnePercentQuestions(pool, usedQuestionIds)
-  if (gameType === 'million-ladder') return selectMillionLadderQuestions(pool, usedQuestionIds)
+  if (gameType === 'one-percent') return selectOnePercentQuestions(pool, usedQuestionIds, settings.roundCount)
+  if (gameType === 'million-ladder') return selectMillionLadderQuestions(pool, usedQuestionIds, settings.roundCount)
   if (gameType === 'majority-rules') {
     return selectPrompts(pool, settings.roundCount || 8, usedQuestionIds)
   }
   if (gameType === 'bluff-battle') {
     return selectPrompts(pool, settings.roundCount || 6, usedQuestionIds)
   }
-  if (gameType === 'survey-showdown') return selectPrompts(pool, 6, usedQuestionIds)
+  if (gameType === 'survey-showdown') return selectPrompts(pool, settings.roundCount || 6, usedQuestionIds)
   if (gameType === 'say-what-you-see') {
     return selectPrompts(pool, settings.roundCount || 10, usedQuestionIds)
   }

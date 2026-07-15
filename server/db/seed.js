@@ -140,6 +140,16 @@ async function seedOfficialQuestions(db) {
       .returning({ id: questionSets.id })
     questionSetCount += 1
 
+    const currentExternalIds = officialSet.questions.map((question) => question.externalId)
+    await db
+      .delete(questions)
+      .where(
+        and(
+          eq(questions.questionSetId, questionSet.id),
+          notInArray(questions.externalId, currentExternalIds),
+        ),
+      )
+
     for (const question of officialSet.questions) {
       await db
         .insert(questions)

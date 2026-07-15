@@ -51,7 +51,7 @@ export function registerCatchphraseHandlers({
       revealQuestion(room)
     } else {
       room.phase = 'answering'
-      resumeQuestionTimer(room, room.catchphraseTimerRemainingMs || questionDurationMs)
+      resumeQuestionTimer(room, room.catchphraseTimerRemainingMs || (room.settings.questionSeconds * 1000) || questionDurationMs)
     }
     broadcast(room)
   }
@@ -124,7 +124,7 @@ export function registerCatchphraseHandlers({
         revealQuestion(room)
       } else {
         room.phase = 'answering'
-        resumeQuestionTimer(room, room.catchphraseTimerRemainingMs || questionDurationMs)
+        resumeQuestionTimer(room, room.catchphraseTimerRemainingMs || (room.settings.questionSeconds * 1000) || questionDurationMs)
       }
     }
     callback?.({ ok: true, correct: isCorrect })

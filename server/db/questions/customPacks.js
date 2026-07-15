@@ -395,7 +395,7 @@ export async function contentOptionsForGame(access, gameType) {
       official: { enabled: true, reason: '' },
       mixed: {
         enabled: activeQuestions.length > 0,
-        reason: activeQuestions.length > 0 ? '' : 'Add one active custom question to mix it in.',
+        reason: activeQuestions.length > 0 ? '' : 'Add a custom question pack to mix it in.',
       },
       user_only: {
         enabled: readiness.ready,

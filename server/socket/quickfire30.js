@@ -48,8 +48,9 @@ export function registerQuickfireHandlers({
 
   function startQuickfireTimer(room) {
     clearQuestionTimer(room)
-    room.questionEndsAt = Date.now() + questionDurationMs
-    room.questionTimer = setTimeout(() => finishQuickfireTimer(room), questionDurationMs)
+    const durationMs = (room.settings?.questionSeconds || questionDurationMs / 1000) * 1000
+    room.questionEndsAt = Date.now() + durationMs
+    room.questionTimer = setTimeout(() => finishQuickfireTimer(room), durationMs)
   }
 
   socket.on('host:quickfire-assign', ({ code, playerId, teamId } = {}, callback) => {

@@ -25,6 +25,10 @@ export function normalizeCatchphraseGuessSeconds(value) {
   return normalizeBoundedInteger(value, { min: 5, max: 30, defaultValue: 10 })
 }
 
+export function normalizeQuestionSeconds(value) {
+  return normalizeBoundedInteger(value, { min: 5, max: 180, defaultValue: 30 })
+}
+
 function withAccessMode(normalized, settings) {
   const contentSettings =
     settings.accessMode === 'demo'
@@ -39,8 +43,10 @@ function withAccessMode(normalized, settings) {
 }
 
 export function settingsForGame(gameType, settings = {}) {
+  const timed = { questionSeconds: normalizeQuestionSeconds(settings.questionSeconds) }
   if (gameType === 'majority-rules') {
     return withAccessMode({
+      ...timed,
       roundCount:
         settings.accessMode === 'demo'
           ? 8
@@ -53,6 +59,7 @@ export function settingsForGame(gameType, settings = {}) {
   }
   if (gameType === 'bluff-battle') {
     return withAccessMode({
+      ...timed,
       roundCount: normalizeBoundedInteger(settings.roundCount, {
         min: 3,
         max: 20,
@@ -60,10 +67,17 @@ export function settingsForGame(gameType, settings = {}) {
       }),
     }, settings)
   }
-  if (gameType === 'million-ladder') return withAccessMode({ roundCount: 15 }, settings)
-  if (gameType === 'survey-showdown') return withAccessMode({ roundCount: 6 }, settings)
+  if (gameType === 'million-ladder') return withAccessMode({
+    ...timed,
+    roundCount: normalizeBoundedInteger(settings.roundCount, { min: 5, max: 15, defaultValue: 15 }),
+  }, settings)
+  if (gameType === 'survey-showdown') return withAccessMode({
+    ...timed,
+    roundCount: normalizeBoundedInteger(settings.roundCount, { min: 3, max: 12, defaultValue: 6 }),
+  }, settings)
   if (gameType === 'say-what-you-see') {
     return withAccessMode({
+      ...timed,
       roundCount: normalizeBoundedInteger(settings.roundCount, {
         min: 3,
         max: 20,
@@ -75,11 +89,15 @@ export function settingsForGame(gameType, settings = {}) {
   }
   if (gameType === 'quickfire-30') {
     return withAccessMode({
+      ...timed,
       diceMode: settings.diceMode === 'manual' ? 'manual' : 'digital',
-      boardLength: 30,
+      roundCount: normalizeBoundedInteger(settings.roundCount, { min: 10, max: 50, defaultValue: 30 }),
+      boardLength: normalizeBoundedInteger(settings.roundCount, { min: 10, max: 50, defaultValue: 30 }),
     }, settings)
   }
   return withAccessMode({
+    ...timed,
+    roundCount: normalizeBoundedInteger(settings.roundCount, { min: 3, max: 10, defaultValue: 10 }),
     lifelineCount: normalizeBoundedInteger(settings.lifelineCount, {
       min: 0,
       max: 10,

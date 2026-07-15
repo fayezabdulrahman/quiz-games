@@ -19,12 +19,6 @@ export default function GameSettings({
   setLifelineCount,
   lifelinesAnytime,
   setLifelinesAnytime,
-  bluffRoundCount,
-  setBluffRoundCount,
-  majorityRoundCount,
-  setMajorityRoundCount,
-  catchphraseRoundCount,
-  setCatchphraseRoundCount,
   catchphraseTimerEnabled,
   setCatchphraseTimerEnabled,
   catchphraseGuessSeconds,
@@ -67,45 +61,11 @@ export default function GameSettings({
   }
 
   if (gameType === 'bluff-battle') {
-    return (
-      <div className="host-settings room-picker-settings">
-        <SettingsHeading
-          title="Bluff rounds"
-          description="Pick how many prompts to play before the final scores."
-        >
-          <Stepper
-            label="Bluff Battle rounds"
-            value={bluffRoundCount}
-            min={3}
-            max={20}
-            decrementLabel="Remove one Bluff Battle round"
-            incrementLabel="Add one Bluff Battle round"
-            onChange={setBluffRoundCount}
-          />
-        </SettingsHeading>
-      </div>
-    )
+    return null
   }
 
   if (gameType === 'majority-rules' && canConfigureMajorityRounds) {
-    return (
-      <div className="host-settings room-picker-settings">
-        <SettingsHeading
-          title="Majority rounds"
-          description="Pick how many prompts to play before the final scores."
-        >
-          <Stepper
-            label="Majority Rules rounds"
-            value={majorityRoundCount}
-            min={3}
-            max={20}
-            decrementLabel="Remove one Majority Rules round"
-            incrementLabel="Add one Majority Rules round"
-            onChange={setMajorityRoundCount}
-          />
-        </SettingsHeading>
-      </div>
-    )
+    return null
   }
 
   if (gameType === 'majority-rules') {
@@ -119,20 +79,6 @@ export default function GameSettings({
   if (gameType === 'say-what-you-see') {
     return (
       <div className="host-settings room-picker-settings catchphrase-settings">
-        <SettingsHeading
-          title="Puzzle rounds"
-          description="Pick how many visual clues to play before the final scores."
-        >
-          <Stepper
-            label="Say What You See rounds"
-            value={catchphraseRoundCount}
-            min={3}
-            max={20}
-            decrementLabel="Remove one Say What You See round"
-            incrementLabel="Add one Say What You See round"
-            onChange={setCatchphraseRoundCount}
-          />
-        </SettingsHeading>
         <SettingsHeading
           title="Buzz answer timer"
           description={

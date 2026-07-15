@@ -27,7 +27,7 @@ export default function RoundSetting({
         decrementLabel={decrementLabel}
         incrementLabel={incrementLabel}
       />
-      <div className="selected-game-note">{note}</div>
+      {note && <div className="selected-game-note">{note}</div>}
     </div>
   )
 }

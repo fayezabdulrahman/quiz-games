@@ -44,6 +44,7 @@ function gameSettingsFromPayload(payload = {}) {
     lifelinesAnytime,
     diceMode,
     roundCount,
+    questionSeconds,
     guessTimerEnabled,
     guessSeconds,
     contentSelectionMode,
@@ -55,6 +56,7 @@ function gameSettingsFromPayload(payload = {}) {
     lifelinesAnytime,
     diceMode,
     roundCount,
+    questionSeconds,
     guessTimerEnabled,
     guessSeconds,
     contentSelectionMode,
@@ -86,10 +88,6 @@ export function registerSocketHandlers({
   } = roundController
 
   function startRoomQuestionTimer(room) {
-    if (room.gameType === 'million-ladder' && room.questionIndex >= 5) {
-      clearQuestionTimer(room)
-      return
-    }
     startQuestionTimer(room, room.phase)
   }
 

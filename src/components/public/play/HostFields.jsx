@@ -1,6 +1,6 @@
 import { gameMap } from '../../../data/games.js'
 import ContentSelector from '../../content/ContentSelector.jsx'
-import RoundSetting from '../RoundSetting.jsx'
+import { RoundSettingInner } from '../RoundSetting.jsx'
 import CatchphraseSettings from './CatchphraseSettings.jsx'
 import GamePicker from './GamePicker.jsx'
 import OnePercentSettings from './OnePercentSettings.jsx'
@@ -25,6 +25,16 @@ export default function HostFields({
   setCatchphraseTimerEnabled,
   catchphraseGuessSeconds,
   setCatchphraseGuessSeconds,
+  onePercentRoundCount,
+  setOnePercentRoundCount,
+  ladderRoundCount,
+  setLadderRoundCount,
+  surveyRoundCount,
+  setSurveyRoundCount,
+  quickfireRoundCount,
+  setQuickfireRoundCount,
+  questionSeconds,
+  setQuestionSeconds,
   availableGameTypes,
   canConfigureMajorityRounds,
   canManageCustomQuestions,
@@ -33,6 +43,16 @@ export default function HostFields({
   preferredQuestionSetId,
   setPreferredQuestionSetId,
 }) {
+  const roundSettings = {
+    'one-percent': [onePercentRoundCount, setOnePercentRoundCount, 3, 10, 'Questions'],
+    'majority-rules': [majorityRoundCount, setMajorityRoundCount, 3, 20, 'Rounds'],
+    'bluff-battle': [bluffRoundCount, setBluffRoundCount, 3, 20, 'Rounds'],
+    'million-ladder': [ladderRoundCount, setLadderRoundCount, 5, 15, 'Rungs'],
+    'survey-showdown': [surveyRoundCount, setSurveyRoundCount, 3, 12, 'Rounds'],
+    'quickfire-30': [quickfireRoundCount, setQuickfireRoundCount, 10, 50, 'Spaces to win'],
+    'say-what-you-see': [catchphraseRoundCount, setCatchphraseRoundCount, 3, 20, 'Puzzles'],
+  }
+  const [roundCount, setRoundCount, roundMin, roundMax, roundLabel] = roundSettings[gameType]
   return (
     <>
       <GamePicker
@@ -43,6 +63,33 @@ export default function HostFields({
         catchphraseRoundCount={catchphraseRoundCount}
         availableGameTypes={availableGameTypes}
       />
+      <div className="host-settings">
+        {(gameType !== 'majority-rules' || canConfigureMajorityRounds) && (
+          <RoundSettingInner
+            title="Game length"
+            description={`Choose how many ${roundLabel.toLowerCase()} to play.`}
+            label={roundLabel}
+            value={roundCount}
+            min={roundMin}
+            max={roundMax}
+            onChange={setRoundCount}
+          />
+        )}
+        <RoundSettingInner
+          title="Round timer"
+          description="Choose the answer time used for each timed turn."
+          label="Seconds per round"
+          value={questionSeconds}
+          min={5}
+          max={180}
+          step={5}
+          suffix="s"
+          onChange={setQuestionSeconds}
+        />
+        <div className="selected-game-note">
+          You can still end the game early from the host controls.
+        </div>
+      </div>
       {gameType === 'one-percent' && (
         <OnePercentSettings
           lifelineCount={lifelineCount}
@@ -51,23 +98,10 @@ export default function HostFields({
           setLifelinesAnytime={setLifelinesAnytime}
         />
       )}
-      {gameType === 'majority-rules' && (
-        canConfigureMajorityRounds ? (
-          <RoundSetting
-            title="Majority rounds"
-            description="Choose how many room-vote prompts this game will use."
-            label="Majority Rules rounds"
-            value={majorityRoundCount}
-            min={3}
-            max={20}
-            onChange={setMajorityRoundCount}
-            note="Pick the answer you think most of the room will choose. Matching the majority earns one point."
-          />
-        ) : (
+      {gameType === 'majority-rules' && !canConfigureMajorityRounds && (
           <div className="selected-game-note majority-note">
             Majority Rules uses 8 fixed demo rounds. Custom round counts unlock with a paid pack.
           </div>
-        )
       )}
       {gameType === 'say-what-you-see' && (
         <CatchphraseSettings
@@ -77,18 +111,7 @@ export default function HostFields({
           setCatchphraseTimerEnabled={setCatchphraseTimerEnabled}
           catchphraseGuessSeconds={catchphraseGuessSeconds}
           setCatchphraseGuessSeconds={setCatchphraseGuessSeconds}
-        />
-      )}
-      {gameType === 'bluff-battle' && (
-        <RoundSetting
-          title="Bluff rounds"
-          description="Choose how many prompts this game will use."
-          label="Bluff Battle rounds"
-          value={bluffRoundCount}
-          min={3}
-          max={20}
-          onChange={setBluffRoundCount}
-          note="Invent a convincing fake answer, find the truth, and score whenever another player falls for your bluff."
+          showRoundSetting={false}
         />
       )}
       {['million-ladder', 'survey-showdown'].includes(gameType) && (

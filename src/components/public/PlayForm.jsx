@@ -24,6 +24,11 @@ export default function PlayForm({ onHost, onJoin, busy, error, accountAccess, d
   const [bluffRoundCount, setBluffRoundCount] = useState(6)
   const [majorityRoundCount, setMajorityRoundCount] = useState(8)
   const [catchphraseRoundCount, setCatchphraseRoundCount] = useState(10)
+  const [onePercentRoundCount, setOnePercentRoundCount] = useState(10)
+  const [ladderRoundCount, setLadderRoundCount] = useState(15)
+  const [surveyRoundCount, setSurveyRoundCount] = useState(6)
+  const [quickfireRoundCount, setQuickfireRoundCount] = useState(30)
+  const [questionSeconds, setQuestionSeconds] = useState(30)
   const [catchphraseTimerEnabled, setCatchphraseTimerEnabled] = useState(false)
   const [catchphraseGuessSeconds, setCatchphraseGuessSeconds] = useState(10)
   const [contentSelectionMode, setContentSelectionMode] = useState('official')
@@ -43,6 +48,7 @@ export default function PlayForm({ onHost, onJoin, busy, error, accountAccess, d
         lifelineCount,
         lifelinesAnytime,
         diceMode,
+        questionSeconds,
         roundCount:
           selectedGameType === 'say-what-you-see'
             ? catchphraseRoundCount
@@ -52,7 +58,15 @@ export default function PlayForm({ onHost, onJoin, busy, error, accountAccess, d
                 : undefined
               : selectedGameType === 'bluff-battle'
                 ? bluffRoundCount
-                : undefined,
+                : selectedGameType === 'one-percent'
+                  ? onePercentRoundCount
+                  : selectedGameType === 'million-ladder'
+                    ? ladderRoundCount
+                    : selectedGameType === 'survey-showdown'
+                      ? surveyRoundCount
+                      : selectedGameType === 'quickfire-30'
+                        ? quickfireRoundCount
+                        : undefined,
         guessTimerEnabled: catchphraseTimerEnabled,
         guessSeconds: catchphraseGuessSeconds,
         contentSelectionMode,
@@ -106,6 +120,16 @@ export default function PlayForm({ onHost, onJoin, busy, error, accountAccess, d
             setCatchphraseTimerEnabled={setCatchphraseTimerEnabled}
             catchphraseGuessSeconds={catchphraseGuessSeconds}
             setCatchphraseGuessSeconds={setCatchphraseGuessSeconds}
+            onePercentRoundCount={onePercentRoundCount}
+            setOnePercentRoundCount={setOnePercentRoundCount}
+            ladderRoundCount={ladderRoundCount}
+            setLadderRoundCount={setLadderRoundCount}
+            surveyRoundCount={surveyRoundCount}
+            setSurveyRoundCount={setSurveyRoundCount}
+            quickfireRoundCount={quickfireRoundCount}
+            setQuickfireRoundCount={setQuickfireRoundCount}
+            questionSeconds={questionSeconds}
+            setQuestionSeconds={setQuestionSeconds}
             availableGameTypes={availableGameTypes}
             canConfigureMajorityRounds={canConfigureMajorityRounds}
             canManageCustomQuestions={canManageCustomQuestions}

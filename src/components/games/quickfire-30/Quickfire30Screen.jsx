@@ -164,7 +164,7 @@ export default function Quickfire30Screen({
           isDescriber ? (
             <div className="quickfire-ready-card">
               <strong>Ready?</strong>
-              <p>The five answers appear only after you press the button. The shared 30-second clock starts immediately.</p>
+              <p>The five answers appear only after you press the button. The shared {Math.round(state.questionDurationMs / 1000)}-second clock starts immediately.</p>
               <button type="button" className="primary" onClick={onDraw}>Draw card & start</button>
             </div>
           ) : (

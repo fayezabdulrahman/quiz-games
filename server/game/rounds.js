@@ -168,7 +168,7 @@ export function createRoundController({ broadcast, questionDurationMs }) {
 
   function startQuestionTimer(room, expectedPhase = 'answering') {
     clearQuestionTimer(room)
-    scheduleQuestionTimer(room, expectedPhase, questionDurationMs)
+    scheduleQuestionTimer(room, expectedPhase, (room.settings?.questionSeconds || questionDurationMs / 1000) * 1000)
   }
 
   function pauseQuestionTimer(room) {

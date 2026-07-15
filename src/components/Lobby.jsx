@@ -69,8 +69,8 @@ export default function Lobby({
           <div className="room-settings-summary">
             {state.gameType === 'quickfire-30' ? (
               <>
-                <span><strong>30</strong> second team turns</span>
-                <span>{state.settings.diceMode === 'manual' ? 'Physical' : 'Digital'} handicap die · first to 30</span>
+                <span><strong>{state.settings.questionSeconds}</strong> second team turns</span>
+                <span>{state.settings.diceMode === 'manual' ? 'Physical' : 'Digital'} handicap die · first to {state.settings.boardLength}</span>
               </>
             ) : state.gameType === 'say-what-you-see' ? (
               <>
@@ -83,7 +83,7 @@ export default function Lobby({
               </>
             ) : state.gameType === 'survey-showdown' ? (
               <>
-                <span><strong>6</strong> team survey rounds</span>
+                <span><strong>{state.settings.roundCount}</strong> team survey rounds</span>
                 <span>Three strikes · one chance to steal</span>
               </>
             ) : state.gameType === 'bluff-battle' ? (
@@ -93,12 +93,12 @@ export default function Lobby({
               </>
             ) : state.gameType === 'majority-rules' ? (
               <>
-                <span><strong>8</strong> opinion rounds</span>
+                <span><strong>{state.settings.roundCount}</strong> opinion rounds</span>
                 <span>Match the majority to score</span>
               </>
             ) : state.gameType === 'million-ladder' ? (
               <>
-                <span><strong>15</strong> prize questions</span>
+                <span><strong>{state.settings.roundCount}</strong> prize questions</span>
                 <span>First player is contestant · others join the audience</span>
               </>
             ) : (

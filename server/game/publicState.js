@@ -172,7 +172,7 @@ export function createPublicState(room, socketId, questionDurationMs) {
     questionTimeRemainingMs: room.questionEndsAt
       ? Math.max(0, room.questionEndsAt - Date.now())
       : 0,
-    questionDurationMs,
+    questionDurationMs: (room.settings?.questionSeconds || questionDurationMs / 1000) * 1000,
     bluffOptions: bluffOptionsFor(room),
     ownBluffOptionId:
       isBluffBattle && me

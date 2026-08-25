@@ -24,6 +24,15 @@ export default function GameLogoMark({ gameType = 'one-percent', className = '' 
     )
   }
 
+  if (gameType === 'word-wheel') {
+    return (
+      <span className={classNames} aria-label="Word Wheel logo" role="img">
+        <span className="logo-word-wheel-letter" aria-hidden="true">A</span>
+        <span className="logo-word-wheel-letter" aria-hidden="true">Z</span>
+      </span>
+    )
+  }
+
   if (gameType === 'survey-showdown') {
     return (
       <span className={classNames} aria-label="Survey Showdown logo" role="img">

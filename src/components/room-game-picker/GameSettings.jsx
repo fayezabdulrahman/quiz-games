@@ -25,6 +25,8 @@ export default function GameSettings({
   setCatchphraseGuessSeconds,
   diceMode,
   setDiceMode,
+  wordWheelInputMode,
+  setWordWheelInputMode,
 }) {
   if (gameType === 'one-percent') {
     return (
@@ -134,6 +136,33 @@ export default function GameSettings({
             onClick={() => setDiceMode('manual')}
           >
             Physical
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (gameType === 'word-wheel') {
+    return (
+      <div className="host-settings room-picker-settings word-wheel-settings">
+        <SettingsHeading
+          title="Answer mode"
+          description="Speak keeps the room honest; type adds a word check before disputes."
+        />
+        <div className="quickfire-dice-options">
+          <button
+            type="button"
+            className={wordWheelInputMode === 'speak' ? 'active' : ''}
+            onClick={() => setWordWheelInputMode('speak')}
+          >
+            Speak
+          </button>
+          <button
+            type="button"
+            className={wordWheelInputMode === 'type' ? 'active' : ''}
+            onClick={() => setWordWheelInputMode('type')}
+          >
+            Type
           </button>
         </div>
       </div>

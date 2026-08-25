@@ -12,6 +12,11 @@ const GAME_OPTIONS = [
     description: 'Visual puzzles, buzzers and fast guesses',
   },
   {
+    id: 'word-wheel',
+    className: 'word-wheel',
+    description: 'Claim category letters before the timer runs out',
+  },
+  {
     id: 'one-percent',
     description: 'Logic, lifelines and elimination',
   },

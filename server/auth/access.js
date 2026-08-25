@@ -1,19 +1,20 @@
 import { clerkClient, verifyToken } from '@clerk/express'
 import { and, eq, gt, inArray, isNull, or } from 'drizzle-orm'
 import { allowedOrigins } from '../config.js'
+import { launchGameTypes } from '../db/catalog/pricingTiers.js'
 import { getDb, schema } from '../db/index.js'
 
 export const FREE_DEMO_PRODUCT_KEY = 'free_demo'
 export const DEMO_GAME_TYPES = ['majority-rules', 'million-ladder']
 
 const paidPlanRank = {
-  game_night_pack_v1: 2,
-  club_pass_monthly: 3,
+  game_night_pack_v1: 1,
 }
 
 const legacyProductKeyMap = {
   family_pack_v1: 'game_night_pack_v1',
   custom_edition_v1: 'game_night_pack_v1',
+  club_pass_monthly: 'game_night_pack_v1',
 }
 const legacyProductKeys = Object.keys(legacyProductKeyMap)
 const activeEntitlementStatuses = ['active', 'trialing']
@@ -150,14 +151,20 @@ async function paidAccessForUser(clerkUserId, userId) {
     .from(productFeatureGrants)
     .where(inArray(productFeatureGrants.productKey, paidPlanKeys))
 
+  const featureKeys = [...new Set(featureRows.map((row) => row.featureKey))]
+  const allowedGameTypes = [...new Set(rows.map((row) => row.gameType))]
+  if (featureKeys.includes('new_games')) {
+    allowedGameTypes.push(...launchGameTypes)
+  }
+
   return {
     clerkUserId,
     userId,
     productKey: paidPlanKeys[0],
     paidPlanKeys,
-    featureKeys: [...new Set(featureRows.map((row) => row.featureKey))],
+    featureKeys,
     accessMode: 'full',
-    allowedGameTypes: [...new Set(rows.map((row) => row.gameType))],
+    allowedGameTypes: [...new Set(allowedGameTypes)],
     hasFullAccess: true,
   }
 }

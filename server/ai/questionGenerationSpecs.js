@@ -2,7 +2,7 @@ import { validateCustomQuestion } from '../../shared/customQuestionSchemas.js'
 
 export const AI_SUPPORTED_GAMES = new Set([
   'one-percent', 'million-ladder', 'bluff-battle', 'majority-rules',
-  'survey-showdown', 'quickfire-30',
+  'survey-showdown', 'quickfire-30', 'word-wheel',
 ])
 
 const specs = {
@@ -29,6 +29,10 @@ const specs = {
   'quickfire-30': {
     instructions: 'Create exactly 5 distinct, family-friendly terms suitable for a verbal guessing card. Keep terms related by the requested topic but not synonyms of one another.',
     schema: { terms: ['string'] },
+  },
+  'word-wheel': {
+    instructions: 'Create one broad, family-friendly category prompt for a fast word game where players name valid items in the category using unused starting letters. The prompt should start with a phrase like "Things...", "Places...", "Foods...", "Animals...", "Jobs...", or "Items..." and should allow many possible answers across the alphabet. Avoid categories that require specialist knowledge, private information, brands only, or a single correct answer.',
+    schema: { prompt: 'string' },
   },
 }
 

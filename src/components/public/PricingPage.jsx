@@ -37,10 +37,10 @@ export default function PricingPage({ accountAccess }) {
       <div className="page-kicker">Pricing</div>
       <div className="page-title-row">
         <div>
-          <h1>Buy once or subscribe. Guests play free.</h1>
+          <h1>Buy once. Host forever. Guests play free.</h1>
           <p>
-            Game Night is priced around the host, not the whole room. Paid buttons are parked for
-            now while checkout gets wired in.
+            One €19.99 payment unlocks the complete experience for your account. No subscription,
+            renewals, or per-player fees.
           </p>
         </div>
       </div>
@@ -51,8 +51,7 @@ export default function PricingPage({ accountAccess }) {
           <div>
             <h2>You currently have our top tier plan.</h2>
             <p>
-              {currentPlan.name} already includes the full paid Game Night library and every
-              upgrade currently available.
+              {currentPlan.name} includes the full Game Night library and all future updates.
             </p>
           </div>
         </section>

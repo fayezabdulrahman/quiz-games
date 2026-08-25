@@ -153,6 +153,18 @@ export function useGameSession({ getAuthToken } = {}) {
       action('player:quickfire-score', { ...roomPayload(), correctTermIndexes }),
     nextQuickfireTurn: () => action('host:quickfire-next', roomPayload()),
     endQuickfireGame: () => action('host:quickfire-end', roomPayload()),
+    submitWordWheelTurn: ({ letter, word }) =>
+      action('player:word-wheel-submit', { ...roomPayload(), letter, word }),
+    pauseWordWheel: () => action('host:word-wheel-pause', roomPayload()),
+    resumeWordWheel: () => action('host:word-wheel-resume', roomPayload()),
+    acceptWordWheelWord: (submissionId) =>
+      action('host:word-wheel-accept-word', { ...roomPayload(), submissionId }),
+    undoWordWheelLast: () => action('host:word-wheel-undo-last', roomPayload()),
+    returnWordWheelTurn: (playerId) =>
+      action('host:word-wheel-return-turn', { ...roomPayload(), playerId }),
+    eliminateWordWheelPlayer: (playerId) =>
+      action('host:word-wheel-eliminate', { ...roomPayload(), playerId }),
+    nextWordWheelRound: () => action('host:word-wheel-next', roomPayload()),
     useLifeline: () => action('player:pass', roomPayload()),
     useLadderLifeline: (lifeline) =>
       action('host:ladder-lifeline', { ...roomPayload(), lifeline }),

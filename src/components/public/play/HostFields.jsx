@@ -33,8 +33,14 @@ export default function HostFields({
   setSurveyRoundCount,
   quickfireRoundCount,
   setQuickfireRoundCount,
+  wordWheelTargetScore,
+  setWordWheelTargetScore,
   questionSeconds,
   setQuestionSeconds,
+  wordWheelTurnSeconds,
+  setWordWheelTurnSeconds,
+  wordWheelInputMode,
+  setWordWheelInputMode,
   availableGameTypes,
   canConfigureMajorityRounds,
   canManageCustomQuestions,
@@ -51,8 +57,10 @@ export default function HostFields({
     'survey-showdown': [surveyRoundCount, setSurveyRoundCount, 3, 12, 'Rounds'],
     'quickfire-30': [quickfireRoundCount, setQuickfireRoundCount, 10, 50, 'Spaces to win'],
     'say-what-you-see': [catchphraseRoundCount, setCatchphraseRoundCount, 3, 20, 'Puzzles'],
+    'word-wheel': [wordWheelTargetScore, setWordWheelTargetScore, 1, 10, 'Categories to win'],
   }
   const [roundCount, setRoundCount, roundMin, roundMax, roundLabel] = roundSettings[gameType]
+  const isWordWheel = gameType === 'word-wheel'
   return (
     <>
       <GamePicker
@@ -66,8 +74,12 @@ export default function HostFields({
       <div className="host-settings">
         {(gameType !== 'majority-rules' || canConfigureMajorityRounds) && (
           <RoundSettingInner
-            title="Game length"
-            description={`Choose how many ${roundLabel.toLowerCase()} to play.`}
+            title={isWordWheel ? 'Winning score' : 'Game length'}
+            description={
+              isWordWheel
+                ? 'Choose how many category rounds a player must win.'
+                : `Choose how many ${roundLabel.toLowerCase()} to play.`
+            }
             label={roundLabel}
             value={roundCount}
             min={roundMin}
@@ -78,13 +90,13 @@ export default function HostFields({
         <RoundSettingInner
           title="Round timer"
           description="Choose the answer time used for each timed turn."
-          label="Seconds per round"
-          value={questionSeconds}
+          label={isWordWheel ? 'Seconds per turn' : 'Seconds per round'}
+          value={isWordWheel ? wordWheelTurnSeconds : questionSeconds}
           min={5}
-          max={180}
+          max={isWordWheel ? 60 : 180}
           step={5}
           suffix="s"
-          onChange={setQuestionSeconds}
+          onChange={isWordWheel ? setWordWheelTurnSeconds : setQuestionSeconds}
         />
         <div className="selected-game-note">
           You can still end the game early from the host controls.
@@ -121,6 +133,32 @@ export default function HostFields({
       )}
       {gameType === 'quickfire-30' && (
         <QuickfireSettings diceMode={diceMode} setDiceMode={setDiceMode} />
+      )}
+      {gameType === 'word-wheel' && (
+        <div className="host-settings word-wheel-settings">
+          <div className="settings-heading">
+            <div>
+              <strong>Answer mode</strong>
+              <span>Speak keeps it social; type adds the word check.</span>
+            </div>
+          </div>
+          <div className="quickfire-dice-options">
+            <button
+              type="button"
+              className={wordWheelInputMode === 'speak' ? 'active' : ''}
+              onClick={() => setWordWheelInputMode('speak')}
+            >
+              Speak
+            </button>
+            <button
+              type="button"
+              className={wordWheelInputMode === 'type' ? 'active' : ''}
+              onClick={() => setWordWheelInputMode('type')}
+            >
+              Type
+            </button>
+          </div>
+        </div>
       )}
       <ContentSelector
         gameType={gameType}

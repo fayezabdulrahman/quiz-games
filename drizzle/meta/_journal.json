@@ -15,6 +15,20 @@
       "when": 1783805061100,
       "tag": "0001_closed_doctor_doom",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784835974241,
+      "tag": "0002_lifetime_pricing",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1784840000000,
+      "tag": "0003_word_wheel",
+      "breakpoints": true
     }
   ]
 }

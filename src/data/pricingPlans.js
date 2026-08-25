@@ -11,37 +11,23 @@ export const pricingPlans = [
   },
   {
     key: 'game_night_pack_v1',
-    name: 'Game Night Pack',
-    price: '€29.99',
-    billing: 'One-time purchase',
-    description: 'The main game-night bundle for hosts who want the full current library.',
+    name: 'Lifetime Access',
+    price: '€19.99',
+    billing: 'One-time purchase · yours forever',
+    description: 'One payment unlocks the complete Game Night experience for this account.',
     features: [
-      'Full built-in question sets for each game',
-      'Custom questions included',
+      'All current and future games',
+      'All official and custom question packs',
       'Free unlimited guests',
     ],
-    cta: 'Get started',
+    cta: 'Get lifetime access',
     featured: true,
-  },
-  {
-    key: 'club_pass_monthly',
-    name: 'Club Pass',
-    price: '€4.99/month',
-    billing: 'Subscription',
-    description: 'For hosts who want the current library while subscribed plus future releases.',
-    features: [
-      'Everything from Game Night Pack',
-      'Future games and early access',
-      'Official, seasonal, and topical packs',
-    ],
-    cta: 'Get started',
   },
 ]
 
 export const planRank = {
   free_demo: 0,
-  game_night_pack_v1: 2,
-  club_pass_monthly: 3,
+  game_night_pack_v1: 1,
 }
 
 export function planByKey(planKey) {

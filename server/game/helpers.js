@@ -95,6 +95,27 @@ export function settingsForGame(gameType, settings = {}) {
       boardLength: normalizeBoundedInteger(settings.roundCount, { min: 10, max: 50, defaultValue: 30 }),
     }, settings)
   }
+  if (gameType === 'word-wheel') {
+    return withAccessMode({
+      ...timed,
+      inputMode: settings.inputMode === 'speak' ? 'speak' : 'type',
+      turnSeconds: normalizeBoundedInteger(settings.questionSeconds || settings.turnSeconds, {
+        min: 5,
+        max: 60,
+        defaultValue: 15,
+      }),
+      targetScore: normalizeBoundedInteger(settings.roundCount || settings.targetScore, {
+        min: 1,
+        max: 10,
+        defaultValue: 5,
+      }),
+      roundCount: normalizeBoundedInteger(settings.roundCount || settings.targetScore, {
+        min: 1,
+        max: 10,
+        defaultValue: 5,
+      }),
+    }, settings)
+  }
   return withAccessMode({
     ...timed,
     roundCount: normalizeBoundedInteger(settings.roundCount, { min: 3, max: 10, defaultValue: 10 }),

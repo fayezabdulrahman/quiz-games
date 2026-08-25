@@ -9,6 +9,7 @@ const valid = {
   'majority-rules': { prompt: 'Best movie snack?', options: ['Popcorn', 'Sweets', 'Nachos'], explanation: 'Choose your favourite.' },
   'survey-showdown': { prompt: 'Name something found at a beach.', answers: [{ text: 'Sand', points: 50, accepted: ['Sand'] }, { text: 'Sea', points: 30, accepted: ['Sea', 'Ocean'] }, { text: 'Shells', points: 20, accepted: ['Shells'] }], explanation: 'Plausible game values, not a real poll.' },
   'quickfire-30': { terms: ['Boot', 'Goal', 'Referee', 'Stadium', 'Corner'] },
+  'word-wheel': { prompt: 'Things you might find in a kitchen' },
 }
 
 for (const gameType of AI_SUPPORTED_GAMES) {

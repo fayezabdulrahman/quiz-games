@@ -27,6 +27,10 @@ export const customOnlyRequirements = {
     minimumActiveQuestions: 10,
     note: 'Needs enough active puzzles for the default round count.',
   },
+  'word-wheel': {
+    minimumActiveQuestions: 20,
+    note: 'Needs enough active category cards for repeated turn-based rounds.',
+  },
 }
 
 export const mixedContentRequirements = Object.fromEntries(

@@ -153,6 +153,7 @@ export async function selectQuestionsForGame(gameType, usedQuestionIds, settings
     return selectPrompts(pool, settings.roundCount || 10, usedQuestionIds)
   }
   if (gameType === 'quickfire-30') return selectPrompts(pool, 64, usedQuestionIds)
+  if (gameType === 'word-wheel') return selectPrompts(pool, 64, usedQuestionIds)
   return selectOnePercentQuestions(pool, usedQuestionIds)
 }
 

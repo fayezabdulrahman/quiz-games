@@ -21,6 +21,7 @@ import {
   startSurveyFaceoff,
   syncSurveyTeamPlayers,
 } from './surveyShowdown.js'
+import { registerWordWheelHandlers, startWordWheelRound } from './wordWheel.js'
 import {
   cleanSessionToken,
   getRoom,
@@ -36,6 +37,7 @@ const twoPlayerGameNames = {
   'bluff-battle': 'Bluff Battle',
   'survey-showdown': 'Survey Showdown',
   'quickfire-30': 'Quickfire 30',
+  'word-wheel': 'Word Wheel',
 }
 
 function gameSettingsFromPayload(payload = {}) {
@@ -50,6 +52,7 @@ function gameSettingsFromPayload(payload = {}) {
     contentSelectionMode,
     preferredQuestionSetId,
     questionSetId,
+    inputMode,
   } = payload
   return {
     lifelineCount,
@@ -61,6 +64,7 @@ function gameSettingsFromPayload(payload = {}) {
     guessSeconds,
     contentSelectionMode,
     preferredQuestionSetId: preferredQuestionSetId || questionSetId || null,
+    inputMode,
   }
 }
 
@@ -114,6 +118,15 @@ export function registerSocketHandlers({
     room.surveyFaceoffPairIndex = 0
     room.surveyFaceoffGuesses = []
     room.surveyControlChooserPlayerId = null
+    room.wordWheelActivePlayerId = null
+    room.wordWheelUsedLetters = []
+    room.wordWheelSubmissions = []
+    room.wordWheelLastSubmissionId = null
+    room.wordWheelLastMove = null
+    room.wordWheelTimerRemainingMs = null
+    room.wordWheelRoundWinnerId = null
+    room.wordWheelRoundWinnerName = null
+    room.wordWheelRoundEndReason = null
   }
 
   function registerSharedHandlers(socket) {
@@ -255,12 +268,14 @@ export function registerSocketHandlers({
         room.quickfireActiveTeamIndex = 0
         room.quickfireTeamTurnCounts = { coral: 0, blue: 0 }
         startQuickfireTurn(room, clearQuestionTimer)
+      } else if (room.gameType === 'word-wheel') {
+        startWordWheelRound(room, clearQuestionTimer, broadcast)
       } else {
         room.phase = room.gameType === 'bluff-battle' ? 'bluffing' : 'answering'
       }
       room.finishReason = null
       room.bluffOptions = []
-      if (room.gameType !== 'survey-showdown') startRoomQuestionTimer(room)
+      if (!['survey-showdown', 'word-wheel'].includes(room.gameType)) startRoomQuestionTimer(room)
       callback?.({ ok: true })
       broadcast(room)
     })
@@ -458,6 +473,7 @@ export function registerSocketHandlers({
       if (room.surveyActivePlayerId === player.id) room.surveyActivePlayerId = null
       if (room.quickfireActivePlayerId === player.id) room.quickfireActivePlayerId = null
       if (room.catchphraseBuzzerPlayerId === player.id) room.catchphraseBuzzerPlayerId = null
+      if (room.wordWheelActivePlayerId === player.id) room.wordWheelActivePlayerId = null
       if (player.ladderRole === 'contestant' && room.players.length) {
         room.players[0].ladderRole = 'contestant'
       }
@@ -586,5 +602,6 @@ export function registerSocketHandlers({
       startRoomQuestionTimer,
     })
     registerBluffBattleHandlers({ socket, rooms, broadcast })
+    registerWordWheelHandlers({ socket, rooms, broadcast, clearQuestionTimer })
   })
 }

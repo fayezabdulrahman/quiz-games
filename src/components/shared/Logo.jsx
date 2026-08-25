@@ -31,6 +31,18 @@ export default function Logo({ gameType = 'one-percent' }) {
     )
   }
 
+  if (gameType === 'word-wheel') {
+    return (
+      <div className="brand brand-word-wheel">
+        <GameLogoMark gameType="word-wheel" className="brand-word-wheel-mark" />
+        <span>
+          <strong>WORD</strong>
+          <small>WHEEL</small>
+        </span>
+      </div>
+    )
+  }
+
   if (gameType === 'million-ladder') {
     return (
       <div className="brand brand-ladder">

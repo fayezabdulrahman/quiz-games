@@ -85,6 +85,46 @@ export function normalizeSelectionMode(selectionMode) {
   return CONTENT_SELECTION_MODES.includes(selectionMode) ? selectionMode : 'official'
 }
 
+function errorText(error) {
+  return [error?.message, error?.cause?.message, error?.detail].filter(Boolean).join(' ')
+}
+
+function isGameTypeMigrationError(error) {
+  return /game_type|question_sets|questions|user_game_content_preferences/i.test(errorText(error))
+}
+
+function officialOnlyContentOptions(gameType, reason) {
+  return {
+    gameType,
+    customContentUnavailable: true,
+    preference: { selectionMode: 'official', preferredQuestionSetId: null },
+    packs: [],
+    counts: { active: 0, draft: 0 },
+    modes: {
+      official: { enabled: true, reason: '' },
+      mixed: { enabled: false, reason },
+      user_only: { enabled: false, reason },
+    },
+    readiness: {
+      ready: false,
+      activeCount: 0,
+      minimumActiveQuestions: GAME_QUESTION_BUILDERS[gameType]?.minimumActiveQuestions || 1,
+      missingRungs: [],
+    },
+  }
+}
+
+function customContentShortfallReason(gameType, readiness) {
+  const remaining = Math.max(0, readiness.minimumActiveQuestions - readiness.activeCount)
+  if (gameType === 'million-ladder') {
+    return `Add active questions for rungs ${readiness.missingRungs.join(', ')}.`
+  }
+  if (gameType === 'word-wheel') {
+    return `Add ${remaining} more active category prompts.`
+  }
+  return `Add ${remaining} more active questions.`
+}
+
 export async function getUserPack(access, packId) {
   const [pack] = await getDb()
     .select(packSelect())
@@ -379,10 +419,22 @@ export async function getContentPreference(access, gameType) {
 
 export async function contentOptionsForGame(access, gameType) {
   if (!isSupportedGame(gameType)) return null
-  const packs = await listUserPacks(access, gameType)
-  const activeQuestions = await listActiveUserQuestions(access, gameType)
+  let packs = []
+  let activeQuestions = []
+  let preference = { selectionMode: 'official', preferredQuestionSetId: null }
+  try {
+    packs = await listUserPacks(access, gameType)
+    activeQuestions = await listActiveUserQuestions(access, gameType)
+    preference = await getContentPreference(access, gameType)
+  } catch (error) {
+    if (!isGameTypeMigrationError(error)) throw error
+    console.warn('[content] Custom content unavailable for this game.', error?.message || error)
+    return officialOnlyContentOptions(
+      gameType,
+      'Custom packs are unavailable until the latest database migration has been applied.',
+    )
+  }
   const readiness = customOnlyReadiness(gameType, activeQuestions)
-  const preference = await getContentPreference(access, gameType)
   return {
     gameType,
     preference,
@@ -399,11 +451,7 @@ export async function contentOptionsForGame(access, gameType) {
       },
       user_only: {
         enabled: readiness.ready,
-        reason: readiness.ready
-          ? ''
-          : gameType === 'million-ladder'
-            ? `Add active questions for rungs ${readiness.missingRungs.join(', ')}.`
-            : `Add ${Math.max(0, readiness.minimumActiveQuestions - readiness.activeCount)} more active questions.`,
+        reason: readiness.ready ? '' : customContentShortfallReason(gameType, readiness),
       },
     },
     readiness,
@@ -426,6 +474,9 @@ export async function saveContentPreference(access, gameType, input = {}) {
   if (selectionMode !== 'user_only') preferredQuestionSetId = null
 
   const options = await contentOptionsForGame(access, gameType)
+  if (options.customContentUnavailable && selectionMode === 'official') {
+    return { ok: true, preference: options.preference }
+  }
   if (!options.modes[selectionMode]?.enabled) {
     return {
       ok: false,

@@ -1,7 +1,11 @@
 import express from 'express'
 import multer from 'multer'
 import { formFromQuestion } from '../../shared/customQuestionSchemas.js'
-import { generateQuestionForm } from '../ai/githubModels.js'
+import {
+  assertQuestionGenerationConfigured,
+  generateQuestionForm,
+} from '../ai/cloudflareWorkersAi.js'
+import { tryAcquireGenerationSlot } from '../ai/generationGuard.js'
 import { AI_SUPPORTED_GAMES } from '../ai/questionGenerationSpecs.js'
 import { resolveAccessFromToken } from '../auth/access.js'
 import {
@@ -21,7 +25,7 @@ import {
   cleanupQuestionImages,
   uploadQuestionImage,
 } from '../storage/r2.js'
-import { aiDailyLimit, recordSuccessfulGeneration, successfulGenerationsToday } from '../db/questions/aiUsage.js'
+import { reserveGenerationAttempt } from '../db/questions/aiUsage.js'
 
 export const customQuestionsRouter = express.Router()
 const upload = multer({
@@ -94,26 +98,52 @@ async function requireCustomQuestionAccess(request, response, next) {
 customQuestionsRouter.use(requireCustomQuestionAccess)
 
 customQuestionsRouter.post('/question-generation', async (request, response, next) => {
+  let slot
+  let providerStarted = false
   try {
     const gameType = String(request.body?.gameType || '')
     if (!AI_SUPPORTED_GAMES.has(gameType)) {
       response.status(400).json({ ok: false, error: 'AI generation is not available for this game.' })
       return
     }
-    const limit = aiDailyLimit()
-    if (await successfulGenerationsToday(request.access.userId) >= limit) {
-      response.status(429).json({ ok: false, error: `You have used today’s ${limit} AI generations. Try again tomorrow.` })
+
+    assertQuestionGenerationConfigured()
+    slot = tryAcquireGenerationSlot(request.access.userId)
+    if (!slot.allowed) {
+      response.set('Retry-After', String(slot.retryAfterSeconds))
+      const error = slot.reason === 'user_busy'
+        ? 'Your previous AI question is still being generated.'
+        : 'AI question generation is busy. Please try again shortly.'
+      response.status(429).json({ ok: false, error })
       return
     }
-    const form = await generateQuestionForm({ gameType, topic: request.body?.topic })
-    const usage = await recordSuccessfulGeneration(request.access.userId)
+
+    const usage = await reserveGenerationAttempt(request.access.userId)
     if (!usage.allowed) {
-      response.status(429).json({ ok: false, error: `You have used today’s ${limit} AI generations. Try again tomorrow.` })
+      const error = usage.reason === 'global_limit'
+        ? 'Today’s shared AI question allowance has been used. Try again tomorrow.'
+        : `You have used today’s ${usage.limit} AI question requests. Try again tomorrow.`
+      response.status(429).json({ ok: false, error })
       return
     }
-    response.json({ ok: true, form, usage })
+
+    providerStarted = true
+    const form = await generateQuestionForm({ gameType, topic: request.body?.topic })
+    response.json({
+      ok: true,
+      form,
+      usage: {
+        used: usage.used,
+        limit: usage.limit,
+      },
+    })
   } catch (error) {
     next(error)
+  } finally {
+    if (slot?.allowed) {
+      if (providerStarted) slot.release()
+      else slot.cancel()
+    }
   }
 })
 

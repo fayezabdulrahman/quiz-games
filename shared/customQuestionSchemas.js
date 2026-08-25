@@ -76,6 +76,11 @@ export const GAME_QUESTION_BUILDERS = {
     questionKind: 'visual_puzzle',
     minimumActiveQuestions: 10,
   },
+  'word-wheel': {
+    title: 'Word Wheel',
+    questionKind: 'category_card',
+    minimumActiveQuestions: 20,
+  },
 }
 
 const MAX_PROMPT_LENGTH = 360
@@ -369,6 +374,26 @@ function buildSayWhatYouSee(input) {
   }
 }
 
+function buildWordWheel(input) {
+  const form = {
+    prompt: cleanLongText(input.prompt),
+  }
+  const errors = []
+  validatePrompt(form, errors)
+  return {
+    form,
+    errors,
+    row: {
+      questionKind: 'category_card',
+      prompt: form.prompt,
+      answer: null,
+      explanation: null,
+      difficulty: null,
+      payload: {},
+    },
+  }
+}
+
 const builders = {
   'one-percent': buildOnePercent,
   'million-ladder': buildMillionLadder,
@@ -377,6 +402,7 @@ const builders = {
   'survey-showdown': buildSurveyShowdown,
   'quickfire-30': buildQuickfire30,
   'say-what-you-see': buildSayWhatYouSee,
+  'word-wheel': buildWordWheel,
 }
 
 export function validateCustomQuestion(gameType, input = {}) {
@@ -460,6 +486,11 @@ export function formFromQuestion(question) {
       layout: payload.layout || 'square-one',
       tokens: payload.tokens || ['', ''],
       media: cleanImageMedia(payload.media),
+    }
+  }
+  if (question?.gameType === 'word-wheel') {
+    return {
+      prompt: question.prompt || '',
     }
   }
   return {}

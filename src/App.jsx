@@ -18,6 +18,8 @@ import AppLoadingScreen from './components/shared/AppLoadingScreen.jsx'
 import HostPlayerManager from './components/shared/HostPlayerManager.jsx'
 import SurveyShowdownFinished from './components/games/survey-showdown/SurveyShowdownFinished.jsx'
 import SurveyShowdownScreen from './components/games/survey-showdown/SurveyShowdownScreen.jsx'
+import WordWheelFinished from './components/games/word-wheel/WordWheelFinished.jsx'
+import WordWheelScreen from './components/games/word-wheel/WordWheelScreen.jsx'
 import { useAccountAccess } from './hooks/useAccountAccess.js'
 import { useGameSession } from './hooks/useGameSession.js'
 
@@ -47,6 +49,14 @@ export default function App() {
     scoreQuickfireCard,
     nextQuickfireTurn,
     endQuickfireGame,
+    submitWordWheelTurn,
+    pauseWordWheel,
+    resumeWordWheel,
+    acceptWordWheelWord,
+    undoWordWheelLast,
+    returnWordWheelTurn,
+    eliminateWordWheelPlayer,
+    nextWordWheelRound,
     useLifeline,
     useLadderLifeline,
     revealAnswer,
@@ -106,6 +116,15 @@ export default function App() {
     if (state.gameType === 'quickfire-30') {
       return (
         <Quickfire30Finished
+          state={state}
+          onRestart={restartGame}
+          onChangeGame={returnToGames}
+        />
+      )
+    }
+    if (state.gameType === 'word-wheel') {
+      return (
+        <WordWheelFinished
           state={state}
           onRestart={restartGame}
           onChangeGame={returnToGames}
@@ -183,6 +202,24 @@ export default function App() {
         onScore={scoreQuickfireCard}
         onNext={nextQuickfireTurn}
         onEnd={endQuickfireGame}
+      />
+    )
+  }
+
+  if (state.gameType === 'word-wheel') {
+    return (
+      <WordWheelScreen
+        state={state}
+        error={error}
+        onSubmit={submitWordWheelTurn}
+        onPause={pauseWordWheel}
+        onResume={resumeWordWheel}
+        onAcceptWord={acceptWordWheelWord}
+        onUndoLast={undoWordWheelLast}
+        onReturnTurn={returnWordWheelTurn}
+        onEliminate={eliminateWordWheelPlayer}
+        onNextRound={nextWordWheelRound}
+        onEnd={endGame}
       />
     )
   }

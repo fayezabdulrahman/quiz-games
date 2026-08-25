@@ -199,12 +199,24 @@ Use Node 20 or newer for the backend runtime. The Cloudflare R2 upload path uses
 2. Set Render's `CLIENT_ORIGIN` to the final Vercel URL, such as `https://your-project.vercel.app`. For local testing against the Render backend, the server also allows the default Vite origins `http://localhost:5173` and `http://127.0.0.1:5173`.
 3. Set Render's `CLERK_SECRET_KEY` to the Clerk backend secret key so the server can verify signed-in users and upsert them into Neon.
 4. Set Render's `DATABASE_URL` to the Neon Postgres connection string.
-5. For custom question image uploads, set Render's Cloudflare R2 variables:
+5. For AI-assisted custom question generation, create a dedicated Cloudflare Workers AI
+   token with Workers AI Read and Edit permissions, then set Render's
+   `CLOUDFLARE_AI_API_TOKEN` and `CLOUDFLARE_AI_ACCOUNT_ID`. The default model is
+   `@cf/meta/llama-3.3-70b-instruct-fp8-fast`, configurable with
+   `CLOUDFLARE_AI_MODEL`.
+6. Configure the server-side AI usage guards on Render:
+   `AI_QUESTION_DAILY_LIMIT` limits each user per day,
+   `AI_QUESTION_GLOBAL_DAILY_LIMIT` caps all users combined,
+   `AI_QUESTION_GLOBAL_MINUTE_LIMIT` limits bursts,
+   `AI_QUESTION_MAX_CONCURRENT` caps simultaneous provider calls, and
+   `AI_QUESTION_MAX_OUTPUT_TOKENS` bounds each response. Generation attempts count
+   toward daily limits because failed provider responses may still consume capacity.
+7. For custom question image uploads, set Render's Cloudflare R2 variables:
    `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, and `R2_PUBLIC_BASE_URL`.
    `R2_PUBLIC_BASE_URL` should be the public bucket URL, preferably a custom domain connected to the bucket.
-6. Deploy the frontend to Vercel.
-7. Set Vercel's `VITE_SOCKET_URL` environment variable to the Render service URL, such as `https://one-percent-club-server.onrender.com`.
-8. Redeploy Vercel after adding the environment variable because Vite embeds it at build time.
+8. Deploy the frontend to Vercel.
+9. Set Vercel's `VITE_SOCKET_URL` environment variable to the Render service URL, such as `https://one-percent-club-server.onrender.com`.
+10. Redeploy Vercel after adding the environment variable because Vite embeds it at build time.
 
 For Vercel preview deployments, add their exact origins to `CLIENT_ORIGIN` as a comma-separated list. Leaving `CLIENT_ORIGIN` empty permits all origins and is useful only for initial setup.
 
@@ -273,12 +285,12 @@ The initial product catalog is represented in `server/db/catalog/pricingTiers.js
 | Product key | Billing | Access model |
 | --- | --- | --- |
 | `free_demo` | Free | Public access, no sign-up, 2 games, built-in demo pools, room size cap of 4 |
-| `game_night_pack_v1` | One-time, EUR 29.99 | The seven launch games, full built-in question pools, custom question creation/import, and reusable packs |
-| `club_pass_monthly` | Subscription, EUR 5/month | All current games while subscribed, custom questions, future games, official/seasonal/topical packs, and early access |
+| `game_night_pack_v1` | One-time, EUR 19.99 | Lifetime access to all current and future games, question packs, and custom-question features |
+| `club_pass_monthly` | Archived legacy subscription | Mapped to `game_night_pack_v1` so previous subscribers retain lifetime access |
 | `family_pack_v1` | Archived legacy one-time product | Mapped to `game_night_pack_v1` for existing entitlement access |
 | `custom_edition_v1` | Archived legacy one-time product | Mapped to `game_night_pack_v1` for existing entitlement access |
 
-Products have `requires_user` and `requires_entitlement` flags. Demo sets both to `false`, so the backend can allow its limited game grants without login. Paid products set both to `true`, so game access should be checked by joining an active `user_entitlements` row to `product_game_grants`. Feature access should be checked through `product_feature_grants`; for example, Club Pass has the `new_games`, official/seasonal/topical pack, and early access features while Game Night Pack has explicit launch-game rows plus custom-question features. Questions use `source = official` for seeded built-in pools and `source = user` for host-created packs. User-owned question rows link back to both `owner_user_id` and `owner_clerk_user_id`, so a paid host can own reusable packs while guests continue joining rooms for free by room code.
+Products have `requires_user` and `requires_entitlement` flags. Demo sets both to `false`, so the backend can allow its limited game grants without login. Paid products set both to `true`, so game access should be checked by joining an active `user_entitlements` row to `product_game_grants`. Feature access should be checked through `product_feature_grants`; Lifetime Access includes the launch-game rows, custom-question features, future games, official/seasonal/topical packs, and early access. Questions use `source = official` for seeded built-in pools and `source = user` for host-created packs. User-owned question rows link back to both `owner_user_id` and `owner_clerk_user_id`, so a paid host can own reusable packs while guests continue joining rooms for free by room code.
 
 Official game banks are imported through the ignored `server/private-question-seeds/officialQuestionCatalog.js` file. The tracked `server/db/catalog/officialQuestionCatalog.js` is only the loader, so the public repository does not expose the full question bank. The private catalog should keep stable set `slug` values and question `external_id` values so official pools can be safely re-imported as new questions are added.
 

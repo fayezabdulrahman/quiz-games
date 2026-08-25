@@ -15,3 +15,29 @@ services:
         sync: false
       - key: DATABASE_URL
         sync: false
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET_NAME
+        sync: false
+      - key: R2_PUBLIC_BASE_URL
+        sync: false
+      - key: CLOUDFLARE_AI_API_TOKEN
+        sync: false
+      - key: CLOUDFLARE_AI_ACCOUNT_ID
+        sync: false
+      - key: CLOUDFLARE_AI_MODEL
+        value: "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+      - key: AI_QUESTION_DAILY_LIMIT
+        value: "5"
+      - key: AI_QUESTION_GLOBAL_DAILY_LIMIT
+        value: "200"
+      - key: AI_QUESTION_GLOBAL_MINUTE_LIMIT
+        value: "10"
+      - key: AI_QUESTION_MAX_CONCURRENT
+        value: "2"
+      - key: AI_QUESTION_MAX_OUTPUT_TOKENS
+        value: "500"

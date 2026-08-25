@@ -6,6 +6,7 @@ export const launchGameTypes = [
   'survey-showdown',
   'quickfire-30',
   'say-what-you-see',
+  'word-wheel',
 ]
 
 export const pricingTiers = [
@@ -89,12 +90,12 @@ export const pricingTiers = [
   },
   {
     key: 'game_night_pack_v1',
-    name: 'Game Night Pack',
+    name: 'Lifetime Access',
     billingType: 'one_time',
     status: 'active',
     requiresUser: true,
     requiresEntitlement: true,
-    priceCents: 2999,
+    priceCents: 1999,
     currency: 'EUR',
     gameGrants: launchGameTypes,
     featureGrants: [
@@ -103,14 +104,19 @@ export const pricingTiers = [
       { featureKey: 'custom_questions' },
       { featureKey: 'custom_question_import' },
       { featureKey: 'reusable_custom_packs' },
+      { featureKey: 'new_games' },
+      { featureKey: 'official_question_packs' },
+      { featureKey: 'seasonal_question_packs' },
+      { featureKey: 'topical_question_packs' },
+      { featureKey: 'early_access' },
     ],
     metadata: {
-      publicLabel: 'Game Night Pack',
+      publicLabel: 'Lifetime Access',
       version: 1,
       publicAccess: false,
       guestsFree: true,
       signUpRequired: true,
-      includesFutureGames: false,
+      includesFutureGames: true,
       includesCustomQuestions: true,
     },
   },
@@ -118,7 +124,7 @@ export const pricingTiers = [
     key: 'club_pass_monthly',
     name: 'Club Pass',
     billingType: 'subscription',
-    status: 'active',
+    status: 'archived',
     requiresUser: true,
     requiresEntitlement: true,
     priceCents: 500,
@@ -139,6 +145,8 @@ export const pricingTiers = [
     metadata: {
       publicLabel: 'Club Pass',
       billingInterval: 'month',
+      archivedReason: 'Replaced by Lifetime Access',
+      successorProductKey: 'game_night_pack_v1',
       publicAccess: false,
       guestsFree: true,
       signUpRequired: true,

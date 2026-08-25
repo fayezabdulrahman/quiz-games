@@ -91,6 +91,15 @@ export async function buildRoom({
     catchphraseGuessEndsAt: null,
     catchphraseLastGuess: null,
     catchphraseGuesses: [],
+    wordWheelActivePlayerId: null,
+    wordWheelUsedLetters: [],
+    wordWheelSubmissions: [],
+    wordWheelLastSubmissionId: null,
+    wordWheelLastMove: null,
+    wordWheelTimerRemainingMs: null,
+    wordWheelRoundWinnerId: null,
+    wordWheelRoundWinnerName: null,
+    wordWheelRoundEndReason: null,
     settings,
   }
 }
@@ -140,6 +149,15 @@ export async function prepareRoomGame(room, gameType, settings, clearQuestionTim
   room.catchphraseGuessEndsAt = null
   room.catchphraseLastGuess = null
   room.catchphraseGuesses = []
+  room.wordWheelActivePlayerId = null
+  room.wordWheelUsedLetters = []
+  room.wordWheelSubmissions = []
+  room.wordWheelLastSubmissionId = null
+  room.wordWheelLastMove = null
+  room.wordWheelTimerRemainingMs = null
+  room.wordWheelRoundWinnerId = null
+  room.wordWheelRoundWinnerName = null
+  room.wordWheelRoundEndReason = null
   room.players.forEach((player) => {
     resetPlayer(player, room.settings, true)
   })

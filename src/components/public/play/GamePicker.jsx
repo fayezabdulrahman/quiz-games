@@ -36,6 +36,8 @@ export default function GamePicker({
                   ? `Write fakes · fool friends · ${bluffRoundCount} rounds`
                   : game.id === 'majority-rules'
                     ? `Match the room · score points · ${majorityRoundCount} rounds`
+                    : game.id === 'word-wheel'
+                      ? 'Categories · claim letters · beat the timer'
                     : game.meta}
             </small>
           </span>

@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import ContentSelector from '../content/ContentSelector.jsx'
-import GameOptionGrid from './GameOptionGrid.jsx'
-import GameSettings from './GameSettings.jsx'
+import { RoundSettingInner } from '../public/RoundSetting.jsx'
 import PlayerList from '../shared/PlayerList.jsx'
 import Spinner from '../shared/Spinner.jsx'
-import { RoundSettingInner } from '../public/RoundSetting.jsx'
+import GameOptionGrid from './GameOptionGrid.jsx'
+import GameSettings from './GameSettings.jsx'
 
 export default function RoomGamePicker({ state, error, onSelectGame, onCloseRoom }) {
   const allowedGameTypes = new Set(state.allowedGameTypes || [])
@@ -26,7 +26,16 @@ export default function RoomGamePicker({ state, error, onSelectGame, onCloseRoom
   const [ladderRoundCount, setLadderRoundCount] = useState(15)
   const [surveyRoundCount, setSurveyRoundCount] = useState(6)
   const [quickfireRoundCount, setQuickfireRoundCount] = useState(30)
+  const [wordWheelTargetScore, setWordWheelTargetScore] = useState(
+    state.gameType === 'word-wheel' ? state.settings?.targetScore || 5 : 5,
+  )
   const [questionSeconds, setQuestionSeconds] = useState(state.settings?.questionSeconds || 30)
+  const [wordWheelTurnSeconds, setWordWheelTurnSeconds] = useState(
+    state.gameType === 'word-wheel' ? state.settings?.turnSeconds || 15 : 15,
+  )
+  const [wordWheelInputMode, setWordWheelInputMode] = useState(
+    state.gameType === 'word-wheel' ? state.settings?.inputMode || 'type' : 'type',
+  )
   const [catchphraseTimerEnabled, setCatchphraseTimerEnabled] = useState(
     Boolean(state.settings?.guessTimerEnabled),
   )
@@ -47,15 +56,17 @@ export default function RoomGamePicker({ state, error, onSelectGame, onCloseRoom
     'survey-showdown': [surveyRoundCount, setSurveyRoundCount, 3, 12, 'Rounds'],
     'quickfire-30': [quickfireRoundCount, setQuickfireRoundCount, 10, 50, 'Spaces to win'],
     'say-what-you-see': [catchphraseRoundCount, setCatchphraseRoundCount, 3, 20, 'Puzzles'],
+    'word-wheel': [wordWheelTargetScore, setWordWheelTargetScore, 1, 10, 'Categories to win'],
   }
   const [roundCount, setRoundCount, roundMin, roundMax, roundLabel] = roundSettings[gameType]
+  const isWordWheel = gameType === 'word-wheel'
 
   const continueToLobby = () => {
     onSelectGame(gameType, {
       lifelineCount,
       lifelinesAnytime,
       diceMode,
-      questionSeconds,
+      questionSeconds: gameType === 'word-wheel' ? wordWheelTurnSeconds : questionSeconds,
       roundCount:
         gameType === 'majority-rules'
           ? canConfigureMajorityRounds
@@ -73,11 +84,15 @@ export default function RoomGamePicker({ state, error, onSelectGame, onCloseRoom
                     ? surveyRoundCount
                     : gameType === 'quickfire-30'
                       ? quickfireRoundCount
+                      : gameType === 'word-wheel'
+                        ? wordWheelTargetScore
                       : undefined,
+      inputMode: wordWheelInputMode,
       guessTimerEnabled: catchphraseTimerEnabled,
       guessSeconds: catchphraseGuessSeconds,
       contentSelectionMode,
-      preferredQuestionSetId,
+      preferredQuestionSetId:
+        contentSelectionMode === 'user_only' ? preferredQuestionSetId : null,
     })
   }
 
@@ -104,8 +119,12 @@ export default function RoomGamePicker({ state, error, onSelectGame, onCloseRoom
               <div className="host-settings room-picker-settings">
                 {(gameType !== 'majority-rules' || canConfigureMajorityRounds) && (
                   <RoundSettingInner
-                    title="Game length"
-                    description={`Choose how many ${roundLabel.toLowerCase()} to play.`}
+                    title={isWordWheel ? 'Winning score' : 'Game length'}
+                    description={
+                      isWordWheel
+                        ? 'Choose how many category rounds a player must win.'
+                        : `Choose how many ${roundLabel.toLowerCase()} to play.`
+                    }
                     label={roundLabel}
                     value={roundCount}
                     min={roundMin}
@@ -116,13 +135,13 @@ export default function RoomGamePicker({ state, error, onSelectGame, onCloseRoom
                 <RoundSettingInner
                   title="Round timer"
                   description="Choose the answer time for each timed turn."
-                  label="Seconds per round"
-                  value={questionSeconds}
+                  label={isWordWheel ? 'Seconds per turn' : 'Seconds per round'}
+                  value={isWordWheel ? wordWheelTurnSeconds : questionSeconds}
                   min={5}
-                  max={180}
+                  max={isWordWheel ? 60 : 180}
                   step={5}
                   suffix="s"
-                  onChange={setQuestionSeconds}
+                  onChange={isWordWheel ? setWordWheelTurnSeconds : setQuestionSeconds}
                 />
               </div>
               <GameSettings
@@ -138,6 +157,8 @@ export default function RoomGamePicker({ state, error, onSelectGame, onCloseRoom
                 setCatchphraseGuessSeconds={setCatchphraseGuessSeconds}
                 diceMode={diceMode}
                 setDiceMode={setDiceMode}
+                wordWheelInputMode={wordWheelInputMode}
+                setWordWheelInputMode={setWordWheelInputMode}
               />
               <ContentSelector
                 gameType={gameType}

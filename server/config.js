@@ -17,4 +17,5 @@ export const gameTypes = new Set([
   'survey-showdown',
   'quickfire-30',
   'say-what-you-see',
+  'word-wheel',
 ])

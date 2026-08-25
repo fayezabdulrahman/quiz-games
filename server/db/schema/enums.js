@@ -8,6 +8,7 @@ export const gameTypeEnum = pgEnum('game_type', [
   'survey-showdown',
   'quickfire-30',
   'say-what-you-see',
+  'word-wheel',
 ])
 
 export const entitlementStatusEnum = pgEnum('entitlement_status', [

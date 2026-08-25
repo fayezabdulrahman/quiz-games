@@ -18,6 +18,15 @@ export const games = [
     accent: 'catchphrase',
   },
   {
+    id: 'word-wheel',
+    name: 'Word Wheel',
+    mark: 'AZ',
+    kicker: 'Claim a letter before time runs out',
+    summary: 'Race through category cards, say or type a unique answer, and lock its starting letter before the turn passes on.',
+    meta: 'Categories · Turn timer · Letter race',
+    accent: 'word-wheel',
+  },
+  {
     id: 'one-percent',
     name: 'The 1% Club',
     mark: '1%',

@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
+import QuickfireTeamSetup from './games/quickfire-30/QuickfireTeamSetup.jsx'
+import SurveyTeamSetup from './games/survey-showdown/SurveyTeamSetup.jsx'
 import Logo from './shared/Logo.jsx'
 import PlayerList from './shared/PlayerList.jsx'
 import RoomJoinQrCode from './shared/RoomJoinQrCode.jsx'
 import Spinner from './shared/Spinner.jsx'
-import QuickfireTeamSetup from './games/quickfire-30/QuickfireTeamSetup.jsx'
-import SurveyTeamSetup from './games/survey-showdown/SurveyTeamSetup.jsx'
+
+const twoPlayerGames = ['bluff-battle', 'survey-showdown', 'quickfire-30', 'word-wheel']
 
 export default function Lobby({
   state,
@@ -18,6 +20,17 @@ export default function Lobby({
   const joinUrl = `${window.location.origin}?join=${state.code}`
   const [copyStatus, setCopyStatus] = useState('')
   const copyTimer = useRef(null)
+  const needsTwoPlayers = twoPlayerGames.includes(state.gameType)
+  const hasEnoughPlayers = state.players.length >= (needsTwoPlayers ? 2 : 1)
+  const hasSurveyTeams =
+    state.gameType !== 'survey-showdown' ||
+    (!state.players.some((player) => !player.teamId) &&
+      !state.surveyTeams.some((team) => team.playerIds.length === 0))
+  const hasQuickfireTeams =
+    state.gameType !== 'quickfire-30' ||
+    (!state.players.some((player) => !player.teamId) &&
+      !state.quickfireTeams.some((team) => team.playerIds.length === 0))
+  const canStartGame = hasEnoughPlayers && hasSurveyTeams && hasQuickfireTeams
 
   useEffect(
     () => () => {
@@ -101,6 +114,11 @@ export default function Lobby({
                 <span><strong>{state.settings.roundCount}</strong> prize questions</span>
                 <span>First player is contestant · others join the audience</span>
               </>
+            ) : state.gameType === 'word-wheel' ? (
+              <>
+                <span><strong>{state.settings.targetScore}</strong> categories to win</span>
+                <span>{state.settings.turnSeconds}s turns · {state.settings.inputMode === 'speak' ? 'Speak' : 'Type'} mode</span>
+              </>
             ) : (
               <>
                 <span>
@@ -134,27 +152,10 @@ export default function Lobby({
                 type="button"
                 className="primary lobby-start-button"
                 onClick={onStart}
-                disabled={
-                  ['bluff-battle', 'survey-showdown', 'quickfire-30'].includes(state.gameType)
-                    ? state.players.length < 2 ||
-                      (state.gameType === 'survey-showdown' &&
-                        (state.players.some((player) => !player.teamId) ||
-                          state.surveyTeams.some((team) => team.playerIds.length === 0))) ||
-                      (state.gameType === 'quickfire-30' &&
-                        (state.players.some((player) => !player.teamId) ||
-                          state.quickfireTeams.some((team) => team.playerIds.length === 0)))
-                    : !state.players.length
-                }
+                disabled={!canStartGame}
               >
-                {['bluff-battle', 'survey-showdown', 'quickfire-30'].includes(state.gameType) &&
-                (state.players.length < 2 ||
-                  (state.gameType === 'survey-showdown' &&
-                    (state.players.some((player) => !player.teamId) ||
-                      state.surveyTeams.some((team) => team.playerIds.length === 0))) ||
-                  (state.gameType === 'quickfire-30' &&
-                    (state.players.some((player) => !player.teamId) ||
-                      state.quickfireTeams.some((team) => team.playerIds.length === 0))))
-                  ? state.players.length < 2
+                {!canStartGame
+                  ? !hasEnoughPlayers
                     ? 'Waiting for 2 players'
                     : 'Assign both teams'
                   : 'Start the game'}

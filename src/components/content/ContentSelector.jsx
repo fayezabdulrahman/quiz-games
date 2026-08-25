@@ -10,6 +10,14 @@ const modeLabels = {
   user_only: 'Custom-only',
 }
 
+function hasSavedCustomPreference(options) {
+  const preference = options?.preference
+  return Boolean(
+    preference &&
+      (preference.selectionMode !== 'official' || preference.preferredQuestionSetId),
+  )
+}
+
 export default function ContentSelector({
   gameType,
   enabled,
@@ -45,13 +53,17 @@ export default function ContentSelector({
         const savedMode = result.options?.preference?.selectionMode || 'official'
         const safeMode = result.options?.modes?.[savedMode]?.enabled ? savedMode : 'official'
         setSelectionMode(safeMode)
-        setPreferredQuestionSetId(result.options?.preference?.preferredQuestionSetId || null)
-      } catch (loadError) {
+        setPreferredQuestionSetId(
+          safeMode === 'official'
+            ? null
+            : result.options?.preference?.preferredQuestionSetId || null,
+        )
+      } catch {
         if (cancelled) return
         setOptions(null)
         setSelectionMode('official')
         setPreferredQuestionSetId(null)
-        setError(loadError?.message || 'Could not load custom packs.')
+        setError('Custom packs are unavailable right now.')
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -67,14 +79,35 @@ export default function ContentSelector({
     let cancelled = false
 
     async function savePreference() {
-      if (!enabled || !options || !gameType) return
+      if (!enabled || !options || options.customContentUnavailable || !gameType) return
+      if (!options.modes?.[selectionMode]?.enabled) {
+        setError('')
+        return
+      }
+      if (
+        selectionMode === 'official' &&
+        !preferredQuestionSetId &&
+        !hasSavedCustomPreference(options)
+      ) {
+        setError('')
+        return
+      }
       try {
         const token = await getToken()
+        if (!token) {
+          if (!cancelled) {
+            setError(
+              selectionMode === 'official' ? '' : 'Sign in to manage custom packs.',
+            )
+          }
+          return
+        }
         await contentRequest(`/api/me/content-preferences/${gameType}`, {
           token,
           method: 'PUT',
           body: { selectionMode, preferredQuestionSetId },
         })
+        if (!cancelled) setError('')
       } catch (saveError) {
         if (!cancelled) setError(saveError?.message || 'Could not save content preference.')
       }
@@ -111,7 +144,7 @@ export default function ContentSelector({
       <div className="content-mode-grid">
         {Object.entries(modeLabels).map(([mode, label]) => {
           const modeOption = options?.modes?.[mode]
-          const disabled = modeOption && !modeOption.enabled
+          const disabled = !options || !modeOption?.enabled
           return (
             <button
               type="button"

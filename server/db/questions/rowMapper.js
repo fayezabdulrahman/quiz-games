@@ -53,6 +53,10 @@ const mappers = {
     layout: payload.layout,
     tokens: arrayOrNull(payload.tokens) || [],
   }),
+  'word-wheel': (row) => ({
+    id: row.externalId || row.id,
+    prompt: row.prompt,
+  }),
 }
 
 export function mapQuestionRow(row) {

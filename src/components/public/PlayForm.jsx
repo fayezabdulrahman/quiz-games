@@ -28,7 +28,10 @@ export default function PlayForm({ onHost, onJoin, busy, error, accountAccess, d
   const [ladderRoundCount, setLadderRoundCount] = useState(15)
   const [surveyRoundCount, setSurveyRoundCount] = useState(6)
   const [quickfireRoundCount, setQuickfireRoundCount] = useState(30)
+  const [wordWheelTargetScore, setWordWheelTargetScore] = useState(5)
   const [questionSeconds, setQuestionSeconds] = useState(30)
+  const [wordWheelTurnSeconds, setWordWheelTurnSeconds] = useState(15)
+  const [wordWheelInputMode, setWordWheelInputMode] = useState('type')
   const [catchphraseTimerEnabled, setCatchphraseTimerEnabled] = useState(false)
   const [catchphraseGuessSeconds, setCatchphraseGuessSeconds] = useState(10)
   const [contentSelectionMode, setContentSelectionMode] = useState('official')
@@ -48,7 +51,7 @@ export default function PlayForm({ onHost, onJoin, busy, error, accountAccess, d
         lifelineCount,
         lifelinesAnytime,
         diceMode,
-        questionSeconds,
+        questionSeconds: selectedGameType === 'word-wheel' ? wordWheelTurnSeconds : questionSeconds,
         roundCount:
           selectedGameType === 'say-what-you-see'
             ? catchphraseRoundCount
@@ -66,11 +69,15 @@ export default function PlayForm({ onHost, onJoin, busy, error, accountAccess, d
                       ? surveyRoundCount
                       : selectedGameType === 'quickfire-30'
                         ? quickfireRoundCount
+                        : selectedGameType === 'word-wheel'
+                          ? wordWheelTargetScore
                         : undefined,
+        inputMode: wordWheelInputMode,
         guessTimerEnabled: catchphraseTimerEnabled,
         guessSeconds: catchphraseGuessSeconds,
         contentSelectionMode,
-        preferredQuestionSetId,
+        preferredQuestionSetId:
+          contentSelectionMode === 'user_only' ? preferredQuestionSetId : null,
       })
       return
     }
@@ -128,8 +135,14 @@ export default function PlayForm({ onHost, onJoin, busy, error, accountAccess, d
             setSurveyRoundCount={setSurveyRoundCount}
             quickfireRoundCount={quickfireRoundCount}
             setQuickfireRoundCount={setQuickfireRoundCount}
+            wordWheelTargetScore={wordWheelTargetScore}
+            setWordWheelTargetScore={setWordWheelTargetScore}
             questionSeconds={questionSeconds}
             setQuestionSeconds={setQuestionSeconds}
+            wordWheelTurnSeconds={wordWheelTurnSeconds}
+            setWordWheelTurnSeconds={setWordWheelTurnSeconds}
+            wordWheelInputMode={wordWheelInputMode}
+            setWordWheelInputMode={setWordWheelInputMode}
             availableGameTypes={availableGameTypes}
             canConfigureMajorityRounds={canConfigureMajorityRounds}
             canManageCustomQuestions={canManageCustomQuestions}

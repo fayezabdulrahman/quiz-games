@@ -104,6 +104,13 @@ function publicQuestion(room, question, socketId) {
     }
   }
 
+  if (room.gameType === 'word-wheel') {
+    return {
+      id: question.id,
+      prompt: question.prompt,
+    }
+  }
+
   return {
     id: question.id,
     type: question.type,
@@ -140,7 +147,8 @@ export function createPublicState(room, socketId, questionDurationMs) {
   const isSurveyShowdown = room.gameType === 'survey-showdown'
   const isQuickfire30 = room.gameType === 'quickfire-30'
   const isSayWhatYouSee = room.gameType === 'say-what-you-see'
-  const isScoreGame = isMajorityRules || isBluffBattle || isSayWhatYouSee
+  const isWordWheel = room.gameType === 'word-wheel'
+  const isScoreGame = isMajorityRules || isBluffBattle || isSayWhatYouSee || isWordWheel
   const topScore = Math.max(0, ...room.players.map((player) => player.score || 0))
   const gameName = isMajorityRules
     ? 'Majority Rules'
@@ -154,6 +162,8 @@ export function createPublicState(room, socketId, questionDurationMs) {
             ? 'Quickfire 30'
           : isSayWhatYouSee
             ? 'Say What You See'
+          : isWordWheel
+            ? 'Word Wheel'
             : 'The 1% Club'
 
   return {
@@ -172,7 +182,7 @@ export function createPublicState(room, socketId, questionDurationMs) {
     questionTimeRemainingMs: room.questionEndsAt
       ? Math.max(0, room.questionEndsAt - Date.now())
       : 0,
-    questionDurationMs: (room.settings?.questionSeconds || questionDurationMs / 1000) * 1000,
+    questionDurationMs: ((isWordWheel ? room.settings?.turnSeconds : room.settings?.questionSeconds) || questionDurationMs / 1000) * 1000,
     bluffOptions: bluffOptionsFor(room),
     ownBluffOptionId:
       isBluffBattle && me
@@ -244,6 +254,52 @@ export function createPublicState(room, socketId, questionDurationMs) {
           quickfireDie: room.quickfireDie,
           quickfireCorrectTermIndexes: room.quickfireCorrectTermIndexes,
           quickfireLastMove: room.quickfireLastMove,
+        }
+      : {}),
+    ...(isWordWheel
+      ? {
+          wordWheelActivePlayerId: room.wordWheelActivePlayerId,
+          wordWheelActivePlayerName:
+            room.players.find((player) => player.id === room.wordWheelActivePlayerId)?.name ||
+            null,
+          wordWheelUsedLetters: room.wordWheelUsedLetters || [],
+          wordWheelAvailableLetters: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+            .split('')
+            .filter((letter) => !(room.wordWheelUsedLetters || []).includes(letter)),
+          wordWheelSubmissions: (room.wordWheelSubmissions || [])
+            .filter((submission) => !submission.revoked)
+            .map((submission) => ({
+              id: submission.id,
+              playerId: submission.playerId,
+              playerName: submission.playerName,
+              letter: submission.letter,
+              word: submission.word,
+              dictionaryStatus: submission.dictionaryStatus,
+              inputMode: submission.inputMode,
+              createdAt: submission.createdAt,
+            })),
+          wordWheelLastSubmission: (() => {
+            const submission = (room.wordWheelSubmissions || []).find(
+              (item) => item.id === room.wordWheelLastSubmissionId && !item.revoked,
+            )
+            return submission
+              ? {
+                  id: submission.id,
+                  playerId: submission.playerId,
+                  playerName: submission.playerName,
+                  letter: submission.letter,
+                  word: submission.word,
+                  dictionaryStatus: submission.dictionaryStatus,
+                  inputMode: submission.inputMode,
+                  createdAt: submission.createdAt,
+                }
+              : null
+          })(),
+          wordWheelLastMove: room.wordWheelLastMove,
+          wordWheelRoundWinnerId: room.wordWheelRoundWinnerId,
+          wordWheelRoundWinnerName: room.wordWheelRoundWinnerName,
+          wordWheelRoundEndReason: room.wordWheelRoundEndReason,
+          wordWheelTimerPausedMs: room.wordWheelTimerRemainingMs,
         }
       : {}),
     winnerNames:

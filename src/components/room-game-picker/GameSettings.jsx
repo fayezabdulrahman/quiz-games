@@ -1,4 +1,5 @@
 import Stepper from './Stepper.jsx'
+import QuizcraftScoringSettings from '../shared/QuizcraftScoringSettings.jsx'
 
 function SettingsHeading({ title, description, children }) {
   return (
@@ -27,7 +28,27 @@ export default function GameSettings({
   setDiceMode,
   wordWheelInputMode,
   setWordWheelInputMode,
+  quizcraftPointsPerCorrect,
+  setQuizcraftPointsPerCorrect,
+  quizcraftSpeedBonusEnabled,
+  setQuizcraftSpeedBonusEnabled,
+  quizcraftMaxSpeedBonus,
+  setQuizcraftMaxSpeedBonus,
 }) {
+  if (gameType === 'quizcraft') {
+    return (
+      <QuizcraftScoringSettings
+        compact
+        pointsPerCorrect={quizcraftPointsPerCorrect}
+        setPointsPerCorrect={setQuizcraftPointsPerCorrect}
+        speedBonusEnabled={quizcraftSpeedBonusEnabled}
+        setSpeedBonusEnabled={setQuizcraftSpeedBonusEnabled}
+        maxSpeedBonus={quizcraftMaxSpeedBonus}
+        setMaxSpeedBonus={setQuizcraftMaxSpeedBonus}
+      />
+    )
+  }
+
   if (gameType === 'one-percent') {
     return (
       <div className="host-settings room-picker-settings">

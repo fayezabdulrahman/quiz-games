@@ -25,6 +25,7 @@ export function isIncompleteDraft(question) {
 }
 
 export function questionKindLabel(question) {
+  if (question.questionKind === 'true_false') return 'True or false'
   return questionKindLabels[question?.questionKind] || question?.questionKind || 'Question'
 }
 

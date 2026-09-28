@@ -48,6 +48,15 @@ export default function RoomGamePicker({ state, error, onSelectGame, onCloseRoom
   const [preferredQuestionSetId, setPreferredQuestionSetId] = useState(
     state.settings?.preferredQuestionSetId || null,
   )
+  const [quizcraftPointsPerCorrect, setQuizcraftPointsPerCorrect] = useState(
+    state.gameType === 'quizcraft' ? state.settings?.pointsPerCorrect || 100 : 100,
+  )
+  const [quizcraftSpeedBonusEnabled, setQuizcraftSpeedBonusEnabled] = useState(
+    state.gameType === 'quizcraft' ? state.settings?.speedBonusEnabled !== false : true,
+  )
+  const [quizcraftMaxSpeedBonus, setQuizcraftMaxSpeedBonus] = useState(
+    state.gameType === 'quizcraft' ? state.settings?.maxSpeedBonus || 100 : 100,
+  )
   const roundSettings = {
     'one-percent': [onePercentRoundCount, setOnePercentRoundCount, 3, 10, 'Questions'],
     'majority-rules': [majorityRoundCount, setMajorityRoundCount, 3, 20, 'Rounds'],
@@ -58,8 +67,10 @@ export default function RoomGamePicker({ state, error, onSelectGame, onCloseRoom
     'say-what-you-see': [catchphraseRoundCount, setCatchphraseRoundCount, 3, 20, 'Puzzles'],
     'word-wheel': [wordWheelTargetScore, setWordWheelTargetScore, 1, 10, 'Categories to win'],
   }
-  const [roundCount, setRoundCount, roundMin, roundMax, roundLabel] = roundSettings[gameType]
+  const roundSetting = roundSettings[gameType]
+  const [roundCount, setRoundCount, roundMin, roundMax, roundLabel] = roundSetting || []
   const isWordWheel = gameType === 'word-wheel'
+  const needsQuizcraftPack = gameType === 'quizcraft' && !preferredQuestionSetId
 
   const continueToLobby = () => {
     onSelectGame(gameType, {
@@ -90,9 +101,14 @@ export default function RoomGamePicker({ state, error, onSelectGame, onCloseRoom
       inputMode: wordWheelInputMode,
       guessTimerEnabled: catchphraseTimerEnabled,
       guessSeconds: catchphraseGuessSeconds,
-      contentSelectionMode,
+      contentSelectionMode: gameType === 'quizcraft' ? 'user_only' : contentSelectionMode,
       preferredQuestionSetId:
-        contentSelectionMode === 'user_only' ? preferredQuestionSetId : null,
+        gameType === 'quizcraft' || contentSelectionMode === 'user_only'
+          ? preferredQuestionSetId
+          : null,
+      pointsPerCorrect: quizcraftPointsPerCorrect,
+      speedBonusEnabled: quizcraftSpeedBonusEnabled,
+      maxSpeedBonus: quizcraftMaxSpeedBonus,
     })
   }
 
@@ -114,10 +130,14 @@ export default function RoomGamePicker({ state, error, onSelectGame, onCloseRoom
               <GameOptionGrid
                 allowedGameTypes={allowedGameTypes}
                 selectedGameType={gameType}
-                onSelectGameType={setGameType}
+                onSelectGameType={(nextGameType) => {
+                  setGameType(nextGameType)
+                  setContentSelectionMode(nextGameType === 'quizcraft' ? 'user_only' : 'official')
+                  setPreferredQuestionSetId(null)
+                }}
               />
               <div className="host-settings room-picker-settings">
-                {(gameType !== 'majority-rules' || canConfigureMajorityRounds) && (
+                {roundSetting && (gameType !== 'majority-rules' || canConfigureMajorityRounds) && (
                   <RoundSettingInner
                     title={isWordWheel ? 'Winning score' : 'Game length'}
                     description={
@@ -159,6 +179,12 @@ export default function RoomGamePicker({ state, error, onSelectGame, onCloseRoom
                 setDiceMode={setDiceMode}
                 wordWheelInputMode={wordWheelInputMode}
                 setWordWheelInputMode={setWordWheelInputMode}
+                quizcraftPointsPerCorrect={quizcraftPointsPerCorrect}
+                setQuizcraftPointsPerCorrect={setQuizcraftPointsPerCorrect}
+                quizcraftSpeedBonusEnabled={quizcraftSpeedBonusEnabled}
+                setQuizcraftSpeedBonusEnabled={setQuizcraftSpeedBonusEnabled}
+                quizcraftMaxSpeedBonus={quizcraftMaxSpeedBonus}
+                setQuizcraftMaxSpeedBonus={setQuizcraftMaxSpeedBonus}
               />
               <ContentSelector
                 gameType={gameType}
@@ -170,8 +196,11 @@ export default function RoomGamePicker({ state, error, onSelectGame, onCloseRoom
                 compact
               />
               {error && <p className="form-error" role="alert">{error}</p>}
+              {needsQuizcraftPack && (
+                <p className="form-error">Choose a published quiz before continuing.</p>
+              )}
               <div className="room-picker-actions">
-                <button type="button" className="primary picker-continue" onClick={continueToLobby}>
+                <button type="button" className="primary picker-continue" disabled={needsQuizcraftPack} onClick={continueToLobby}>
                   Continue to lobby
                 </button>
                 {state.players.length > 0 && (

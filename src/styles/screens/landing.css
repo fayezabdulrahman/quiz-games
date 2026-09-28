@@ -536,6 +536,7 @@
 .bluff { --card-accent: #ff8bd9; }
 .majority { --card-accent: #ffc247; }
 .ladder { --card-accent: #ff6b7f; }
+.quizcraft { --card-accent: #6ee7c7; }
 
 .page-kicker {
 	width: fit-content;

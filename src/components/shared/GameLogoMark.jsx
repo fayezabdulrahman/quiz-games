@@ -3,6 +3,17 @@ export default function GameLogoMark({ gameType = 'one-percent', className = '' 
     .filter(Boolean)
     .join(' ')
 
+  if (gameType === 'quizcraft') {
+    return (
+      <span className={classNames} aria-label="Quizcraft logo" role="img">
+        <svg className="game-logo-svg game-logo-svg-quizcraft" viewBox="0 0 64 64" aria-hidden="true">
+          <path d="M12 13h40v38H12z" />
+          <path d="m20 25 4 4 8-9M20 41h24M37 26h7" />
+        </svg>
+      </span>
+    )
+  }
+
   if (gameType === 'quickfire-30') {
     return (
       <span className={classNames} aria-label="Quickfire 30 logo" role="img">

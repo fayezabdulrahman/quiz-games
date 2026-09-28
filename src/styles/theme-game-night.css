@@ -560,6 +560,7 @@ label {
 .bluff { --card-accent: #b7442d; }
 .majority { --card-accent: #7b775f; }
 .ladder { --card-accent: #9e6b2f; }
+.quizcraft { --card-accent: #2a7e70; }
 
 .play-page {
 	min-height: calc(100vh - 76px);
@@ -730,7 +731,8 @@ label {
 .brand-catchphrase-mark,
 .brand-ladder-mark,
 .brand-bluff-mark,
-.brand-majority-mark {
+.brand-majority-mark,
+.brand-quizcraft-mark {
 	display: grid;
 	place-items: center;
 	min-width: 42px;
@@ -752,6 +754,11 @@ label {
 .ladder-layout,
 .survey-layout,
 .catchphrase-layout {
+	gap: 28px;
+	padding-top: 34px;
+}
+
+.quizcraft-layout {
 	gap: 28px;
 	padding-top: 34px;
 }

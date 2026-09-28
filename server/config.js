@@ -10,6 +10,7 @@ export const allowedOrigins =
 export const corsOrigin = allowedOrigins.length > 0 ? allowedOrigins : true
 export const questionDurationMs = Number(process.env.QUESTION_TIME_MS || 30_000)
 export const gameTypes = new Set([
+  'quizcraft',
   'one-percent',
   'majority-rules',
   'bluff-battle',

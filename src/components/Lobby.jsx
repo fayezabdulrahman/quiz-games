@@ -85,6 +85,15 @@ export default function Lobby({
                 <span><strong>{state.settings.questionSeconds}</strong> second team turns</span>
                 <span>{state.settings.diceMode === 'manual' ? 'Physical' : 'Digital'} handicap die · first to {state.settings.boardLength}</span>
               </>
+            ) : state.gameType === 'quizcraft' ? (
+              <>
+                <span><strong>{state.settings.pointsPerCorrect}</strong> points per correct answer</span>
+                <span>
+                  {state.settings.speedBonusEnabled
+                    ? `Up to ${state.settings.maxSpeedBonus} extra points for speed`
+                    : 'Speed bonus off'}
+                </span>
+              </>
             ) : state.gameType === 'say-what-you-see' ? (
               <>
                 <span><strong>{state.settings.roundCount}</strong> visual puzzles</span>

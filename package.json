@@ -10,7 +10,7 @@
     "build": "vite build",
     "db:generate": "drizzle-kit generate",
     "db:check": "node server/db/checkSchema.js",
-    "db:migrate": "drizzle-kit migrate",
+    "db:migrate": "node server/db/migrate.js",
     "db:seed": "node server/db/seed.js",
     "db:studio": "drizzle-kit studio",
     "lint": "eslint .",

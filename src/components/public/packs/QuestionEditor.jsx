@@ -411,7 +411,7 @@ export default function QuestionEditor({ gameType, question, onCancel, onDeleteI
         <IconButton label="Close" icon="close" onClick={cancel} />
       </div>
 
-      {gameType !== 'say-what-you-see' && (
+      {!['say-what-you-see', 'quizcraft'].includes(gameType) && (
         <div className="question-ai-panel">
           <div className="question-ai-copy">
             <strong>Need some inspiration?</strong>
@@ -441,7 +441,7 @@ export default function QuestionEditor({ gameType, question, onCancel, onDeleteI
         </div>
       )}
 
-      {['one-percent', 'million-ladder', 'bluff-battle', 'majority-rules', 'survey-showdown'].includes(gameType) && (
+      {['quizcraft', 'one-percent', 'million-ladder', 'bluff-battle', 'majority-rules', 'survey-showdown'].includes(gameType) && (
         <>
           <Field label="Prompt">
             <textarea value={form.prompt || ''} onChange={(event) => update({ prompt: event.target.value })} />
@@ -452,6 +452,54 @@ export default function QuestionEditor({ gameType, question, onCancel, onDeleteI
             onDeleteImage={deleteTemporaryImage}
             onUploadImage={uploadImage}
           />
+        </>
+      )}
+
+      {gameType === 'quizcraft' && (
+        <>
+          <Field label="Question type">
+            <select
+              value={form.questionType || 'multiple_choice'}
+              onChange={(event) => {
+                const questionType = event.target.value
+                update({
+                  questionType,
+                  options: questionType === 'true_false' ? ['True', 'False'] : ['', '', '', ''],
+                  answer: '',
+                })
+              }}
+            >
+              <option value="multiple_choice">Multiple choice</option>
+              <option value="true_false">True or false</option>
+            </select>
+          </Field>
+          {form.questionType === 'true_false' ? (
+            <div className="quizcraft-boolean-builder" role="group" aria-label="Correct answer">
+              {['True', 'False'].map((option) => (
+                <button
+                  type="button"
+                  key={option}
+                  className={form.answer === option ? 'active' : ''}
+                  aria-pressed={form.answer === option}
+                  onClick={() => update({ answer: option, options: ['True', 'False'] })}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <>
+              <ArrayInputs label="Answers" values={form.options} min={2} max={6} onChange={(options) => update({ options })} />
+              <Field label="Correct answer">
+                <select value={form.answer || ''} onChange={(event) => update({ answer: event.target.value })}>
+                  <option value="">Choose an answer</option>
+                  {(form.options || []).filter(Boolean).map((option) => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                </select>
+              </Field>
+            </>
+          )}
         </>
       )}
 

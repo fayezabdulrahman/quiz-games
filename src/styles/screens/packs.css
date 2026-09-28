@@ -57,6 +57,63 @@
   background: linear-gradient(145deg, rgba(199, 71, 44, .34), rgba(31, 59, 39, .12));
 }
 
+.quizcraft-boolean-builder {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.quizcraft-boolean-builder button {
+  min-height: 58px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--cream);
+  background: rgba(255, 255, 255, .05);
+  font-weight: 900;
+}
+
+.quizcraft-boolean-builder button.active {
+  border-color: #58cbb8;
+  color: #081714;
+  background: #70e0cc;
+}
+
+.quizcraft-empty-state {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  padding: 16px;
+  border: 1px dashed rgba(112, 224, 204, .36);
+  border-radius: 8px;
+  background: rgba(42, 126, 112, .1);
+}
+
+.quizcraft-empty-state span {
+  color: var(--muted);
+}
+
+.quizcraft-empty-state .quizcraft-create-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-height: 44px;
+  margin-top: 8px;
+  padding: 0 18px;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.quizcraft-selector .content-selector-heading .quizcraft-manage-link {
+  flex: 0 0 auto;
+  min-width: 142px;
+  min-height: 44px;
+  padding-inline: 16px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
 .pack-game-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
@@ -915,6 +972,10 @@
   .content-selector-heading {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .quizcraft-selector .content-selector-heading .quizcraft-manage-link {
+    width: 100%;
   }
 
   .packs-heading h1 {

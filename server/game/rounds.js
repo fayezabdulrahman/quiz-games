@@ -1,10 +1,11 @@
-import { correctAnswer } from './helpers.js'
+import { calculateQuizcraftScore, correctAnswer } from './helpers.js'
 
 export function createRoundController({ broadcast, questionDurationMs }) {
   function clearQuestionTimer(room) {
     if (room.questionTimer) clearTimeout(room.questionTimer)
     room.questionTimer = null
     room.questionEndsAt = null
+    room.questionStartedAt = null
   }
 
   function revealQuestion(room) {
@@ -43,6 +44,26 @@ export function createRoundController({ broadcast, questionDurationMs }) {
       room.players.forEach((player) => {
         player.roundPoints =
           player.hasAnswered && room.majorityAnswers.includes(player.answer) ? 1 : 0
+        player.score = (player.score || 0) + player.roundPoints
+      })
+      room.phase = 'revealed'
+      return true
+    }
+
+    if (room.gameType === 'quizcraft') {
+      room.players.forEach((player) => {
+        player.isCorrect = player.hasAnswered && correctAnswer(question, player.answer)
+        const score = calculateQuizcraftScore({
+          isCorrect: player.isCorrect,
+          answerElapsedMs: player.answerElapsedMs,
+          questionSeconds: room.settings.questionSeconds,
+          pointsPerCorrect: room.settings.pointsPerCorrect,
+          speedBonusEnabled: room.settings.speedBonusEnabled,
+          maxSpeedBonus: room.settings.maxSpeedBonus,
+        })
+        player.roundBasePoints = score.basePoints
+        player.roundSpeedBonus = score.speedBonus
+        player.roundPoints = score.totalPoints
         player.score = (player.score || 0) + player.roundPoints
       })
       room.phase = 'revealed'
@@ -153,7 +174,8 @@ export function createRoundController({ broadcast, questionDurationMs }) {
 
   function scheduleQuestionTimer(room, expectedPhase, durationMs) {
     const questionIndex = room.questionIndex
-    room.questionEndsAt = Date.now() + durationMs
+    room.questionStartedAt = Date.now()
+    room.questionEndsAt = room.questionStartedAt + durationMs
     room.questionTimer = setTimeout(() => {
       if (room.phase !== expectedPhase || room.questionIndex !== questionIndex) return
       if (room.gameType === 'bluff-battle') {

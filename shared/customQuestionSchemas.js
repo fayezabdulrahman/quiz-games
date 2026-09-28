@@ -41,6 +41,11 @@ export const SAY_WHAT_YOU_SEE_LAYOUTS = [
 ]
 
 export const GAME_QUESTION_BUILDERS = {
+  quizcraft: {
+    title: 'Quizcraft',
+    questionKind: 'multiple_choice',
+    minimumActiveQuestions: 1,
+  },
   'one-percent': {
     title: 'The 1% Club',
     questionKind: 'multiple_choice',
@@ -149,6 +154,45 @@ function mediaPayload(form) {
 
 function validatePrompt(form, errors) {
   if (!form.prompt) errors.push(error('Add the prompt players will see.', 'prompt'))
+}
+
+function buildQuizcraft(input) {
+  const questionType = input.questionType === 'true_false' ? 'true_false' : 'multiple_choice'
+  const options =
+    questionType === 'true_false'
+      ? ['True', 'False']
+      : uniqueList(cleanList(input.options, 6))
+  const form = {
+    ...baseForm(input),
+    questionType,
+    options,
+  }
+  const errors = []
+  validatePrompt(form, errors)
+  if (questionType === 'multiple_choice' && (options.length < 2 || options.length > 6)) {
+    errors.push(error('Add between two and six answer options.', 'options'))
+  }
+  if (!form.answer) errors.push(error('Choose the correct answer.', 'answer'))
+  if (form.answer && !options.includes(form.answer)) {
+    errors.push(error('The correct answer must match one of the options.', 'answer'))
+  }
+  return {
+    form,
+    errors,
+    row: {
+      questionKind: questionType,
+      prompt: form.prompt,
+      answer: form.answer || null,
+      explanation: form.explanation || null,
+      difficulty: null,
+      payload: {
+        ...mediaPayload(form),
+        questionType,
+        options,
+        acceptedAnswers: form.answer ? [form.answer] : [],
+      },
+    },
+  }
 }
 
 function buildOnePercent(input) {
@@ -395,6 +439,7 @@ function buildWordWheel(input) {
 }
 
 const builders = {
+  quizcraft: buildQuizcraft,
   'one-percent': buildOnePercent,
   'million-ladder': buildMillionLadder,
   'bluff-battle': buildBluffBattle,
@@ -426,6 +471,17 @@ export function validateCustomQuestion(gameType, input = {}) {
 
 export function formFromQuestion(question) {
   const payload = question?.payload || {}
+  if (question?.gameType === 'quizcraft') {
+    const questionType = payload.questionType === 'true_false' ? 'true_false' : 'multiple_choice'
+    return {
+      prompt: question.prompt || '',
+      questionType,
+      options: questionType === 'true_false' ? ['True', 'False'] : payload.options || ['', '', '', ''],
+      answer: question.answer || '',
+      explanation: question.explanation || '',
+      media: cleanImageMedia(payload.media),
+    }
+  }
   if (question?.gameType === 'one-percent') {
     const type = payload.legacyType || (question.questionKind === 'multiple_choice' ? 'choice' : 'input')
     return {

@@ -1,6 +1,15 @@
 import GameLogoMark from './GameLogoMark.jsx'
 
 export default function Logo({ gameType = 'one-percent' }) {
+  if (gameType === 'quizcraft') {
+    return (
+      <div className="brand brand-quizcraft">
+        <GameLogoMark gameType="quizcraft" className="brand-quizcraft-mark" />
+        <span><strong>QUIZ</strong><small>CRAFT</small></span>
+      </div>
+    )
+  }
+
   if (gameType === 'quickfire-30') {
     return (
       <div className="brand brand-quickfire">

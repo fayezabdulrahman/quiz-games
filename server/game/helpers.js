@@ -29,6 +29,39 @@ export function normalizeQuestionSeconds(value) {
   return normalizeBoundedInteger(value, { min: 5, max: 180, defaultValue: 30 })
 }
 
+export function calculateQuizcraftScore({
+  isCorrect,
+  answerElapsedMs,
+  questionSeconds,
+  pointsPerCorrect,
+  speedBonusEnabled,
+  maxSpeedBonus,
+}) {
+  if (!isCorrect) return { basePoints: 0, speedBonus: 0, totalPoints: 0 }
+
+  const basePoints = normalizeBoundedInteger(pointsPerCorrect, {
+    min: 50,
+    max: 1000,
+    defaultValue: 100,
+  })
+  if (!speedBonusEnabled) return { basePoints, speedBonus: 0, totalPoints: basePoints }
+
+  const bonusLimit = normalizeBoundedInteger(maxSpeedBonus, {
+    min: 50,
+    max: 1000,
+    defaultValue: 100,
+  })
+  const durationMs = normalizeQuestionSeconds(questionSeconds) * 1000
+  const elapsedValue = Number(answerElapsedMs)
+  const elapsedMs = Math.max(
+    0,
+    Math.min(Number.isFinite(elapsedValue) ? elapsedValue : durationMs, durationMs),
+  )
+  const speedBonus = Math.round(bonusLimit * (1 - elapsedMs / durationMs))
+
+  return { basePoints, speedBonus, totalPoints: basePoints + speedBonus }
+}
+
 function withAccessMode(normalized, settings) {
   const contentSettings =
     settings.accessMode === 'demo'
@@ -44,6 +77,25 @@ function withAccessMode(normalized, settings) {
 
 export function settingsForGame(gameType, settings = {}) {
   const timed = { questionSeconds: normalizeQuestionSeconds(settings.questionSeconds) }
+  if (gameType === 'quizcraft') {
+    return withAccessMode({
+      ...timed,
+      pointsPerCorrect: normalizeBoundedInteger(settings.pointsPerCorrect, {
+        min: 50,
+        max: 1000,
+        defaultValue: 100,
+      }),
+      speedBonusEnabled: settings.speedBonusEnabled !== false,
+      maxSpeedBonus: normalizeBoundedInteger(settings.maxSpeedBonus, {
+        min: 50,
+        max: 1000,
+        defaultValue: 100,
+      }),
+    }, {
+      ...settings,
+      contentSelectionMode: 'user_only',
+    })
+  }
   if (gameType === 'majority-rules') {
     return withAccessMode({
       ...timed,
@@ -140,6 +192,9 @@ export function resetPlayer(player, settings, resetScore = false) {
   player.passedCurrentQuestion = false
   player.lifelinesRemaining = settings.lifelineCount || 0
   player.roundPoints = 0
+  player.roundBasePoints = 0
+  player.roundSpeedBonus = 0
+  player.answerElapsedMs = null
   player.bluff = null
   player.voteOptionId = null
   player.fooledCount = 0
@@ -167,6 +222,9 @@ export function resetPlayerForNextQuestion(player) {
   player.isCorrect = null
   player.passedCurrentQuestion = false
   player.roundPoints = 0
+  player.roundBasePoints = 0
+  player.roundSpeedBonus = 0
+  player.answerElapsedMs = null
   player.bluff = null
   player.voteOptionId = null
   player.fooledCount = 0

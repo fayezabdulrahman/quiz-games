@@ -1,4 +1,5 @@
 export const launchGameTypes = [
+  'quizcraft',
   'one-percent',
   'majority-rules',
   'bluff-battle',

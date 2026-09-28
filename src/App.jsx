@@ -11,6 +11,8 @@ import MillionLadderScreen from './components/games/million-ladder/MillionLadder
 import QuestionScreen from './components/games/one-percent/QuestionScreen.jsx'
 import Quickfire30Finished from './components/games/quickfire-30/Quickfire30Finished.jsx'
 import Quickfire30Screen from './components/games/quickfire-30/Quickfire30Screen.jsx'
+import QuizcraftFinished from './components/games/quizcraft/QuizcraftFinished.jsx'
+import QuizcraftScreen from './components/games/quizcraft/QuizcraftScreen.jsx'
 import RoomGamePicker from './components/room-game-picker/RoomGamePicker.jsx'
 import SayWhatYouSeeFinished from './components/games/say-what-you-see/SayWhatYouSeeFinished.jsx'
 import SayWhatYouSeeScreen from './components/games/say-what-you-see/SayWhatYouSeeScreen.jsx'
@@ -113,6 +115,15 @@ export default function App() {
   }
 
   if (state.phase === 'finished') {
+    if (state.gameType === 'quizcraft') {
+      return (
+        <QuizcraftFinished
+          state={state}
+          onRestart={restartGame}
+          onChangeGame={returnToGames}
+        />
+      )
+    }
     if (state.gameType === 'quickfire-30') {
       return (
         <Quickfire30Finished
@@ -176,6 +187,19 @@ export default function App() {
   if (state.gameType === 'survey-showdown') {
     return <SurveyShowdownScreen state={state} error={error} onGuess={submitSurveyGuess}
       onChooseControl={chooseSurveyControl} onNext={nextQuestion} onEnd={endGame} />
+  }
+
+  if (state.gameType === 'quizcraft') {
+    return (
+      <QuizcraftScreen
+        state={state}
+        error={error}
+        onAnswer={answerQuestion}
+        onReveal={revealAnswer}
+        onNext={nextQuestion}
+        onEnd={endGame}
+      />
+    )
   }
 
   if (state.gameType === 'say-what-you-see') {

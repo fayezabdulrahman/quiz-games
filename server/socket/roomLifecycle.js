@@ -53,6 +53,7 @@ export async function buildRoom({
     phase: 'lobby',
     finishReason: null,
     questionIndex: -1,
+    questionStartedAt: null,
     questionEndsAt: null,
     questionTimer: null,
     questions,
@@ -113,6 +114,7 @@ export async function prepareRoomGame(room, gameType, settings, clearQuestionTim
     ownerUserId: room.hostUserId,
   })
   room.questionIndex = -1
+  room.questionStartedAt = null
   room.phase = 'lobby'
   room.finishReason = null
   room.roundResults = []

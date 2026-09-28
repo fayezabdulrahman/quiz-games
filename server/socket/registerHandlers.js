@@ -53,6 +53,9 @@ function gameSettingsFromPayload(payload = {}) {
     preferredQuestionSetId,
     questionSetId,
     inputMode,
+    pointsPerCorrect,
+    speedBonusEnabled,
+    maxSpeedBonus,
   } = payload
   return {
     lifelineCount,
@@ -65,6 +68,9 @@ function gameSettingsFromPayload(payload = {}) {
     contentSelectionMode,
     preferredQuestionSetId: preferredQuestionSetId || questionSetId || null,
     inputMode,
+    pointsPerCorrect,
+    speedBonusEnabled,
+    maxSpeedBonus,
   }
 }
 
@@ -307,6 +313,12 @@ export function registerSocketHandlers({
 
       player.answer = String(answer).trim().slice(0, 120)
       player.hasAnswered = true
+      if (room.gameType === 'quizcraft') {
+        player.answerElapsedMs = Math.max(
+          0,
+          Date.now() - (room.questionStartedAt || Date.now()),
+        )
+      }
       if (room.gameType === 'million-ladder') {
         if (player.ladderRole === 'contestant') {
           clearQuestionTimer(room)

@@ -1,0 +1,336 @@
+.brand-quizcraft {
+  gap: .65rem;
+  line-height: 1;
+}
+
+.brand-quizcraft > span:last-child {
+  display: grid;
+  gap: 1px;
+}
+
+.brand-quizcraft strong {
+  font-size: 1.08rem;
+  letter-spacing: .08em;
+}
+
+.brand-quizcraft small {
+  color: #70e0cc;
+  font-size: .7rem;
+  letter-spacing: .28em;
+}
+
+.game-logo-mark-quizcraft {
+  color: #071512;
+  background: linear-gradient(145deg, #94f2df, #48ad9b);
+}
+
+.game-logo-svg-quizcraft path:first-child {
+  fill: rgba(255, 255, 255, .16);
+  stroke: currentColor;
+  stroke-width: 3;
+}
+
+.game-logo-svg-quizcraft path:last-child {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 4;
+}
+
+.quizcraft-shell {
+  --quizcraft-mint: #70e0cc;
+  --quizcraft-ink: #081714;
+  --progress-gradient: linear-gradient(90deg, #2d8f7d, var(--quizcraft-mint));
+}
+
+.quizcraft-shell .progress-copy strong {
+  color: var(--quizcraft-mint);
+}
+
+.quizcraft-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 54px;
+}
+
+.quizcraft-question-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  max-width: 860px;
+}
+
+.quizcraft-question-heading > div:first-child {
+  display: grid;
+  gap: 7px;
+}
+
+.quizcraft-scoring-summary {
+  color: #9bb4af;
+  font-size: .82rem;
+  font-weight: 800;
+}
+
+.quizcraft-main h1 {
+  max-width: 860px;
+  margin: 14px 0 28px;
+  font: 700 clamp(2.15rem, 5vw, 4.7rem)/1.04 var(--font-display);
+  letter-spacing: -.05em;
+}
+
+.quizcraft-main .question-media {
+  max-width: 860px;
+}
+
+.quizcraft-main .question-media img {
+  max-height: 36vh;
+}
+
+.quizcraft-timer {
+  flex: 0 0 auto;
+  background: conic-gradient(var(--quizcraft-mint) var(--timer-progress), #252a43 0);
+}
+
+.quizcraft-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  max-width: 860px;
+}
+
+.quizcraft-options button {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 82px;
+  padding: 14px;
+  border: 1px solid #34413f;
+  border-radius: 8px;
+  color: #f6f0df;
+  background: linear-gradient(145deg, rgba(35, 52, 48, .88), rgba(13, 23, 21, .94));
+  text-align: left;
+}
+
+.quizcraft-options button:not(:disabled):hover {
+  border-color: var(--quizcraft-mint);
+  transform: translateY(-2px);
+}
+
+.quizcraft-options button > span {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 7px;
+  color: var(--quizcraft-ink);
+  background: var(--quizcraft-mint);
+  font-weight: 900;
+}
+
+.quizcraft-options button > strong {
+  overflow-wrap: anywhere;
+}
+
+.quizcraft-options button > small {
+  color: var(--quizcraft-mint);
+  font-size: .7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.quizcraft-options button.correct {
+  border-color: #70e0a2;
+  background: rgba(68, 145, 101, .24);
+}
+
+.quizcraft-options button.incorrect {
+  border-color: #dd6d63;
+  background: rgba(151, 55, 48, .2);
+}
+
+.quizcraft-host-controls {
+  max-width: 860px;
+  margin-top: 28px;
+}
+
+.quizcraft-locked {
+  max-width: 860px;
+  border-color: rgba(112, 224, 204, .28);
+  background: rgba(42, 126, 112, .1);
+}
+
+.quizcraft-locked .lock-icon {
+  color: var(--quizcraft-ink);
+  background: var(--quizcraft-mint);
+}
+
+.quizcraft-reveal {
+  display: grid;
+  gap: 16px;
+  max-width: 860px;
+  margin-top: 18px;
+  padding: 20px;
+  border: 1px solid rgba(112, 224, 204, .34);
+  border-radius: 8px;
+  background: linear-gradient(145deg, rgba(42, 126, 112, .15), rgba(9, 18, 16, .72));
+}
+
+.quizcraft-reveal > div:first-child {
+  display: grid;
+  gap: 5px;
+}
+
+.quizcraft-reveal span,
+.quizcraft-reveal p {
+  color: #aabbb7;
+}
+
+.quizcraft-reveal .result-banner strong,
+.quizcraft-reveal .result-banner span {
+  display: block;
+}
+
+.quizcraft-reveal .result-banner strong {
+  color: inherit;
+  font: 900 1.05rem var(--font-body);
+}
+
+.quizcraft-reveal .result-banner span {
+  margin-top: 3px;
+  color: inherit;
+  font-size: .78rem;
+}
+
+.quizcraft-scoring-settings {
+  display: grid;
+  gap: 18px;
+}
+
+.quizcraft-score-example {
+  padding: 11px 13px;
+  border: 1px solid rgba(112, 224, 204, .22);
+  border-radius: 8px;
+  color: #a9bab6;
+  background: rgba(42, 126, 112, .08);
+  font-size: .82rem;
+}
+
+.quizcraft-score-example strong {
+  color: #70e0cc;
+}
+
+.quizcraft-reveal strong {
+  color: var(--quizcraft-mint);
+  font: 700 clamp(1.6rem, 3.5vw, 2.7rem) var(--font-display);
+}
+
+.quizcraft-reveal p {
+  margin: 0;
+}
+
+.quizcraft-scoreboard h2 {
+  margin: 6px 0 20px;
+  font: 600 1.8rem var(--font-display);
+}
+
+.quizcraft-score-list {
+  display: grid;
+  gap: 8px;
+}
+
+.quizcraft-score-list > div {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 12px;
+  border: 1px solid #303b39;
+  border-radius: 8px;
+  background: #101b19;
+}
+
+.quizcraft-score-list > div.is-me {
+  border-color: rgba(112, 224, 204, .42);
+  background: rgba(42, 126, 112, .12);
+}
+
+.quizcraft-score-list span {
+  color: #778782;
+  font-size: .76rem;
+}
+
+.quizcraft-score-list small {
+  color: var(--quizcraft-mint);
+  font-weight: 900;
+}
+
+.quizcraft-score-list b {
+  display: grid;
+  place-items: center;
+  min-width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  color: var(--quizcraft-ink);
+  background: var(--quizcraft-mint);
+}
+
+.quizcraft-finish {
+  background: radial-gradient(circle, rgba(42, 126, 112, .25), transparent 42%), #090d0c;
+}
+
+.quizcraft-winner-score {
+  display: grid;
+  place-items: center;
+  min-width: 190px;
+  width: auto;
+  height: 150px;
+  border: 2px solid #70e0cc;
+  border-radius: 8px;
+  color: #70e0cc;
+  background: rgba(42, 126, 112, .1);
+  transform: rotate(-2deg);
+}
+
+.quizcraft-winner-score strong {
+  padding-inline: 18px;
+  font: 800 clamp(2.4rem, 7vw, 4rem)/1 var(--font-display);
+}
+
+.quizcraft-winner-score span {
+  max-width: 120px;
+  text-align: center;
+}
+
+@media (max-width: 800px) {
+  .quizcraft-layout {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+}
+
+@media (max-width: 560px) {
+  .quizcraft-main h1 {
+    font-size: 2.35rem;
+  }
+
+  .quizcraft-options {
+    grid-template-columns: 1fr;
+  }
+
+  .quizcraft-options button {
+    min-height: 72px;
+  }
+
+  .quizcraft-question-heading {
+    align-items: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quizcraft-options button {
+    transition: none;
+  }
+}

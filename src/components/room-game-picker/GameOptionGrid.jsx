@@ -2,6 +2,11 @@ import Logo from '../shared/Logo.jsx'
 
 const GAME_OPTIONS = [
   {
+    id: 'quizcraft',
+    className: 'quizcraft',
+    description: 'Play one of your own custom quizzes',
+  },
+  {
     id: 'quickfire-30',
     className: 'quickfire',
     description: 'Two teams describe five names against the clock',

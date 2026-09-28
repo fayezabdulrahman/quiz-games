@@ -1,5 +1,14 @@
 export const games = [
   {
+    id: 'quizcraft',
+    name: 'Quizcraft',
+    mark: 'QC',
+    kicker: 'Your questions. Their answers.',
+    summary: 'Build a quiz from scratch, add images if you like, then challenge the room with multiple-choice and true-or-false questions.',
+    meta: 'Custom quizzes · Live scoring · Any topic',
+    accent: 'quizcraft',
+  },
+  {
     id: 'quickfire-30',
     name: 'Quickfire 30',
     mark: '30',

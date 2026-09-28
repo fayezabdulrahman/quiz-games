@@ -69,6 +69,18 @@ async function userQuestionPoolForGame(gameType, settings = {}, context = {}) {
 async function questionPoolForGame(gameType, settings = {}, context = {}) {
   if (settings.accessMode === 'demo') return officialQuestionPoolForGame(gameType, settings)
 
+  if (gameType === 'quizcraft') {
+    if (!context.ownerUserId) throw new Error('Sign in to play Quizcraft.')
+    if (!settings.preferredQuestionSetId) throw new Error('Choose a Quizcraft quiz to play.')
+    const userPool = await userQuestionPoolForGame(
+      gameType,
+      { ...settings, contentSelectionMode: 'user_only' },
+      context,
+    )
+    if (!userPool.length) throw new Error('That Quizcraft quiz has no active questions.')
+    return userPool
+  }
+
   const selectionMode = normalizeSelectionMode(settings.contentSelectionMode)
   if (selectionMode === 'official' || !context.ownerUserId) {
     return officialQuestionPoolForGame(gameType, settings)
@@ -140,6 +152,10 @@ function selectMillionLadderQuestions(pool, usedQuestionIds = new Set(), roundCo
 
 export async function selectQuestionsForGame(gameType, usedQuestionIds, settings = {}, context = {}) {
   const pool = await questionPoolForGame(gameType, settings, context)
+  if (gameType === 'quizcraft') {
+    pool.forEach((question) => usedQuestionIds.add(question.id))
+    return structuredClone(pool)
+  }
   if (gameType === 'one-percent') return selectOnePercentQuestions(pool, usedQuestionIds, settings.roundCount)
   if (gameType === 'million-ladder') return selectMillionLadderQuestions(pool, usedQuestionIds, settings.roundCount)
   if (gameType === 'majority-rules') {

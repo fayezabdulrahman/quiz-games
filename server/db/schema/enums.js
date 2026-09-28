@@ -1,6 +1,7 @@
 import { pgEnum } from 'drizzle-orm/pg-core'
 
 export const gameTypeEnum = pgEnum('game_type', [
+  'quizcraft',
   'one-percent',
   'majority-rules',
   'bluff-battle',

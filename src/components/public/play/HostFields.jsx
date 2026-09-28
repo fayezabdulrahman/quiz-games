@@ -5,6 +5,7 @@ import CatchphraseSettings from './CatchphraseSettings.jsx'
 import GamePicker from './GamePicker.jsx'
 import OnePercentSettings from './OnePercentSettings.jsx'
 import QuickfireSettings from './QuickfireSettings.jsx'
+import QuizcraftScoringSettings from '../../shared/QuizcraftScoringSettings.jsx'
 
 export default function HostFields({
   gameType,
@@ -48,6 +49,12 @@ export default function HostFields({
   setContentSelectionMode,
   preferredQuestionSetId,
   setPreferredQuestionSetId,
+  quizcraftPointsPerCorrect,
+  setQuizcraftPointsPerCorrect,
+  quizcraftSpeedBonusEnabled,
+  setQuizcraftSpeedBonusEnabled,
+  quizcraftMaxSpeedBonus,
+  setQuizcraftMaxSpeedBonus,
 }) {
   const roundSettings = {
     'one-percent': [onePercentRoundCount, setOnePercentRoundCount, 3, 10, 'Questions'],
@@ -59,20 +66,25 @@ export default function HostFields({
     'say-what-you-see': [catchphraseRoundCount, setCatchphraseRoundCount, 3, 20, 'Puzzles'],
     'word-wheel': [wordWheelTargetScore, setWordWheelTargetScore, 1, 10, 'Categories to win'],
   }
-  const [roundCount, setRoundCount, roundMin, roundMax, roundLabel] = roundSettings[gameType]
+  const roundSetting = roundSettings[gameType]
+  const [roundCount, setRoundCount, roundMin, roundMax, roundLabel] = roundSetting || []
   const isWordWheel = gameType === 'word-wheel'
   return (
     <>
       <GamePicker
         gameType={gameType}
-        setGameType={setGameType}
+        setGameType={(nextGameType) => {
+          setGameType(nextGameType)
+          setContentSelectionMode(nextGameType === 'quizcraft' ? 'user_only' : 'official')
+          setPreferredQuestionSetId(null)
+        }}
         bluffRoundCount={bluffRoundCount}
         majorityRoundCount={majorityRoundCount}
         catchphraseRoundCount={catchphraseRoundCount}
         availableGameTypes={availableGameTypes}
       />
       <div className="host-settings">
-        {(gameType !== 'majority-rules' || canConfigureMajorityRounds) && (
+        {roundSetting && (gameType !== 'majority-rules' || canConfigureMajorityRounds) && (
           <RoundSettingInner
             title={isWordWheel ? 'Winning score' : 'Game length'}
             description={
@@ -108,6 +120,16 @@ export default function HostFields({
           setLifelineCount={setLifelineCount}
           lifelinesAnytime={lifelinesAnytime}
           setLifelinesAnytime={setLifelinesAnytime}
+        />
+      )}
+      {gameType === 'quizcraft' && (
+        <QuizcraftScoringSettings
+          pointsPerCorrect={quizcraftPointsPerCorrect}
+          setPointsPerCorrect={setQuizcraftPointsPerCorrect}
+          speedBonusEnabled={quizcraftSpeedBonusEnabled}
+          setSpeedBonusEnabled={setQuizcraftSpeedBonusEnabled}
+          maxSpeedBonus={quizcraftMaxSpeedBonus}
+          setMaxSpeedBonus={setQuizcraftMaxSpeedBonus}
         />
       )}
       {gameType === 'majority-rules' && !canConfigureMajorityRounds && (

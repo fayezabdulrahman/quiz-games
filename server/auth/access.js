@@ -152,7 +152,9 @@ async function paidAccessForUser(clerkUserId, userId) {
     .where(inArray(productFeatureGrants.productKey, paidPlanKeys))
 
   const featureKeys = [...new Set(featureRows.map((row) => row.featureKey))]
-  const allowedGameTypes = [...new Set(rows.map((row) => row.gameType))]
+  const allowedGameTypes = [...new Set(rows.map((row) => row.gameType))].filter(
+    (gameType) => gameType !== 'quizcraft' || featureKeys.includes('custom_questions'),
+  )
   if (featureKeys.includes('new_games')) {
     allowedGameTypes.push(...launchGameTypes)
   }

@@ -36,12 +36,16 @@ export default function PlayForm({ onHost, onJoin, busy, error, accountAccess, d
   const [catchphraseGuessSeconds, setCatchphraseGuessSeconds] = useState(10)
   const [contentSelectionMode, setContentSelectionMode] = useState('official')
   const [preferredQuestionSetId, setPreferredQuestionSetId] = useState(null)
+  const [quizcraftPointsPerCorrect, setQuizcraftPointsPerCorrect] = useState(100)
+  const [quizcraftSpeedBonusEnabled, setQuizcraftSpeedBonusEnabled] = useState(true)
+  const [quizcraftMaxSpeedBonus, setQuizcraftMaxSpeedBonus] = useState(100)
   const canConfigureMajorityRounds = Boolean(accountAccess?.access?.hasFullAccess && !demoMode)
   const canManageCustomQuestions = Boolean(
     accountAccess?.isSignedIn &&
       !demoMode &&
       accountAccess?.access?.featureKeys?.includes('custom_questions'),
   )
+  const needsQuizcraftPack = selectedGameType === 'quizcraft' && !preferredQuestionSetId
 
   const submit = (event) => {
     event.preventDefault()
@@ -75,9 +79,14 @@ export default function PlayForm({ onHost, onJoin, busy, error, accountAccess, d
         inputMode: wordWheelInputMode,
         guessTimerEnabled: catchphraseTimerEnabled,
         guessSeconds: catchphraseGuessSeconds,
-        contentSelectionMode,
+        contentSelectionMode: selectedGameType === 'quizcraft' ? 'user_only' : contentSelectionMode,
         preferredQuestionSetId:
-          contentSelectionMode === 'user_only' ? preferredQuestionSetId : null,
+          selectedGameType === 'quizcraft' || contentSelectionMode === 'user_only'
+            ? preferredQuestionSetId
+            : null,
+        pointsPerCorrect: quizcraftPointsPerCorrect,
+        speedBonusEnabled: quizcraftSpeedBonusEnabled,
+        maxSpeedBonus: quizcraftMaxSpeedBonus,
       })
       return
     }
@@ -150,6 +159,12 @@ export default function PlayForm({ onHost, onJoin, busy, error, accountAccess, d
             setContentSelectionMode={setContentSelectionMode}
             preferredQuestionSetId={preferredQuestionSetId}
             setPreferredQuestionSetId={setPreferredQuestionSetId}
+            quizcraftPointsPerCorrect={quizcraftPointsPerCorrect}
+            setQuizcraftPointsPerCorrect={setQuizcraftPointsPerCorrect}
+            quizcraftSpeedBonusEnabled={quizcraftSpeedBonusEnabled}
+            setQuizcraftSpeedBonusEnabled={setQuizcraftSpeedBonusEnabled}
+            quizcraftMaxSpeedBonus={quizcraftMaxSpeedBonus}
+            setQuizcraftMaxSpeedBonus={setQuizcraftMaxSpeedBonus}
           />
         )}
         {error && (
@@ -157,7 +172,10 @@ export default function PlayForm({ onHost, onJoin, busy, error, accountAccess, d
             {error}
           </p>
         )}
-        <button type="submit" className="primary wide" disabled={busy}>
+        {needsQuizcraftPack && mode === 'host' && (
+          <p className="form-error">Choose a published quiz before creating the room.</p>
+        )}
+        <button type="submit" className="primary wide" disabled={busy || (mode === 'host' && needsQuizcraftPack)}>
           {busy ? 'Connecting…' : mode === 'host' ? 'Create game room' : 'Join room'}
         </button>
       </form>

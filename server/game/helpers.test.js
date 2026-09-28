@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { settingsForGame } from './helpers.js'
+import { calculateQuizcraftScore, settingsForGame } from './helpers.js'
 
 test('normalizes custom timers and game lengths for every game', () => {
   const expectations = {
@@ -36,5 +36,54 @@ test('uses existing game defaults when custom values are missing', () => {
       'quickfire-30': 30,
       'say-what-you-see': 10,
     },
+  )
+})
+
+test('forces Quizcraft to a selected custom quiz', () => {
+  assert.deepEqual(
+    settingsForGame('quizcraft', {
+      contentSelectionMode: 'official',
+      preferredQuestionSetId: 'quiz-id',
+      questionSeconds: 45,
+    }),
+    {
+      contentSelectionMode: 'user_only',
+      maxSpeedBonus: 100,
+      pointsPerCorrect: 100,
+      preferredQuestionSetId: 'quiz-id',
+      questionSeconds: 45,
+      speedBonusEnabled: true,
+    },
+  )
+})
+
+test('awards faster Quizcraft answers a larger speed bonus', () => {
+  const shared = {
+    isCorrect: true,
+    questionSeconds: 30,
+    pointsPerCorrect: 100,
+    speedBonusEnabled: true,
+    maxSpeedBonus: 100,
+  }
+  const fastest = calculateQuizcraftScore({ ...shared, answerElapsedMs: 0 })
+  const middle = calculateQuizcraftScore({ ...shared, answerElapsedMs: 15_000 })
+  const slowest = calculateQuizcraftScore({ ...shared, answerElapsedMs: 30_000 })
+
+  assert.deepEqual(fastest, { basePoints: 100, speedBonus: 100, totalPoints: 200 })
+  assert.deepEqual(middle, { basePoints: 100, speedBonus: 50, totalPoints: 150 })
+  assert.deepEqual(slowest, { basePoints: 100, speedBonus: 0, totalPoints: 100 })
+})
+
+test('Quizcraft speed scoring can be disabled', () => {
+  assert.deepEqual(
+    calculateQuizcraftScore({
+      isCorrect: true,
+      answerElapsedMs: 0,
+      questionSeconds: 30,
+      pointsPerCorrect: 250,
+      speedBonusEnabled: false,
+      maxSpeedBonus: 1000,
+    }),
+    { basePoints: 250, speedBonus: 0, totalPoints: 250 },
   )
 })

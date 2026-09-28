@@ -27,6 +27,7 @@ export default function ContentSelector({
   setPreferredQuestionSetId,
   compact = false,
 }) {
+  const isQuizcraft = gameType === 'quizcraft'
   const { getToken } = useAuth()
   const [options, setOptions] = useState(null)
   const [error, setError] = useState('')
@@ -50,13 +51,24 @@ export default function ContentSelector({
         const result = await contentRequest(contentOptionsPath(gameType), { token })
         if (cancelled) return
         setOptions(result.options)
-        const savedMode = result.options?.preference?.selectionMode || 'official'
+        const savedMode = isQuizcraft
+          ? 'user_only'
+          : result.options?.preference?.selectionMode || 'official'
         const safeMode = result.options?.modes?.[savedMode]?.enabled ? savedMode : 'official'
+        const playablePacks = (result.options?.packs || []).filter(
+          (pack) => pack.status === 'active' && pack.counts?.active > 0,
+        )
+        const savedPackId = result.options?.preference?.preferredQuestionSetId
+        const selectedPackId = isQuizcraft
+          ? playablePacks.some((pack) => pack.id === savedPackId)
+            ? savedPackId
+            : playablePacks[0]?.id || null
+          : savedPackId || null
         setSelectionMode(safeMode)
         setPreferredQuestionSetId(
           safeMode === 'official'
             ? null
-            : result.options?.preference?.preferredQuestionSetId || null,
+            : selectedPackId,
         )
       } catch {
         if (cancelled) return
@@ -73,13 +85,14 @@ export default function ContentSelector({
     return () => {
       cancelled = true
     }
-  }, [enabled, gameType, getToken, setPreferredQuestionSetId, setSelectionMode])
+  }, [enabled, gameType, getToken, isQuizcraft, setPreferredQuestionSetId, setSelectionMode])
 
   useEffect(() => {
     let cancelled = false
 
     async function savePreference() {
       if (!enabled || !options || options.customContentUnavailable || !gameType) return
+      if (isQuizcraft && !preferredQuestionSetId) return
       if (!options.modes?.[selectionMode]?.enabled) {
         setError('')
         return
@@ -117,12 +130,57 @@ export default function ContentSelector({
     return () => {
       cancelled = true
     }
-  }, [enabled, gameType, getToken, options, preferredQuestionSetId, selectionMode])
+  }, [enabled, gameType, getToken, isQuizcraft, options, preferredQuestionSetId, selectionMode])
 
   if (!enabled) return null
 
   const packs = options?.packs || []
-  const activePacks = packs.filter((pack) => pack.counts?.active > 0)
+  const activePacks = packs.filter((pack) => pack.status === 'active' && pack.counts?.active > 0)
+
+  if (isQuizcraft) {
+    return (
+      <section className={`content-selector quizcraft-selector ${compact ? 'compact' : ''}`}>
+        <div className="content-selector-heading">
+          <div>
+            <strong>Choose your quiz</strong>
+            <span>Quizcraft only plays questions from the quiz you select.</span>
+          </div>
+          <Link className="quizcraft-manage-link" to="/packs">Manage quizzes</Link>
+        </div>
+        {error && <p className="form-error">{error}</p>}
+        {loading ? (
+          <div className="content-loading">
+            <Spinner className="spinner content-spinner" label="Loading quizzes" />
+            <span>Loading quizzes</span>
+          </div>
+        ) : activePacks.length ? (
+          <label className="content-pack-select">
+            <span>Quiz</span>
+            <select
+              value={preferredQuestionSetId || ''}
+              onChange={(event) => {
+                setSelectionMode('user_only')
+                setPreferredQuestionSetId(event.target.value || null)
+              }}
+            >
+              <option value="">Choose a quiz</option>
+              {activePacks.map((pack) => (
+                <option key={pack.id} value={pack.id}>
+                  {pack.title} ({pack.counts.active} {pack.counts.active === 1 ? 'question' : 'questions'})
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : (
+          <div className="quizcraft-empty-state">
+            <strong>No published quizzes yet</strong>
+            <span>Create a Quizcraft pack, add at least one active question, then publish it.</span>
+            <Link className="primary quizcraft-create-link" to="/packs">Create a quiz</Link>
+          </div>
+        )}
+      </section>
+    )
+  }
 
   return (
     <section className={`content-selector ${compact ? 'compact' : ''}`}>

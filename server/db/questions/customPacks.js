@@ -94,6 +94,7 @@ function isGameTypeMigrationError(error) {
 }
 
 function officialOnlyContentOptions(gameType, reason) {
+  const isQuizcraft = gameType === 'quizcraft'
   return {
     gameType,
     customContentUnavailable: true,
@@ -101,7 +102,7 @@ function officialOnlyContentOptions(gameType, reason) {
     packs: [],
     counts: { active: 0, draft: 0 },
     modes: {
-      official: { enabled: true, reason: '' },
+      official: { enabled: !isQuizcraft, reason: isQuizcraft ? reason : '' },
       mixed: { enabled: false, reason },
       user_only: { enabled: false, reason },
     },
@@ -435,6 +436,7 @@ export async function contentOptionsForGame(access, gameType) {
     )
   }
   const readiness = customOnlyReadiness(gameType, activeQuestions)
+  const isQuizcraft = gameType === 'quizcraft'
   return {
     gameType,
     preference,
@@ -444,10 +446,17 @@ export async function contentOptionsForGame(access, gameType) {
       draft: packs.reduce((sum, pack) => sum + pack.counts.draft, 0),
     },
     modes: {
-      official: { enabled: true, reason: '' },
+      official: {
+        enabled: !isQuizcraft,
+        reason: isQuizcraft ? 'Quizcraft is built entirely from your own quizzes.' : '',
+      },
       mixed: {
-        enabled: activeQuestions.length > 0,
-        reason: activeQuestions.length > 0 ? '' : 'Add a custom question pack to mix it in.',
+        enabled: !isQuizcraft && activeQuestions.length > 0,
+        reason: isQuizcraft
+          ? 'Quizcraft plays one custom quiz at a time.'
+          : activeQuestions.length > 0
+            ? ''
+            : 'Add a custom question pack to mix it in.',
       },
       user_only: {
         enabled: readiness.ready,
@@ -462,13 +471,28 @@ export async function saveContentPreference(access, gameType, input = {}) {
   if (!isSupportedGame(gameType)) {
     return { ok: false, status: 400, error: 'Choose a supported game.' }
   }
-  const selectionMode = normalizeSelectionMode(input.selectionMode)
+  const selectionMode = gameType === 'quizcraft'
+    ? 'user_only'
+    : normalizeSelectionMode(input.selectionMode)
   let preferredQuestionSetId = input.preferredQuestionSetId || null
+
+  if (gameType === 'quizcraft' && !preferredQuestionSetId) {
+    return { ok: false, status: 400, error: 'Choose the Quizcraft quiz you want to play.' }
+  }
 
   if (preferredQuestionSetId) {
     const pack = await getUserPack(access, preferredQuestionSetId)
     if (!pack || pack.gameType !== gameType || pack.status === 'archived') {
       return { ok: false, status: 400, error: 'Choose one of your packs for this game.' }
+    }
+    if (gameType === 'quizcraft') {
+      if (pack.status !== 'active') {
+        return { ok: false, status: 400, error: 'Publish that quiz before playing it.' }
+      }
+      const activeQuestions = await listActiveUserQuestions(access, gameType, pack.id)
+      if (!activeQuestions.length) {
+        return { ok: false, status: 400, error: 'Add an active question before playing that quiz.' }
+      }
     }
   }
   if (selectionMode !== 'user_only') preferredQuestionSetId = null

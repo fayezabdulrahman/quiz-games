@@ -10,6 +10,8 @@ function playerView(player, revealResponses = false) {
     lifelinesRemaining: player.lifelinesRemaining,
     score: player.score || 0,
     roundPoints: player.roundPoints || 0,
+    roundBasePoints: player.roundBasePoints || 0,
+    roundSpeedBonus: player.roundSpeedBonus || 0,
     bluffSubmitted: Boolean(player.bluff),
     hasVoted: Boolean(player.voteOptionId),
     fooledCount: player.fooledCount || 0,
@@ -142,16 +144,19 @@ export function createPublicState(room, socketId, questionDurationMs) {
     room.phase === 'revealed' ||
     (room.phase === 'finished' && room.finishReason === 'all-eliminated')
   const isMajorityRules = room.gameType === 'majority-rules'
+  const isQuizcraft = room.gameType === 'quizcraft'
   const isBluffBattle = room.gameType === 'bluff-battle'
   const isMillionLadder = room.gameType === 'million-ladder'
   const isSurveyShowdown = room.gameType === 'survey-showdown'
   const isQuickfire30 = room.gameType === 'quickfire-30'
   const isSayWhatYouSee = room.gameType === 'say-what-you-see'
   const isWordWheel = room.gameType === 'word-wheel'
-  const isScoreGame = isMajorityRules || isBluffBattle || isSayWhatYouSee || isWordWheel
+  const isScoreGame = isQuizcraft || isMajorityRules || isBluffBattle || isSayWhatYouSee || isWordWheel
   const topScore = Math.max(0, ...room.players.map((player) => player.score || 0))
-  const gameName = isMajorityRules
-    ? 'Majority Rules'
+  const gameName = isQuizcraft
+    ? 'Quizcraft'
+    : isMajorityRules
+      ? 'Majority Rules'
     : isBluffBattle
       ? 'Bluff Battle'
       : isMillionLadder

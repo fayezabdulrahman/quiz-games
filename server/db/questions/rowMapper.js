@@ -17,6 +17,13 @@ function baseQuestion(row) {
 }
 
 const mappers = {
+  quizcraft: (row, payload) => ({
+    ...baseQuestion(row),
+    type: 'choice',
+    questionType: payload.questionType || 'multiple_choice',
+    options: arrayOrNull(payload.options) || [],
+    answer: acceptedAnswers(row, payload),
+  }),
   'one-percent': (row, payload) => ({
     ...baseQuestion(row),
     difficulty: row.difficulty,

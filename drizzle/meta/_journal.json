@@ -29,6 +29,20 @@
       "when": 1784840000000,
       "tag": "0003_word_wheel",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1784843600000,
+      "tag": "0004_quizcraft",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1784847200000,
+      "tag": "0005_quizcraft_grants",
+      "breakpoints": true
     }
   ]
 }

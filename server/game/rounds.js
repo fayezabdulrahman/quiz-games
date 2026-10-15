@@ -1,4 +1,4 @@
-import { calculateQuizcraftScore, correctAnswer } from './helpers.js'
+import { calculateQuizcraftScore, correctAnswer, nextQuizcraftStreak } from './helpers.js'
 
 export function createRoundController({ broadcast, questionDurationMs }) {
   function clearQuestionTimer(room) {
@@ -53,6 +53,7 @@ export function createRoundController({ broadcast, questionDurationMs }) {
     if (room.gameType === 'quizcraft') {
       room.players.forEach((player) => {
         player.isCorrect = player.hasAnswered && correctAnswer(question, player.answer)
+        player.correctStreak = nextQuizcraftStreak(player.correctStreak, player.isCorrect)
         const score = calculateQuizcraftScore({
           isCorrect: player.isCorrect,
           answerElapsedMs: player.answerElapsedMs,

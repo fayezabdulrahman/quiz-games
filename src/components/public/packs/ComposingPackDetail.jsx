@@ -18,6 +18,7 @@ export default function ComposingPackDetail({
   onGenerateQuestion,
   onSavePack,
   onSaveQuestion,
+  onReorderQuestions,
   onSetDraftPackTitle,
   onStartQuestion,
   onStopEditing,
@@ -33,7 +34,7 @@ export default function ComposingPackDetail({
         <div className="pack-inline-actions">
           <IconButton
             label="Save pack"
-            icon="save"
+            icon="check"
             variant="primary"
             disabled={busy || editing || !draftPackTitle.trim()}
             onClick={onSavePack}
@@ -79,6 +80,7 @@ export default function ComposingPackDetail({
         questions={pendingPackQuestions}
         onDeleteQuestion={onDeleteQuestion}
         onEditQuestion={onEditQuestion}
+        onReorderQuestions={onReorderQuestions}
       />
     </>
   )

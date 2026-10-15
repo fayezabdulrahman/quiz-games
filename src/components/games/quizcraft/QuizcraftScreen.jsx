@@ -33,14 +33,28 @@ function Scoreboard({ players, highlightId }) {
 
   return (
     <div className="quizcraft-score-list">
-      {ordered.map((player, index) => (
-        <div className={player.id === highlightId ? 'is-me' : ''} key={player.id}>
-          <span>{index + 1}</span>
-          <strong>{player.name}</strong>
-          {player.roundPoints > 0 && <small>+{player.roundPoints}</small>}
-          <b>{player.score.toLocaleString()}</b>
-        </div>
-      ))}
+      {ordered.map((player, index) => {
+        const isOnStreak = player.correctStreak >= 2
+        const className = [
+          player.id === highlightId ? 'is-me' : '',
+          isOnStreak ? 'on-streak' : '',
+        ].filter(Boolean).join(' ')
+        return (
+          <div className={className} key={player.id}>
+            <span>{index + 1}</span>
+            <div className="quizcraft-score-player">
+              <strong>{player.name}</strong>
+              {isOnStreak && (
+                <small className="quizcraft-streak">
+                  {player.correctStreak} correct in a row
+                </small>
+              )}
+            </div>
+            {player.roundPoints > 0 && <small>+{player.roundPoints}</small>}
+            <b>{player.score.toLocaleString()}</b>
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -103,12 +117,14 @@ export default function QuizcraftScreen({ state, error, onAnswer, onReveal, onNe
         </div>
       </div>
 
-      <section className="quizcraft-layout">
+      <section className={`quizcraft-layout ${state.isHost ? 'host-view' : 'player-view'}`}>
         <div className="quizcraft-main">
           <div className="quizcraft-question-heading">
             <div>
               <div className="eyebrow">Choose the best answer</div>
-              <span className="quizcraft-scoring-summary">{scoringDescription}</span>
+              {state.isHost && (
+                <span className="quizcraft-scoring-summary">{scoringDescription}</span>
+              )}
             </div>
             {isAnswering && (
               <Timer
@@ -154,20 +170,6 @@ export default function QuizcraftScreen({ state, error, onAnswer, onReveal, onNe
                 <strong>{state.question.answer}</strong>
               </div>
               {state.question.explanation && <p>{state.question.explanation}</p>}
-              {!state.isHost && (
-                <div className={`result-banner ${state.me?.isCorrect ? 'right' : 'wrong'}`}>
-                  {state.me?.isCorrect ? (
-                    <>
-                      <strong>+{state.me.roundPoints} points</strong>
-                      <span>
-                        {state.settings.speedBonusEnabled
-                          ? `${state.me.roundBasePoints} correct + ${state.me.roundSpeedBonus} speed bonus`
-                          : 'Correct answer'}
-                      </span>
-                    </>
-                  ) : 'Not this time.'}
-                </div>
-              )}
             </div>
           )}
 
@@ -180,11 +182,13 @@ export default function QuizcraftScreen({ state, error, onAnswer, onReveal, onNe
           )}
         </div>
 
-        <aside className="quizcraft-scoreboard">
-          <div className="eyebrow">Live standings</div>
-          <h2>Scoreboard</h2>
-          <Scoreboard players={state.players} highlightId={state.me?.id} />
-        </aside>
+        {state.isHost && (
+          <aside className="quizcraft-scoreboard">
+            <div className="eyebrow">Live standings</div>
+            <h2>Scoreboard</h2>
+            <Scoreboard players={state.players} highlightId={state.me?.id} />
+          </aside>
+        )}
       </section>
     </main>
   )

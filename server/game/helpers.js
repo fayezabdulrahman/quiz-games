@@ -62,6 +62,12 @@ export function calculateQuizcraftScore({
   return { basePoints, speedBonus, totalPoints: basePoints + speedBonus }
 }
 
+export function nextQuizcraftStreak(currentStreak, isCorrect) {
+  if (!isCorrect) return 0
+  const streak = Number.isInteger(currentStreak) ? Math.max(0, currentStreak) : 0
+  return streak + 1
+}
+
 function withAccessMode(normalized, settings) {
   const contentSettings =
     settings.accessMode === 'demo'
@@ -200,7 +206,12 @@ export function resetPlayer(player, settings, resetScore = false) {
   player.fooledCount = 0
   player.teamId = null
   player.buzzedOut = false
-  if (resetScore) player.score = 0
+  if (resetScore) {
+    player.score = 0
+    player.correctStreak = 0
+  } else if (!Number.isInteger(player.correctStreak)) {
+    player.correctStreak = 0
+  }
 }
 
 export function createSurveyTeams(players) {

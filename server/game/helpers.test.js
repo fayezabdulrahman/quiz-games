@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { calculateQuizcraftScore, settingsForGame } from './helpers.js'
+import { calculateQuizcraftScore, nextQuizcraftStreak, settingsForGame } from './helpers.js'
 
 test('normalizes custom timers and game lengths for every game', () => {
   const expectations = {
@@ -86,4 +86,11 @@ test('Quizcraft speed scoring can be disabled', () => {
     }),
     { basePoints: 250, speedBonus: 0, totalPoints: 250 },
   )
+})
+
+test('Quizcraft streaks grow on correct answers and reset on a miss', () => {
+  assert.equal(nextQuizcraftStreak(0, true), 1)
+  assert.equal(nextQuizcraftStreak(4, true), 5)
+  assert.equal(nextQuizcraftStreak(5, false), 0)
+  assert.equal(nextQuizcraftStreak(undefined, true), 1)
 })

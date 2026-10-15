@@ -16,6 +16,7 @@ import {
   getUserPackWithQuestions,
   isSupportedGame,
   listUserPacks,
+  reorderUserQuestions,
   saveContentPreference,
   updateUserPack,
   upsertUserQuestion,
@@ -224,6 +225,17 @@ customQuestionsRouter.delete('/question-packs/:packId', async (request, response
 customQuestionsRouter.post('/question-packs/:packId/questions', async (request, response, next) => {
   try {
     sendResult(response, await upsertUserQuestion(request.access, request.params.packId, request.body))
+  } catch (error) {
+    next(error)
+  }
+})
+
+customQuestionsRouter.put('/question-packs/:packId/questions/order', async (request, response, next) => {
+  try {
+    sendResult(
+      response,
+      await reorderUserQuestions(request.access, request.params.packId, request.body),
+    )
   } catch (error) {
     next(error)
   }

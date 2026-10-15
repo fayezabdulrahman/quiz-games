@@ -322,6 +322,32 @@ export default function PacksPage({ accountAccess }) {
     setEditing(true)
   }
 
+  const reorderPendingQuestions = (questions) => {
+    setPendingPackQuestions(questions)
+  }
+
+  const reorderSavedQuestions = async (questions) => {
+    if (!selectedPack || busy) return
+    const previousQuestions = selectedPack.questions
+    const packId = selectedPack.id
+    setSelectedPack((current) => current?.id === packId ? { ...current, questions } : current)
+    setBusy(true)
+    setError('')
+    try {
+      await tokenRequest(`/api/me/question-packs/${packId}/questions/order`, {
+        method: 'PUT',
+        body: { questionIds: questions.map((question) => question.id) },
+      })
+    } catch (reorderError) {
+      setSelectedPack((current) => current?.id === packId
+        ? { ...current, questions: previousQuestions }
+        : current)
+      setError(reorderError?.message || 'Could not reorder the questions.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const requestDeletePendingQuestion = (question) => {
     setDeleteConfirmation({
       type: 'pending-question',
@@ -504,6 +530,7 @@ export default function PacksPage({ accountAccess }) {
                 onGenerateQuestion={generateQuestion}
                 onSavePack={savePack}
                 onSaveQuestion={saveQuestion}
+                onReorderQuestions={reorderPendingQuestions}
                 onSetDraftPackTitle={setDraftPackTitle}
                 onStartQuestion={startQuestion}
                 onStopEditing={stopEditing}
@@ -523,6 +550,7 @@ export default function PacksPage({ accountAccess }) {
                 onEditQuestion={editQuestion}
                 onGenerateQuestion={generateQuestion}
                 onSaveQuestion={saveQuestion}
+                onReorderQuestions={reorderSavedQuestions}
                 onStartQuestion={startQuestion}
                 onStopEditing={stopEditing}
                 onUpdatePackStatus={updatePackStatus}

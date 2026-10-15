@@ -12,6 +12,7 @@ function playerView(player, revealResponses = false) {
     roundPoints: player.roundPoints || 0,
     roundBasePoints: player.roundBasePoints || 0,
     roundSpeedBonus: player.roundSpeedBonus || 0,
+    correctStreak: player.correctStreak || 0,
     bluffSubmitted: Boolean(player.bluff),
     hasVoted: Boolean(player.voteOptionId),
     fooledCount: player.fooledCount || 0,

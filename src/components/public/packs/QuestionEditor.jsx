@@ -618,10 +618,10 @@ export default function QuestionEditor({ gameType, question, onCancel, onDeleteI
       )}
 
       <div className="pack-editor-actions">
-        <IconButton label="Save draft" icon="save" onClick={() => save('draft')} />
+        <IconButton label="Save draft" icon="draft" onClick={() => save('draft')} />
         <IconButton
           label={question ? 'Save question' : 'Create question'}
-          icon={question ? 'save' : 'check'}
+          icon="check"
           variant="primary"
           disabled={validation.errors.length > 0}
           onClick={() => save('active')}

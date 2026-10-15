@@ -16,6 +16,7 @@ export default function SavedPackDetail({
   onEditQuestion,
   onGenerateQuestion,
   onSaveQuestion,
+  onReorderQuestions,
   onStartQuestion,
   onStopEditing,
   onUpdatePackStatus,
@@ -43,7 +44,7 @@ export default function SavedPackDetail({
           />
           <IconButton
             label={selectedPack.status === 'active' ? 'Make draft' : 'Activate pack'}
-            icon={selectedPack.status === 'active' ? 'save' : 'check'}
+            icon={selectedPack.status === 'active' ? 'draft' : 'check'}
             disabled={busy || selectedPack.questions.length === 0}
             onClick={() => onUpdatePackStatus(selectedPack.status === 'active' ? 'draft' : 'active')}
           />
@@ -77,6 +78,7 @@ export default function SavedPackDetail({
         saved
         onDeleteQuestion={onDeleteQuestion}
         onEditQuestion={onEditQuestion}
+        onReorderQuestions={onReorderQuestions}
       />
     </>
   )

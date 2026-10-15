@@ -309,7 +309,6 @@ export async function upsertUserQuestion(access, packId, input = {}, questionId 
     answer: validation.row.answer,
     explanation: validation.row.explanation,
     difficulty: validation.row.difficulty,
-    sortOrder: Number.isInteger(input.sortOrder) ? input.sortOrder : 0,
     payload: {
       ...validation.row.payload,
       completion: {
@@ -322,7 +321,7 @@ export async function upsertUserQuestion(access, packId, input = {}, questionId 
 
   if (questionId) {
     const [existing] = await getDb()
-      .select({ id: questions.id, payload: questions.payload })
+      .select({ id: questions.id, payload: questions.payload, sortOrder: questions.sortOrder })
       .from(questions)
       .where(
         and(
@@ -336,21 +335,93 @@ export async function upsertUserQuestion(access, packId, input = {}, questionId 
 
     const [updated] = await getDb()
       .update(questions)
-      .set(questionValues)
+      .set({
+        ...questionValues,
+        sortOrder: Number.isInteger(input.sortOrder) ? input.sortOrder : existing.sortOrder,
+      })
       .where(eq(questions.id, existing.id))
       .returning(questionSelect())
     await cleanupQuestionImages(access, keysToDelete)
     return { ok: true, question: updated, warnings: validation.warnings }
   }
 
+  const [lastQuestion] = await getDb()
+    .select({
+      sortOrder: sql`coalesce(max(${questions.sortOrder}), -1) + 1`.mapWith(Number),
+    })
+    .from(questions)
+    .where(eq(questions.questionSetId, pack.id))
+
   const [created] = await getDb()
     .insert(questions)
     .values({
       ...questionValues,
       externalId: `user-${crypto.randomUUID()}`,
+      sortOrder: Number.isInteger(input.sortOrder) ? input.sortOrder : lastQuestion?.sortOrder || 0,
     })
     .returning(questionSelect())
   return { ok: true, question: created, warnings: validation.warnings }
+}
+
+export async function reorderUserQuestions(access, packId, input = {}) {
+  const pack = await getUserPack(access, packId)
+  if (!pack || pack.status === 'archived') {
+    return { ok: false, status: 404, error: 'Pack not found.' }
+  }
+
+  const questionIds = Array.isArray(input.questionIds)
+    ? input.questionIds.map((questionId) => String(questionId).trim())
+    : []
+  const uniqueQuestionIds = new Set(questionIds)
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+  if (
+    questionIds.length === 0 ||
+    uniqueQuestionIds.size !== questionIds.length ||
+    questionIds.some((questionId) => !uuidPattern.test(questionId))
+  ) {
+    return { ok: false, status: 400, error: 'Send each question in the pack exactly once.' }
+  }
+
+  const existingQuestions = await getDb()
+    .select({ id: questions.id })
+    .from(questions)
+    .where(
+      and(
+        eq(questions.questionSetId, pack.id),
+        eq(questions.ownerUserId, access.userId),
+        ne(questions.status, 'archived'),
+      ),
+    )
+  const existingIds = new Set(existingQuestions.map((question) => question.id))
+  if (
+    existingIds.size !== questionIds.length ||
+    questionIds.some((questionId) => !existingIds.has(questionId))
+  ) {
+    return {
+      ok: false,
+      status: 409,
+      error: 'The pack changed while you were reordering it. Refresh and try again.',
+    }
+  }
+
+  const orderCases = questionIds.map(
+    (questionId, index) => sql`when ${questions.id} = ${questionId}::uuid then ${index}`,
+  )
+  await getDb()
+    .update(questions)
+    .set({
+      sortOrder: sql`case ${sql.join(orderCases, sql.raw(' '))} else ${questions.sortOrder} end`,
+      updatedAt: now(),
+    })
+    .where(
+      and(
+        eq(questions.questionSetId, pack.id),
+        eq(questions.ownerUserId, access.userId),
+        ne(questions.status, 'archived'),
+      ),
+    )
+
+  return { ok: true }
 }
 
 export async function deleteUserQuestion(access, packId, questionId) {

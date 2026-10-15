@@ -159,6 +159,8 @@ export function useGameSession({ getAuthToken } = {}) {
     resumeWordWheel: () => action('host:word-wheel-resume', roomPayload()),
     acceptWordWheelWord: (submissionId) =>
       action('host:word-wheel-accept-word', { ...roomPayload(), submissionId }),
+    rejectWordWheelWord: (submissionId) =>
+      action('host:word-wheel-reject-word', { ...roomPayload(), submissionId }),
     undoWordWheelLast: () => action('host:word-wheel-undo-last', roomPayload()),
     returnWordWheelTurn: (playerId) =>
       action('host:word-wheel-return-turn', { ...roomPayload(), playerId }),

@@ -128,6 +128,7 @@ export function registerSocketHandlers({
     room.wordWheelUsedLetters = []
     room.wordWheelSubmissions = []
     room.wordWheelLastSubmissionId = null
+    room.wordWheelPendingSubmissionId = null
     room.wordWheelLastMove = null
     room.wordWheelTimerRemainingMs = null
     room.wordWheelRoundWinnerId = null

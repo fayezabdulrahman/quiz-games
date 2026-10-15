@@ -8,16 +8,17 @@ function firstLetterForWord(value = '') {
   return String(value).trim().match(/[A-Za-z]/)?.[0]?.toUpperCase() || ''
 }
 
-function Timer({ remainingMs, durationMs, paused, endsAtMs }) {
+function Timer({ remainingMs, durationMs, paused }) {
+  const [endsAt] = useState(() => Date.now() + remainingMs)
   const [seconds, setSeconds] = useState(() => Math.max(0, Math.ceil(remainingMs / 1000)))
 
   useEffect(() => {
-    if (paused || !endsAtMs) return undefined
+    if (paused) return undefined
     const interval = window.setInterval(() => {
-      setSeconds(Math.max(0, Math.ceil((endsAtMs - Date.now()) / 1000)))
+      setSeconds(Math.max(0, Math.ceil((endsAt - Date.now()) / 1000)))
     }, 200)
     return () => window.clearInterval(interval)
-  }, [endsAtMs, paused])
+  }, [endsAt, paused])
 
   const progress = Math.max(0, Math.min(1, seconds / (durationMs / 1000)))
 
@@ -61,6 +62,59 @@ function LetterBoard({ usedLetters, selectedLetter, enabled, onSelect }) {
   )
 }
 
+function TurnControls({ isMyTurn, isTypeMode, paused, usedLetters, onSubmit }) {
+  const [word, setWord] = useState('')
+  const [selectedLetter, setSelectedLetter] = useState('')
+  const derivedLetter = useMemo(() => firstLetterForWord(word), [word])
+  const letterToSubmit = isTypeMode ? derivedLetter : selectedLetter
+  const canSubmit =
+    isMyTurn && !paused && letterToSubmit && (!isTypeMode || word.trim())
+
+  const submitTurn = async (event) => {
+    event.preventDefault()
+    if (!canSubmit || usedLetters.includes(letterToSubmit)) return
+    const result = await onSubmit({ letter: letterToSubmit, word })
+    if (result?.ok) {
+      setWord('')
+      setSelectedLetter('')
+    }
+  }
+
+  return (
+    <form onSubmit={submitTurn}>
+      {isTypeMode && isMyTurn && (
+        <label className="word-wheel-word-entry">
+          <span>Your word</span>
+          <input
+            value={word}
+            onChange={(event) => setWord(event.target.value)}
+            placeholder="Type a word"
+            autoComplete="off"
+            disabled={paused}
+          />
+        </label>
+      )}
+
+      <LetterBoard
+        usedLetters={usedLetters}
+        selectedLetter={letterToSubmit}
+        enabled={isMyTurn && !paused && !isTypeMode}
+        onSelect={setSelectedLetter}
+      />
+
+      {isMyTurn && (
+        <button
+          type="submit"
+          className="primary wide word-wheel-lock"
+          disabled={!canSubmit || usedLetters.includes(letterToSubmit)}
+        >
+          {letterToSubmit ? `Lock ${letterToSubmit}` : 'Choose a letter'}
+        </button>
+      )}
+    </form>
+  )
+}
+
 function Scoreboard({ players, activePlayerId, meId, targetScore }) {
   const ordered = [...players].sort((a, b) => b.score - a.score || a.name.localeCompare(b.name))
   return (
@@ -90,6 +144,7 @@ function HostControls({
   onPause,
   onResume,
   onAcceptWord,
+  onRejectWord,
   onUndoLast,
   onReturnTurn,
   onEliminate,
@@ -100,20 +155,21 @@ function HostControls({
   const last = state.wordWheelLastSubmission
   const canDiscuss = running || paused
   const lastNeedsApproval = last?.word && last.dictionaryStatus === 'unrecognized'
+  const reviewingWord = lastNeedsApproval && state.wordWheelPendingSubmissionId === last.id
   const activePlayerId = state.wordWheelActivePlayerId
 
   return (
     <div className="host-controls word-wheel-host-controls">
       <div className="word-wheel-host-primary">
-        {paused ? (
+        {paused && !reviewingWord ? (
           <button type="button" className="primary" onClick={onResume}>
             Resume timer
           </button>
-        ) : (
+        ) : !reviewingWord ? (
           <button type="button" className="secondary" onClick={onPause} disabled={!running}>
             Pause timer
           </button>
-        )}
+        ) : null}
         <button
           type="button"
           className="secondary danger"
@@ -130,10 +186,19 @@ function HostControls({
             {last.playerName} claimed {last.letter}
             {last.word ? ` with ${last.word}` : ''}
           </strong>
-          {lastNeedsApproval && (
-            <button type="button" className="primary" onClick={() => onAcceptWord(last.id)}>
-              Accept word
-            </button>
+          {reviewingWord && (
+            <>
+              <button type="button" className="primary" onClick={() => onAcceptWord(last.id)}>
+                Accept word
+              </button>
+              <button
+                type="button"
+                className="secondary danger"
+                onClick={() => onRejectWord(last.id)}
+              >
+                Reject word
+              </button>
+            </>
           )}
           <button type="button" className="secondary" onClick={onUndoLast}>
             Undo letter
@@ -178,33 +243,21 @@ export default function WordWheelScreen({
   onPause,
   onResume,
   onAcceptWord,
+  onRejectWord,
   onUndoLast,
   onReturnTurn,
   onEliminate,
   onNextRound,
   onEnd,
 }) {
-  const [word, setWord] = useState('')
-  const [selectedLetter, setSelectedLetter] = useState('')
   const isMyTurn = state.me?.id === state.wordWheelActivePlayerId
   const inputMode = state.settings?.inputMode || 'type'
   const isTypeMode = inputMode === 'type'
-  const derivedLetter = useMemo(() => firstLetterForWord(word), [word])
-  const letterToSubmit = isTypeMode ? derivedLetter : selectedLetter
   const usedLetters = state.wordWheelUsedLetters || []
   const activePlayerName = state.wordWheelActivePlayerName || 'Next player'
   const paused = state.phase === 'word-wheel-paused'
+  const reviewingWord = Boolean(state.wordWheelPendingSubmissionId)
   const roundOver = state.phase === 'word-wheel-round-over'
-  const canSubmit =
-    isMyTurn && state.phase === 'word-wheel-playing' && letterToSubmit && (!isTypeMode || word.trim())
-
-  const submitTurn = async () => {
-    const result = await onSubmit({ letter: letterToSubmit, word })
-    if (result?.ok) {
-      setWord('')
-      setSelectedLetter('')
-    }
-  }
 
   return (
     <main className="game-shell word-wheel-shell">
@@ -229,7 +282,6 @@ export default function WordWheelScreen({
                 remainingMs={state.questionTimeRemainingMs || state.wordWheelTimerPausedMs || 0}
                 durationMs={state.questionDurationMs}
                 paused={paused}
-                endsAtMs={state.questionEndsAt}
               />
             )}
           </div>
@@ -249,40 +301,26 @@ export default function WordWheelScreen({
           ) : (
             <>
               <div className={`word-wheel-turn-card ${isMyTurn ? 'is-my-turn' : ''}`}>
-                <span>{paused ? 'Discussion paused' : isMyTurn ? 'Your turn' : 'Current turn'}</span>
-                <strong>{paused ? activePlayerName : activePlayerName}</strong>
+                <span>
+                  {reviewingWord
+                    ? 'Host reviewing word'
+                    : paused
+                      ? 'Discussion paused'
+                      : isMyTurn
+                        ? 'Your turn'
+                        : 'Current turn'}
+                </span>
+                <strong>{activePlayerName}</strong>
               </div>
 
-              {isTypeMode && isMyTurn && (
-                <label className="word-wheel-word-entry">
-                  <span>Your word</span>
-                  <input
-                    value={word}
-                    onChange={(event) => setWord(event.target.value)}
-                    placeholder="Type a word"
-                    autoComplete="off"
-                    disabled={paused}
-                  />
-                </label>
-              )}
-
-              <LetterBoard
+              <TurnControls
+                key={`${state.questionIndex}-${state.wordWheelActivePlayerId}`}
+                isMyTurn={isMyTurn}
+                isTypeMode={isTypeMode}
+                paused={paused}
                 usedLetters={usedLetters}
-                selectedLetter={letterToSubmit}
-                enabled={isMyTurn && state.phase === 'word-wheel-playing' && !isTypeMode}
-                onSelect={setSelectedLetter}
+                onSubmit={onSubmit}
               />
-
-              {isMyTurn && (
-                <button
-                  type="button"
-                  className="primary wide word-wheel-lock"
-                  disabled={!canSubmit || usedLetters.includes(letterToSubmit)}
-                  onClick={submitTurn}
-                >
-                  {letterToSubmit ? `Lock ${letterToSubmit}` : 'Choose a letter'}
-                </button>
-              )}
             </>
           )}
 
@@ -293,6 +331,7 @@ export default function WordWheelScreen({
             onPause={onPause}
             onResume={onResume}
             onAcceptWord={onAcceptWord}
+            onRejectWord={onRejectWord}
             onUndoLast={onUndoLast}
             onReturnTurn={onReturnTurn}
             onEliminate={onEliminate}

@@ -96,6 +96,7 @@ export async function buildRoom({
     wordWheelUsedLetters: [],
     wordWheelSubmissions: [],
     wordWheelLastSubmissionId: null,
+    wordWheelPendingSubmissionId: null,
     wordWheelLastMove: null,
     wordWheelTimerRemainingMs: null,
     wordWheelRoundWinnerId: null,
@@ -155,6 +156,7 @@ export async function prepareRoomGame(room, gameType, settings, clearQuestionTim
   room.wordWheelUsedLetters = []
   room.wordWheelSubmissions = []
   room.wordWheelLastSubmissionId = null
+  room.wordWheelPendingSubmissionId = null
   room.wordWheelLastMove = null
   room.wordWheelTimerRemainingMs = null
   room.wordWheelRoundWinnerId = null

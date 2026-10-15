@@ -42,6 +42,7 @@ function nextActivePlayerId(room, currentPlayerId) {
 function finishWordWheelRound(room, clearQuestionTimer, winnerId, reason) {
   clearQuestionTimer(room)
   room.wordWheelActivePlayerId = null
+  room.wordWheelPendingSubmissionId = null
   room.wordWheelTimerRemainingMs = null
   room.wordWheelRoundWinnerId = winnerId || null
   room.wordWheelRoundWinnerName = playerName(room, winnerId)
@@ -77,6 +78,7 @@ function startWordWheelTurn(room, clearQuestionTimer, broadcast, playerId, durat
     ? playerId
     : activePlayers[0]?.id
   room.wordWheelActivePlayerId = activePlayerId
+  room.wordWheelPendingSubmissionId = null
   room.wordWheelTimerRemainingMs = null
   room.phase = 'word-wheel-playing'
   startWordWheelTimer(
@@ -92,6 +94,7 @@ export function startWordWheelRound(room, clearQuestionTimer, broadcast) {
   room.wordWheelUsedLetters = []
   room.wordWheelSubmissions = []
   room.wordWheelLastSubmissionId = null
+  room.wordWheelPendingSubmissionId = null
   room.wordWheelRoundWinnerId = null
   room.wordWheelRoundWinnerName = null
   room.wordWheelRoundEndReason = null
@@ -132,6 +135,9 @@ function undoLastSubmission(room) {
   const lastSubmission = lastLiveSubmission(room)
   if (!lastSubmission) return null
   lastSubmission.revoked = true
+  if (room.wordWheelPendingSubmissionId === lastSubmission.id) {
+    room.wordWheelPendingSubmissionId = null
+  }
   room.wordWheelUsedLetters = (room.wordWheelUsedLetters || []).filter(
     (letter) => letter !== lastSubmission.letter,
   )
@@ -167,7 +173,13 @@ function ensureWordWheelInProgress(room, callback) {
   return true
 }
 
-export function registerWordWheelHandlers({ socket, rooms, broadcast, clearQuestionTimer }) {
+export function registerWordWheelHandlers({
+  socket,
+  rooms,
+  broadcast,
+  clearQuestionTimer,
+  approveWord = approveDictionaryWord,
+}) {
   socket.on('player:word-wheel-submit', async ({ code, letter, word } = {}, callback) => {
     const room = getRoom(rooms, code)
     const player = getSocketPlayer(room, socket)
@@ -199,6 +211,15 @@ export function registerWordWheelHandlers({ socket, rooms, broadcast, clearQuest
       if (result.status === 'invalid') return replyError(callback, 'Type a valid word.')
       dictionaryStatus = result.status
       normalizedWord = result.normalizedWord
+
+      if (
+        room.phase !== 'word-wheel-playing' ||
+        room.wordWheelActivePlayerId !== player.id ||
+        !player.active ||
+        (room.wordWheelUsedLetters || []).includes(cleanLetter)
+      ) {
+        return replyError(callback, 'That turn has already ended.')
+      }
     }
 
     clearQuestionTimer(room)
@@ -229,7 +250,11 @@ export function registerWordWheelHandlers({ socket, rooms, broadcast, clearQuest
     player.answer = room.settings.inputMode === 'type' ? cleanWord : cleanLetter
     player.hasAnswered = true
 
-    if (room.wordWheelUsedLetters.length >= alphabet.length) {
+    if (dictionaryStatus === 'unrecognized') {
+      room.wordWheelPendingSubmissionId = submission.id
+      room.wordWheelTimerRemainingMs = (room.settings.turnSeconds || 15) * 1000
+      room.phase = 'word-wheel-paused'
+    } else if (room.wordWheelUsedLetters.length >= alphabet.length) {
       finishWordWheelRound(room, clearQuestionTimer, player.id, 'letters-complete')
     } else {
       startWordWheelTurn(room, clearQuestionTimer, broadcast, nextActivePlayerId(room, player.id))
@@ -253,6 +278,9 @@ export function registerWordWheelHandlers({ socket, rooms, broadcast, clearQuest
     const room = getRoom(rooms, code)
     if (!ensureWordWheelHost(room, socket, callback)) return
     if (room.phase !== 'word-wheel-paused') return replyError(callback, 'The timer is not paused.')
+    if (room.wordWheelPendingSubmissionId) {
+      return replyError(callback, 'Accept or reject the word before resuming.')
+    }
     const remainingMs = room.wordWheelTimerRemainingMs || (room.settings.turnSeconds || 15) * 1000
     room.phase = 'word-wheel-playing'
     startWordWheelTimer(room, clearQuestionTimer, broadcast, remainingMs)
@@ -264,13 +292,19 @@ export function registerWordWheelHandlers({ socket, rooms, broadcast, clearQuest
     const room = getRoom(rooms, code)
     if (!ensureWordWheelHost(room, socket, callback)) return
     if (!ensureWordWheelInProgress(room, callback)) return
-    const submission =
-      (room.wordWheelSubmissions || []).find((item) => item.id === submissionId) ||
-      lastLiveSubmission(room)
-    if (!submission || submission.revoked || !submission.word) {
-      return replyError(callback, 'There is no typed word to accept.')
+    const pendingSubmissionId = room.wordWheelPendingSubmissionId
+    const submission = (room.wordWheelSubmissions || []).find(
+      (item) => item.id === pendingSubmissionId && item.id === submissionId,
+    )
+    if (
+      !submission ||
+      submission.revoked ||
+      !submission.word ||
+      submission.dictionaryStatus !== 'unrecognized'
+    ) {
+      return replyError(callback, 'There is no word waiting for approval.')
     }
-    await approveDictionaryWord({
+    await approveWord({
       word: submission.word,
       normalizedWord: submission.normalizedWord,
       acceptedByUserId: room.hostUserId,
@@ -278,6 +312,7 @@ export function registerWordWheelHandlers({ socket, rooms, broadcast, clearQuest
       gameType: room.gameType,
     })
     submission.dictionaryStatus = 'host-approved'
+    room.wordWheelPendingSubmissionId = null
     room.wordWheelLastMove = {
       type: 'host-approved',
       playerId: submission.playerId,
@@ -286,6 +321,48 @@ export function registerWordWheelHandlers({ socket, rooms, broadcast, clearQuest
       word: submission.word,
       createdAt: Date.now(),
     }
+    if (room.wordWheelUsedLetters.length >= alphabet.length) {
+      finishWordWheelRound(room, clearQuestionTimer, submission.playerId, 'letters-complete')
+    } else {
+      startWordWheelTurn(
+        room,
+        clearQuestionTimer,
+        broadcast,
+        nextActivePlayerId(room, submission.playerId),
+      )
+    }
+    callback?.({ ok: true })
+    broadcast(room)
+  })
+
+  socket.on('host:word-wheel-reject-word', ({ code, submissionId } = {}, callback) => {
+    const room = getRoom(rooms, code)
+    if (!ensureWordWheelHost(room, socket, callback)) return
+    if (!ensureWordWheelInProgress(room, callback)) return
+    const pendingSubmissionId = room.wordWheelPendingSubmissionId
+    const submission = (room.wordWheelSubmissions || []).find(
+      (item) => item.id === pendingSubmissionId && item.id === submissionId,
+    )
+    if (!submission || submission.revoked || submission.dictionaryStatus !== 'unrecognized') {
+      return replyError(callback, 'There is no word waiting for approval.')
+    }
+
+    undoLastSubmission(room)
+    room.wordWheelPendingSubmissionId = null
+    const player = room.players.find((item) => item.id === submission.playerId)
+    if (player) {
+      player.hasAnswered = false
+      player.answer = null
+    }
+    room.wordWheelLastMove = {
+      type: 'host-rejected',
+      playerId: submission.playerId,
+      playerName: submission.playerName,
+      letter: submission.letter,
+      word: submission.word,
+      createdAt: Date.now(),
+    }
+    startWordWheelTurn(room, clearQuestionTimer, broadcast, submission.playerId)
     callback?.({ ok: true })
     broadcast(room)
   })

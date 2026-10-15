@@ -302,6 +302,7 @@ export function createPublicState(room, socketId, questionDurationMs) {
               : null
           })(),
           wordWheelLastMove: room.wordWheelLastMove,
+          wordWheelPendingSubmissionId: room.wordWheelPendingSubmissionId,
           wordWheelRoundWinnerId: room.wordWheelRoundWinnerId,
           wordWheelRoundWinnerName: room.wordWheelRoundWinnerName,
           wordWheelRoundEndReason: room.wordWheelRoundEndReason,

@@ -55,6 +55,7 @@ export default function App() {
     pauseWordWheel,
     resumeWordWheel,
     acceptWordWheelWord,
+    rejectWordWheelWord,
     undoWordWheelLast,
     returnWordWheelTurn,
     eliminateWordWheelPlayer,
@@ -239,6 +240,7 @@ export default function App() {
         onPause={pauseWordWheel}
         onResume={resumeWordWheel}
         onAcceptWord={acceptWordWheelWord}
+        onRejectWord={rejectWordWheelWord}
         onUndoLast={undoWordWheelLast}
         onReturnTurn={returnWordWheelTurn}
         onEliminate={eliminateWordWheelPlayer}
